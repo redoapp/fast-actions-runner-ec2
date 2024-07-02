@@ -1,0 +1,16 @@
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+ExecStart=/usr/bin/actions-runner
+Group=actions
+Restart=on-success
+Type=exec
+User=actions
+WorkingDirectory=/opt/actions-runner
+
+[Unit]
+After=actions-runner-setup.service
+After=network.target
+Description=GitHub Actions Runner
+Requires=actions-runner-setup.service

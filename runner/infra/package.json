@@ -1,0 +1,15 @@
+{
+  "name": "@redotech/fast-actions-ec2-runner-infra",
+  "exports": {
+    "./*": "./lib/*.js"
+  },
+  "private": true,
+  "typesVersions": {
+    "*": {
+      "*": [
+        "lib/*",
+        "src/*"
+      ]
+    }
+  }
+}

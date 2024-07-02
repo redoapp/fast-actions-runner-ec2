@@ -1,0 +1,15 @@
+{
+  "name": "@redotech/github-webhook",
+  "exports": {
+    "./*": "./lib/*.js"
+  },
+  "private": true,
+  "typesVersions": {
+    "*": {
+      "*": [
+        "lib/*",
+        "src/*"
+      ]
+    }
+  }
+}

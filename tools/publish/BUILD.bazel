@@ -1,0 +1,9 @@
+load("//shell/rules:rules.bzl", "sh_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+sh_binary(
+    name = "runner_publish",
+    data = ["//runner/publish"],
+    main = "runner-publish.sh",
+)

@@ -1,0 +1,33 @@
+load("@better_rules_javascript//commonjs:rules.bzl", "cjs_root")
+load("@better_rules_javascript//typescript:rules.bzl", "ts_import")
+
+package(default_visibility = ["//visibility:public"])
+
+genrule(
+    name = "event_validate",
+    srcs = [
+        "@npm//@octokit/webhooks-schemas:lib",
+        "ajv/keywords.js",
+    ],
+    outs = ["lib/event-validate.js"],
+    cmd = "$(execpath //tools/ajv:cli) compile -c ajv-formats -c ./$(location ajv/keywords.js) -s $(location @npm//@octokit/webhooks-schemas:lib)/schema.json -o $@ --code-lines true",
+    tools = ["//tools/ajv:cli"],
+)
+
+ts_import(
+    name = "lib",
+    compile_deps = ["@npm//ajv:lib"],
+    declarations = glob(["src/**/*.d.ts"]),
+    js = [":event_validate"],
+    root = ":root",
+    deps = [
+        "@npm//@octokit/webhooks-types:lib",
+        "@npm//ajv-formats:lib",
+    ],
+)
+
+cjs_root(
+    name = "root",
+    package_name = "@redotech/github-webhook",
+    descriptors = ["package.json"],
+)

@@ -1,0 +1,19 @@
+load("//shell/rules:rules.bzl", "sh_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+sh_binary(
+    name = "publish",
+    data = [
+        "//aws/cli-installer:deb",
+        "//aws/network:deb",
+        "//runner/basic-infra:cf",
+        "//runner/basic-infra:cloud_config",
+        "//runner/ec2:deb_",
+        "//runner/infra:cf",
+        "//runner/provision:function",
+        "//runner/service:deb_",
+        "//runner/webhook:function",
+    ],
+    main = "publish.sh",
+)

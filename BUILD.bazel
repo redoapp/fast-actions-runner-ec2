@@ -1,0 +1,75 @@
+load("@better_rules_javascript//commonjs:rules.bzl", "cjs_root")
+load("@better_rules_javascript//javascript:rules.bzl", "js_library")
+
+package(default_visibility = ["//visibility:public"])
+
+alias(
+    name = "bazelrc",
+    actual = "//tools/bazel:bazelrc",
+)
+
+alias(
+    name = "lint",
+    actual = "//tools/lint",
+)
+
+alias(
+    name = "dts",
+    actual = "//tools/typescript:libs_dts",
+)
+
+alias(
+    name = "nodejs_install",
+    actual = "//tools/nodejs:install",
+)
+
+alias(
+    name = "nodejs_roots",
+    actual = "//tools/nodejs:roots",
+)
+
+alias(
+    name = "npm_resolve",
+    actual = "//tools/npm:resolve",
+)
+
+alias(
+    name = "refresh",
+    actual = "//tools/bazel:refresh",
+)
+
+alias(
+    name = "tslint",
+    actual = "//tools/lint:tslint",
+)
+
+test_suite(
+    name = "external_test",
+    tests = ["//tools/test:external_test"],
+)
+
+cjs_root(
+    name = "root",
+    package_name = "@redotech/_root",
+)
+
+js_library(
+    name = "eslint_config",
+    srcs = [".eslintrc.js"],
+    root = ":root",
+)
+
+alias(
+    name = "runner_publish",
+    actual = "//tools/publish:runner_publish",
+)
+
+js_library(
+    name = "prettier_config",
+    srcs = [".prettierrc.yml"],
+    root = ":root",
+    deps = [
+        "@npm//prettier-plugin-organize-imports:lib",
+        "@npm//prettier-plugin-sort-json:lib",
+    ],
+)

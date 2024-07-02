@@ -1,0 +1,9 @@
+[Service]
+ExecStart=/usr/sbin/actions-runner-setup
+Group=actions
+User=actions
+Type=oneshot
+WorkingDirectory=/opt/actions-runner
+
+[Unit]
+Description=GitHub Actions Runner Setup

@@ -1,0 +1,11 @@
+load("//shell/rules:rules.bzl", "sh_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+sh_binary(
+    name = "test_deploy",
+    data = [
+        "//runner/publish",
+    ],
+    main = "test-deploy.sh",
+)

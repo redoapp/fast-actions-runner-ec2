@@ -1,0 +1,69 @@
+load("@rules_file//generate:rules.bzl", "format", "formatter_composite", "generate_test", "multi_generate")
+
+package(default_visibility = ["//visibility:public"])
+
+format(
+    name = "bazel_lint",
+    srcs = ["@files//:bazel_files"],
+    formatter = "//tools/buildifier",
+    strip_prefix = "/files",
+)
+
+# format(
+#     name = "black_lint",
+#     srcs = ["@files//:black_files"],
+#     formatter = "//tools/black",
+#     strip_prefix = "/files",
+# )
+
+formatter_composite(
+    name = "eslint",
+    formatters = [
+        "//tools/eslint",
+        "//tools/prettier",
+    ],
+)
+
+format(
+    name = "eslint_lint",
+    srcs = ["@files//:eslint_files"],
+    formatter = ":eslint",
+    strip_prefix = "/files",
+)
+
+format(
+    name = "prettier_lint",
+    srcs = ["@files//:prettier_files"],
+    formatter = "//tools/prettier",
+    strip_prefix = "/files",
+)
+
+multi_generate(
+    name = "lint",
+    deps = [
+        ":bazel_lint",
+        # ":black_lint",
+        ":eslint_lint",
+        ":prettier_lint",
+        # ":tslint_lint",
+    ],
+)
+
+generate_test(
+    name = "lint_test",
+    generate = ":lint",
+    tags = ["lint"],
+)
+
+format(
+    name = "tslint",
+    srcs = ["@files//:tslint_files"],
+    formatter = "//tools/eslint:tslint",
+    strip_prefix = "/files",
+)
+
+generate_test(
+    name = "tslint_test",
+    generate = ":tslint",
+    tags = ["lint"],
+)

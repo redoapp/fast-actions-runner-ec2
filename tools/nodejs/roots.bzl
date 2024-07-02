@@ -1,0 +1,16 @@
+TARGETS = [
+    "//:root",
+    "//aws/cdk-util:root",
+    "//cloud-init/config-gen:root",
+    "//github/webhook:root",
+    "//runner/basic-infra:root",
+    "//runner/common:root",
+    "//runner/infra:root",
+    "//runner/provision:root",
+    "//runner/provision-infra:root",
+    "//runner/webhook:root",
+    "//runner/webhook-infra:root",
+    "//tools/nodejs:root",
+    "//tools/prettier:root",
+    "//tools/typescript:root",
+]

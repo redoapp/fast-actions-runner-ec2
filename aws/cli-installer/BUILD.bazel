@@ -1,0 +1,34 @@
+load("@rules_pkg//pkg:deb.bzl", "pkg_deb")
+load("@rules_pkg//pkg:mappings.bzl", "pkg_attributes", "pkg_files")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+
+package(default_visibility = ["//visibility:public"])
+
+pkg_deb(
+    name = "deb",
+    data = ":tar",
+    depends = [
+        "curl",
+        "unzip",
+    ],
+    description = "AWS CLI Installer",
+    maintainer = "Redo Tech",
+    package = "awscli-installer",
+    version = "1.0.0",
+)
+
+pkg_files(
+    name = "scripts",
+    srcs = [
+        "install",
+    ],
+    attributes = pkg_attributes(mode = "0755"),
+    renames = {"install": "/usr/bin/awscli-install"},
+)
+
+pkg_tar(
+    name = "tar",
+    srcs = [
+        ":scripts",
+    ],
+)

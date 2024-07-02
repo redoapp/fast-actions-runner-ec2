@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+arch="$(uname -m)"
+if [ "$arch" = x86_64 ]; then
+  arch=x86_64
+elif [ "$arch" = aarch64* ] || [ "$arch" = arm* ]; then
+  arch=aarch64
+else
+  echo "Unsupported architecture: $arch"
+  exit 1
+fi
+
+curl -LSs -o /tmp/aws-cli.zip https://awscli.amazonaws.com/awscli-exe-linux-"$arch".zip
+unzip -q /tmp/aws-cli.zip -d /tmp/aws-cli
+rm /tmp/aws-cli.zip
+/tmp/aws-cli/aws/install
+rm -r /tmp/aws-cli

@@ -1,0 +1,56 @@
+# Startup
+startup --host_jvm_args=-Xmx1024m
+startup --windows_enable_symlinks
+
+# Files
+import %workspace%/tools/bazel/deleted.bazelrc
+
+# Bzlmod
+common --noenable_bzlmod
+
+# Tags
+common --incompatible_allow_tags_propagation
+
+# Cache
+build --disk_cache ~/.cache/bazel-disk
+build:ci --disk_cache=''
+fetch --disk_cache ~/.cache/bazel-disk
+fetch:ci --disk_cache=''
+query --disk_cache ~/.cache/bazel-disk
+query:ci --disk_cache=''
+sync --disk_cache ~/.cache/bazel-disk
+sync:ci --disk_cache=''
+build --noexperimental_check_output_files
+
+# Profile
+build --nogenerate_json_trace_profile
+build:ci --generate_json_trace_profile
+
+# Build
+build -k
+build --experimental_guard_against_concurrent_changes
+
+# Runfiles
+build --enable_runfiles
+build --nolegacy_external_runfiles
+
+# Validations
+build --norun_validations
+
+# Sandbox
+build --noincompatible_strict_action_env
+build --nosandbox_default_allow_network
+build --reuse_sandbox_directories
+
+# Run
+# https://github.com/bazelbuild/bazel/issues/3325
+build --run_under=//tools/bazel:run
+
+# Test
+build --incompatible_exclusive_test_sandboxed
+build --nozip_undeclared_test_outputs
+build --test_output=errors
+test --build_tests_only
+
+# User settings
+try-import %workspace%/user.bazelrc

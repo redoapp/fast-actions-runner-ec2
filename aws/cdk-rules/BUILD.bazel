@@ -1,0 +1,13 @@
+load("//shell/rules:rules.bzl", "sh_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "app.sh.tpl",
+    "project-runner.sh.tpl",
+])
+
+sh_binary(
+    name = "synth",
+    main = "synth.sh",
+)

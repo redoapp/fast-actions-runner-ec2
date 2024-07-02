@@ -1,0 +1,11 @@
+#!/bin/bash
+function cleanup {
+    [ -z "${temp-}" ] || rm -fr "$tmp"
+}
+trap cleanup EXIT
+
+tmp="$(mktemp -d)"
+
+tar xzf "$1" -C "$tmp"
+rm -r "$tmp"/*/node_modules
+tar czf "$2" -C "$tmp" $(cd "$tmp" && ls)

@@ -1,0 +1,54 @@
+load("@rules_pkg//pkg:deb.bzl", "pkg_deb")
+load("@rules_pkg//pkg:mappings.bzl", "pkg_attributes", "pkg_files")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+
+package(default_visibility = ["//visibility:public"])
+
+pkg_deb(
+    name = "deb_",
+    data = ":tar",
+    depends = [
+        "curl",
+        "jq",
+    ],
+    description = "GitHub Actions Runner Service",
+    maintainer = "Redo Tech",
+    package = "actions-runner",
+    postinst = "deb/postinst",
+    postrm = "deb/postrm",
+    preinst = "deb/preinst",
+    version = "1.0.0",
+)
+
+pkg_files(
+    name = "files",
+    srcs = [
+        "actions-runner.service",
+        "actions-runner-setup.service",
+    ],
+    renames = {
+        "actions-runner.service": "/usr/lib/systemd/system/actions-runner.service",
+        "actions-runner-setup.service": "/usr/lib/systemd/system/actions-runner-setup.service",
+    },
+)
+
+pkg_files(
+    name = "scripts",
+    srcs = [
+        "run",
+        "setup",
+    ],
+    attributes = pkg_attributes(mode = "0755"),
+    renames = {
+        "run": "/usr/bin/actions-runner",
+        "setup": "/usr/sbin/actions-runner-setup",
+    },
+)
+
+pkg_tar(
+    name = "tar",
+    srcs = [
+        ":files",
+        ":scripts",
+    ],
+)

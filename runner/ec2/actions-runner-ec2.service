@@ -1,0 +1,11 @@
+[Unit]
+Before=actions-runner-setup.service
+Description=Configure Actions Runner using EC2 tags
+
+[Service]
+ExecStart=/usr/sbin/actions-runner-ec2-conf
+RemainAfterExit=yes
+Type=oneshot
+
+[Install]
+RequiredBy=actions-runner-setup.service

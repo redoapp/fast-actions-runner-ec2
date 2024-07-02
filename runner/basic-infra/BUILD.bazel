@@ -1,0 +1,85 @@
+load("@better_rules_javascript//commonjs:rules.bzl", "cjs_root")
+load("@better_rules_javascript//javascript:rules.bzl", "js_library")
+load("@better_rules_javascript//nodejs:rules.bzl", "nodejs_binary")
+load("@better_rules_javascript//typescript:rules.bzl", "ts_library")
+load("//aws/cdk-rules:rules.bzl", "cdk_project", "cdk_synth")
+
+package(default_visibility = ["//visibility:public"])
+
+js_library(
+    name = "assets",
+    srcs = ["lib/cloud-config.yaml"] + glob(["lib/**/*.sh"]),
+)
+
+nodejs_binary(
+    name = "bin",
+    dep = ":lib",
+    main = "lib/main.js",
+)
+
+cdk_project(
+    name = "cdk",
+    bin = ":bin",
+    cdk = "//tools/cdk",
+    config = "cdk.json",
+)
+
+cdk_synth(
+    name = "cf",
+    project = ":cdk",
+    stack = "Basic",
+)
+
+ts_library(
+    name = "lib",
+    srcs = glob(["src/**/*.ts"]),
+    compiler = "//tools/typescript:tsc",
+    config = "tsconfig.json",
+    config_dep = ":tsconfig",
+    declaration_prefix = "lib",
+    js_prefix = "lib",
+    root = ":root",
+    strip_prefix = "src",
+    deps = [
+        ":assets",
+        "//aws/cdk-util:lib",
+        "//runner/infra:lib",
+        "@npm//@types/node:lib",
+        "@npm//aws-cdk-lib:lib",
+        "@npm//constructs:lib",
+        "@npm//yaml:lib",
+    ],
+)
+
+cjs_root(
+    name = "root",
+    package_name = "@redotech/fast-actions-ec2-runner-basic-infra",
+    descriptors = ["package.json"],
+)
+
+genrule(
+    name = "cloud_config",
+    srcs = [
+        "cloud-config/config.yaml",
+        "cloud-config/aws-network-setup.sh",
+        "cloud-config/awscli-install.sh",
+        "cloud-config/actions-runner-install.sh",
+    ],
+    outs = ["lib/cloud-config.yaml"],
+    cmd = """
+    < $(location cloud-config/config.yaml) \\
+    $(execpath //cloud-init/config-gen:bin) \\
+    $(location cloud-config/aws-network-setup.sh) \\
+    $(location cloud-config/awscli-install.sh) \\
+    $(location cloud-config/actions-runner-install.sh) \\
+    > $@
+  """,
+    tools = ["//cloud-init/config-gen:bin"],
+)
+
+js_library(
+    name = "tsconfig",
+    srcs = ["tsconfig.json"],
+    root = ":root",
+    deps = ["//tools/typescript:lib"],
+)

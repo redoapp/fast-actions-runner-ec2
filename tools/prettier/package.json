@@ -1,0 +1,12 @@
+{
+  "name": "@redotech/tools-prettier",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "lib/*",
+        "src/*"
+      ]
+    }
+  },
+  "private": true
+}

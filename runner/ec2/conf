@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+metadata_token="$(curl -Ss -H "X-AWS-EC2-Metadata-Token-TTL-Seconds: 60" -X PUT http://169.254.169.254/latest/api/token)"
+
+instance_tag() {
+  metadata tags/instance/"$1"
+}
+
+metadata() {
+  curl -Ss -H "X-AWS-EC2-Metadata-Token: $metadata_token" http://169.254.169.254/latest/meta-data/"$1"
+}
+
+ssm_param() {
+  aws --output text --query Parameter.Value ssm get-parameter --name "$1" --with-decryption
+}
+
+mkdir -p /etc/actions-runner
+
+github_org="$(instance_tag ActionsRunner:GithubOrg)"
+github_repo="$(instance_tag ActionsRunner:GithubRepo)"
+github_token="$(ssm_param "$(instance_tag ActionsRunner:GithubTokenName)")"
+runner_group="$(instance_tag ActionsRunner:RunnerGroup)"
+runner_labels="$(instance_tag ActionsRunner:RunnerLabels)"
+runner_name="$(metadata instance-id)"
+touch /etc/actions-runner/ec2.env
+chmod 600 /etc/actions-runner/ec2.env
+cat >/etc/actions-runner/ec2.env <<EOL
+GITHUB_ORG=$github_org
+GITHUB_REPO=$github_repo
+GITHUB_TOKEN=$github_token
+RUNNER_GROUP=$runner_group
+RUNNER_LABELS=$runner_labels
+RUNNER_NAME=$runner_name
+EOL

@@ -1,0 +1,37 @@
+load("@better_rules_javascript//commonjs:rules.bzl", "cjs_root")
+load("@better_rules_javascript//javascript:rules.bzl", "js_export", "js_library")
+load("@better_rules_javascript//typescript:rules.bzl", "configure_ts_compiler")
+load("//bazel/rules:rules.bzl", "query_bzl")
+load(":libs.bzl", LIBS = "TARGETS")
+
+package(default_visibility = ["//visibility:public"])
+
+cjs_root(
+    name = "root",
+    package_name = "@redotech/tools-typescript",
+    descriptors = ["package.json"],
+)
+
+js_library(
+    name = "lib",
+    srcs = glob(["tsconfig.*.json"]),
+    root = ":root",
+)
+
+query_bzl(
+    name = "libs_bzl",
+    out = "libs.bzl",
+    query = "kind('ts_library', ...)",
+)
+
+filegroup(
+    name = "libs_dts",
+    srcs = LIBS,
+    output_group = "dts",
+)
+
+configure_ts_compiler(
+    name = "tsc",
+    ts = "@npm//typescript:lib",
+    tslib = "@npm//tslib:lib",
+)

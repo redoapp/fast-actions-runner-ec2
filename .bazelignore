@@ -1,0 +1,4 @@
+.bazel-npm-cache.json
+.git
+.yarn
+node_modules
