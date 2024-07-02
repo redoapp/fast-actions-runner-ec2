@@ -1,0 +1,10 @@
+.bazel-npm-cache.json
+.DS_Store
+.vscode/*
+.yarn
+node_modules
+user.bazelrc
+
+/bazel-*
+
+!.vscode/extensions.json
