@@ -261,7 +261,7 @@ export function instanceStack(
     "-c",
     readFileSync(join(__dirname, "setup.sh"), "utf8"),
     "setup",
-    '"${SetupScriptB64}"',
+    '${SetupScriptB64}',
   ]);
 
   const launchTemplate = new CfnLaunchTemplate(
