@@ -5,13 +5,13 @@ load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 package(default_visibility = ["//visibility:public"])
 
 pkg_deb(
-    name = "deb_",
+    name = "deb",
     data = ":tar",
     depends = [
         "curl",
         "jq",
     ],
-    description = "GitHub Actions Runner Service",
+    description = "GitHub Actions Runner",
     maintainer = "Redo Tech",
     package = "actions-runner",
     postinst = "deb/postinst",
@@ -24,24 +24,11 @@ pkg_files(
     name = "files",
     srcs = [
         "actions-runner.service",
-        "actions-runner-setup.service",
+        "actions-runner-config.service",
     ],
     renames = {
         "actions-runner.service": "/usr/lib/systemd/system/actions-runner.service",
-        "actions-runner-setup.service": "/usr/lib/systemd/system/actions-runner-setup.service",
-    },
-)
-
-pkg_files(
-    name = "scripts",
-    srcs = [
-        "run",
-        "setup",
-    ],
-    attributes = pkg_attributes(mode = "0755"),
-    renames = {
-        "run": "/usr/bin/actions-runner",
-        "setup": "/usr/sbin/actions-runner-setup",
+        "actions-runner-config.service": "/usr/lib/systemd/system/actions-runner-config.service",
     },
 )
 
@@ -49,6 +36,5 @@ pkg_tar(
     name = "tar",
     srcs = [
         ":files",
-        ":scripts",
     ],
 )

@@ -5,11 +5,12 @@ load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 package(default_visibility = ["//visibility:public"])
 
 pkg_deb(
-    name = "deb_",
+    name = "deb",
     data = ":tar",
     depends = [
         "curl",
         "jq",
+        "sigv4",
     ],
     description = "GitHub Actions Runner EC2",
     maintainer = "Redo Tech",
@@ -21,30 +22,32 @@ pkg_deb(
 pkg_files(
     name = "files",
     srcs = [
+        "actions-runner-10-ec2.conf",
+        "actions-runner-config-10-ec2.conf",
         "actions-runner-ec2.service",
-        "actions-runner-setup-10-ec2.conf",
     ],
     renames = {
+        "actions-runner-10-ec2.conf": "/etc/systemd/system/actions-runner.service.d/10-ec2.conf",
+        "actions-runner-config-10-ec2.conf": "/etc/systemd/system/actions-runner-config.service.d/10-ec2.conf",
         "actions-runner-ec2.service": "/usr/lib/systemd/system/actions-runner-ec2.service",
-        "actions-runner-setup-10-ec2.conf": "/etc/systemd/system/actions-runner-setup.service.d/10-ec2.conf",
     },
 )
 
 pkg_files(
-    name = "scripts",
+    name = "execs",
     srcs = [
-        "conf",
+        "bin",
     ],
     attributes = pkg_attributes(mode = "0755"),
     renames = {
-        "conf": "/usr/sbin/actions-runner-ec2-conf",
+        "bin": "/usr/lib/actions-runner-ec2/bin",
     },
 )
 
 pkg_tar(
     name = "tar",
     srcs = [
+        ":execs",
         ":files",
-        ":scripts",
     ],
 )

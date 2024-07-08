@@ -1,0 +1,15 @@
+{
+  "name": "@redotech/dynamodb",
+  "exports": {
+    "./*": "./lib/*.js"
+  },
+  "private": true,
+  "typesVersions": {
+    "*": {
+      "*": [
+        "lib/*",
+        "src/*"
+      ]
+    }
+  }
+}

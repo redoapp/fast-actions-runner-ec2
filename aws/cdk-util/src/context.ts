@@ -1,3 +1,4 @@
+import { Aws, Fn } from "aws-cdk-lib/core";
 import { Construct } from "constructs";
 
 export class Namespace {
@@ -10,7 +11,7 @@ export class Namespace {
   static readonly EMPTY = new Namespace([]);
 
   toString() {
-    return this.parts.join("/");
+    return Fn.join("/", this.parts);
   }
 }
 
@@ -22,5 +23,9 @@ export class Context {
 
   child(name: string) {
     return new Context(new Construct(this.scope, name), this.name.child(name));
+  }
+
+  static forStack(scope: Construct) {
+    return new Context(scope, Namespace.EMPTY.child(Aws.STACK_NAME));
   }
 }

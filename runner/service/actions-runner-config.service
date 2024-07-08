@@ -1,0 +1,11 @@
+[Service]
+ExecStart=/opt/actions-runner/config.sh --ephemeral --unattended
+ExecStartPre=/opt/actions-runner/config.sh remove --local
+Group=actions
+Type=oneshot
+User=actions
+WorkingDirectory=/opt/actions-runner
+
+[Unit]
+After=network.target
+Description=GitHub Actions Runner Configure

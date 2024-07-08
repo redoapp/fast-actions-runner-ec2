@@ -1,0 +1,15 @@
+[Install]
+WantedBy=network.target
+
+[Service]
+Environment=METADATA_USERS=root
+ExecStartPre=/usr/sbin/metadata-secure down
+ExecStart=/usr/sbin/metadata-secure up
+ExecStop=/usr/sbin/metadata-secure down
+Type=oneshot
+
+[Unit]
+DefaultDependencies=no
+Description=Secure AWS metadata service
+Before=network-pre.service
+Wants=network-pre.service

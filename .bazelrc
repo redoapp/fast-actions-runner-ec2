@@ -52,5 +52,8 @@ build --nozip_undeclared_test_outputs
 build --test_output=errors
 test --build_tests_only
 
+# Publish
+build --//aws/artifact:s3_url=https://redotech-fast-actions-ec2-runner-artifact.s3.us-east-1.amazonaws.com/dev/
+
 # User settings
 try-import %workspace%/user.bazelrc

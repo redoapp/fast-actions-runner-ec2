@@ -1,3 +1,8 @@
 package(default_visibility = ["//visibility:public"])
 
 exports_files(["query-targets.sh.tpl"])
+
+config_setting(
+    name = "stamp",
+    values = {"stamp": "1"},
+)

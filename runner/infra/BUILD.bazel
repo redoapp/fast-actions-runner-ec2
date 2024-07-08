@@ -7,6 +7,18 @@ load("//shell/rules:rules.bzl", "sh_binary")
 
 package(default_visibility = ["//visibility:public"])
 
+cdk_synth(
+    name = "app_cf",
+    project = ":cdk",
+    stack = "App",
+)
+
+cdk_synth(
+    name = "base_cf",
+    project = ":cdk",
+    stack = "Base",
+)
+
 nodejs_binary(
     name = "bin",
     dep = ":lib",
@@ -18,12 +30,6 @@ cdk_project(
     bin = ":bin",
     cdk = "//tools/cdk",
     config = "cdk.json",
-)
-
-cdk_synth(
-    name = "cf",
-    project = ":cdk",
-    stack = "Runner",
 )
 
 ts_library(
@@ -38,13 +44,20 @@ ts_library(
     strip_prefix = "src",
     deps = [
         "//aws/cdk-util:lib",
-        "//runner/provision-infra:lib",
-        "//runner/webhook-infra:lib",
+        "//github/util:lib",
+        "//javascript/temporal-types:lib",
         "@better_rules_javascript//bazel/runfiles:lib",
         "@npm//@types/node:lib",
         "@npm//aws-cdk-lib:lib",
         "@npm//constructs:lib",
+        "@npm//temporal-polyfill:lib",
     ],
+)
+
+cdk_synth(
+    name = "provisioner_cf",
+    project = ":cdk",
+    stack = "Provisioner",
 )
 
 cjs_root(

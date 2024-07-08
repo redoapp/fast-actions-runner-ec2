@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-iptables -N METADATA_OUTPUT
-iptables -A OUTPUT -d 169.254.169.254 -j METADATA_OUTPUT
-for user in "$@"; do
-  iptables -A METADATA_OUTPUT -m owner --uid-owner "$user" -j ACCEPT
-done
-iptables -A METADATA_OUTPUT -j DROP
+action="$1"
 
-iptables-save > /etc/iptables/rules.v4
+if [ "$action" = up ]; then
+  iptables -N METADATA_OUTPUT
+  iptables -A OUTPUT -d 169.254.169.254 -j METADATA_OUTPUT
+  for user in $METADATA_USERS; do
+    iptables -A METADATA_OUTPUT -m owner --uid-owner "$user" -j ACCEPT
+  done
+  iptables -A METADATA_OUTPUT -j DROP
+elif [ "$action" = down ]; then
+  iptables -D OUTPUT -d 169.254.169.254 -j METADATA_OUTPUT
+  iptables -X METADATA_OUTPUT
+fi

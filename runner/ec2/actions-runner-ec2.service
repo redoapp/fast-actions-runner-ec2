@@ -1,11 +1,11 @@
-[Unit]
-Before=actions-runner-setup.service
-Description=Configure Actions Runner using EC2 tags
+[Install]
+RequiredBy=actions-runner.service
 
 [Service]
-ExecStart=/usr/sbin/actions-runner-ec2-conf
-RemainAfterExit=yes
+ExecStart=/usr/lib/actions-runner-ec2/bin
 Type=oneshot
 
-[Install]
-RequiredBy=actions-runner-setup.service
+[Unit]
+After=network.target
+Before=actions-runner.service
+Description=Create GitHub Actions Runner on EC2

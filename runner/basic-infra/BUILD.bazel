@@ -8,7 +8,13 @@ package(default_visibility = ["//visibility:public"])
 
 js_library(
     name = "assets",
-    srcs = ["lib/cloud-config.yaml"] + glob(["lib/**/*.sh"]),
+    srcs = glob(["lib/**/*.tpl"]),
+)
+
+cdk_synth(
+    name = "cluster_cf",
+    project = ":cdk",
+    stack = "Base",
 )
 
 nodejs_binary(
@@ -22,12 +28,6 @@ cdk_project(
     bin = ":bin",
     cdk = "//tools/cdk",
     config = "cdk.json",
-)
-
-cdk_synth(
-    name = "cf",
-    project = ":cdk",
-    stack = "Basic",
 )
 
 ts_library(
@@ -57,24 +57,10 @@ cjs_root(
     descriptors = ["package.json"],
 )
 
-genrule(
-    name = "cloud_config",
-    srcs = [
-        "cloud-config/config.yaml",
-        "cloud-config/aws-network-setup.sh",
-        "cloud-config/awscli-install.sh",
-        "cloud-config/actions-runner-install.sh",
-    ],
-    outs = ["lib/cloud-config.yaml"],
-    cmd = """
-    < $(location cloud-config/config.yaml) \\
-    $(execpath //cloud-init/config-gen:bin) \\
-    $(location cloud-config/aws-network-setup.sh) \\
-    $(location cloud-config/awscli-install.sh) \\
-    $(location cloud-config/actions-runner-install.sh) \\
-    > $@
-  """,
-    tools = ["//cloud-init/config-gen:bin"],
+cdk_synth(
+    name = "provisioner_cf",
+    project = ":cdk",
+    stack = "Runner",
 )
 
 js_library(

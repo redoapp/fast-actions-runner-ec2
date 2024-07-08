@@ -2,15 +2,17 @@
 WantedBy=multi-user.target
 
 [Service]
-ExecStart=/usr/bin/actions-runner
+ExecStart=/opt/actions-runner/run.sh
 Group=actions
+KillMode=mixed
 Restart=on-success
+TimeoutStopSec=5m
 Type=exec
 User=actions
 WorkingDirectory=/opt/actions-runner
 
 [Unit]
-After=actions-runner-setup.service
+After=actions-runner-config.service
 After=network.target
 Description=GitHub Actions Runner
-Requires=actions-runner-setup.service
+Requires=actions-runner-config.service

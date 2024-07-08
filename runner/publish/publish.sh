@@ -32,5 +32,7 @@ s3_upload application/vnd.debian.binary-package redotech_fast_actions_ec2_runner
 s3_upload application/vnd.debian.binary-package redotech_fast_actions_ec2_runner/runner/ec2/actions-runner-ec2_1.0.0_all.deb actions-runner-ec2.deb
 s3_upload application/vnd.debian.binary-package redotech_fast_actions_ec2_runner/runner/service/actions-runner_1.0.0_all.deb actions-runner.deb
 s3_subst_upload application/yaml redotech_fast_actions_ec2_runner/runner/basic-infra/lib/cloud-config.yaml cloud-config.yaml
-s3_subst_upload application/yaml redotech_fast_actions_ec2_runner/runner/basic-infra/cf.yaml basic.template.yaml
-s3_subst_upload application/yaml redotech_fast_actions_ec2_runner/runner/infra/cf.yaml runner.template.yaml
+s3_subst_upload application/yaml redotech_fast_actions_ec2_runner/runner/basic-infra/base_cf.yaml basic-base.template.yaml
+s3_subst_upload application/yaml redotech_fast_actions_ec2_runner/runner/basic-infra/runner_cf.yaml basic-runner.template.yaml
+s3_subst_upload application/yaml redotech_fast_actions_ec2_runner/runner/infra/base_cf.yaml base.template.yaml
+s3_subst_upload application/yaml redotech_fast_actions_ec2_runner/runner/infra/runner_cf.yaml runner.template.yaml

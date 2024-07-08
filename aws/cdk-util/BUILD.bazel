@@ -4,6 +4,14 @@ load("@better_rules_javascript//typescript:rules.bzl", "ts_library")
 
 package(default_visibility = ["//visibility:public"])
 
+js_library(
+    name = "s3_url",
+    srcs = ["//aws/artifact:s3-url.txt"],
+    prefix = "lib",
+    root = ":root",
+    strip_prefix = "/aws/artifact",
+)
+
 ts_library(
     name = "lib",
     srcs = glob(["src/**/*.ts"]),
@@ -15,6 +23,8 @@ ts_library(
     root = ":root",
     strip_prefix = "src",
     deps = [
+        ":s3_url",
+        "@npm//@types/node:lib",
         "@npm//aws-cdk-lib:lib",
         "@npm//constructs:lib",
     ],

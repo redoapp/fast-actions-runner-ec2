@@ -1,6 +1,7 @@
 {
   "name": "@redotech/github-webhook",
   "exports": {
+    ".": "./lib/index.js",
     "./*": "./lib/*.js"
   },
   "private": true,

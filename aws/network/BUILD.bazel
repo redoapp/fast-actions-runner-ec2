@@ -7,15 +7,23 @@ package(default_visibility = ["//visibility:public"])
 pkg_deb(
     name = "deb",
     data = ":tar",
-    depends = ["iptables-persistent"],
     description = "AWS network utilities",
     maintainer = "Redo Tech",
     package = "aws-network",
+    postinst = "deb/postinst",
     version = "1.0.0",
 )
 
 pkg_files(
-    name = "scripts",
+    name = "files",
+    srcs = [
+        "metadata-secure.service",
+    ],
+    attributes = pkg_attributes(mode = "0755"),
+)
+
+pkg_files(
+    name = "execs",
     srcs = [
         "metadata-secure",
     ],
@@ -26,6 +34,7 @@ pkg_files(
 pkg_tar(
     name = "tar",
     srcs = [
-        ":scripts",
+        ":execs",
+        ":files",
     ],
 )

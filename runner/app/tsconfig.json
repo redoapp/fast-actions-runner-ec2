@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx"
+  },
+  "extends": "@redotech/tools-typescript/tsconfig.common.json"
+}

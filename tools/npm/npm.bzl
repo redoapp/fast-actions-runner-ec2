@@ -14,6 +14,22 @@ PACKAGES = {
         "name": "@aws-cdk/asset-node-proxy-agent-v6",
         "url": "https://registry.npmjs.org/@aws-cdk/asset-node-proxy-agent-v6/-/asset-node-proxy-agent-v6-2.0.3.tgz",
     },
+    "@aws-crypto/crc32@5.2.0": {
+        "deps": [
+            {
+                "id": "@aws-crypto/util@5.2.0",
+            },
+            {
+                "id": "@aws-sdk/types@3.598.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-nLbCWqQNgUiwwtFsen1AdzAtvuLRsQS8rYgMuxCrdKf9kOssamGLuPwyTY9wyYblNr9+1XM8v6zoDTPPSIeANg==",
+        "name": "@aws-crypto/crc32",
+        "url": "https://registry.npmjs.org/@aws-crypto/crc32/-/crc32-5.2.0.tgz",
+    },
     "@aws-crypto/sha256-browser@5.2.0": {
         "deps": [
             {
@@ -361,6 +377,151 @@ PACKAGES = {
         "integrity": "sha512-ZnmqKRewjYkEps7tRoTaA7yo8wSgwOHqGU+Pw6wVsaR7RqmfxCtWb6QQNAk7sqqv1zv15a8TNfA/oekA5fFUPw==",
         "name": "@aws-sdk/client-ec2",
         "url": "https://registry.npmjs.org/@aws-sdk/client-ec2/-/client-ec2-3.604.0.tgz",
+    },
+    "@aws-sdk/client-lambda@3.609.0": {
+        "deps": [
+            {
+                "id": "@aws-crypto/sha256-browser@5.2.0",
+            },
+            {
+                "id": "@aws-crypto/sha256-js@5.2.0",
+            },
+            {
+                "id": "@aws-sdk/client-sso-oidc@3.609.0-724a8583",
+            },
+            {
+                "id": "@aws-sdk/client-sts@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/core@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/credential-provider-node@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/middleware-host-header@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/middleware-logger@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/middleware-recursion-detection@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/middleware-user-agent@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/region-config-resolver@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/types@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/util-endpoints@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/util-user-agent-browser@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/util-user-agent-node@3.609.0-514b98b2",
+            },
+            {
+                "id": "@smithy/config-resolver@3.0.4",
+            },
+            {
+                "id": "@smithy/core@2.2.4",
+            },
+            {
+                "id": "@smithy/eventstream-serde-browser@3.0.4",
+            },
+            {
+                "id": "@smithy/eventstream-serde-config-resolver@3.0.3",
+            },
+            {
+                "id": "@smithy/eventstream-serde-node@3.0.4",
+            },
+            {
+                "id": "@smithy/fetch-http-handler@3.2.0",
+            },
+            {
+                "id": "@smithy/hash-node@3.0.3",
+            },
+            {
+                "id": "@smithy/invalid-dependency@3.0.3",
+            },
+            {
+                "id": "@smithy/middleware-content-length@3.0.3",
+            },
+            {
+                "id": "@smithy/middleware-endpoint@3.0.4",
+            },
+            {
+                "id": "@smithy/middleware-retry@3.0.7",
+            },
+            {
+                "id": "@smithy/middleware-serde@3.0.3",
+            },
+            {
+                "id": "@smithy/middleware-stack@3.0.3",
+            },
+            {
+                "id": "@smithy/node-config-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/node-http-handler@3.1.1",
+            },
+            {
+                "id": "@smithy/protocol-http@4.0.3",
+            },
+            {
+                "id": "@smithy/smithy-client@3.1.5",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "@smithy/url-parser@3.0.3",
+            },
+            {
+                "id": "@smithy/util-base64@3.0.0",
+            },
+            {
+                "id": "@smithy/util-body-length-browser@3.0.0",
+            },
+            {
+                "id": "@smithy/util-body-length-node@3.0.0",
+            },
+            {
+                "id": "@smithy/util-defaults-mode-browser@3.0.7",
+            },
+            {
+                "id": "@smithy/util-defaults-mode-node@3.0.7",
+            },
+            {
+                "id": "@smithy/util-endpoints@2.0.4",
+            },
+            {
+                "id": "@smithy/util-middleware@3.0.3",
+            },
+            {
+                "id": "@smithy/util-retry@3.0.3",
+            },
+            {
+                "id": "@smithy/util-stream@3.0.5",
+            },
+            {
+                "id": "@smithy/util-utf8@3.0.0",
+            },
+            {
+                "id": "@smithy/util-waiter@3.1.2",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-+us5UQmuZu7Qd33l9xt2TZ2TAT4LWY7QfjSCUaaR8/LRNG6af1LvKfdxSC5iYU+jjb6Yrc1FITH/IoNxbjD6NQ==",
+        "name": "@aws-sdk/client-lambda",
+        "url": "https://registry.npmjs.org/@aws-sdk/client-lambda/-/client-lambda-3.609.0.tgz",
     },
     "@aws-sdk/client-sqs@3.600.0": {
         "deps": [
@@ -906,6 +1067,142 @@ PACKAGES = {
         "name": "@aws-sdk/client-sso-oidc",
         "url": "https://registry.npmjs.org/@aws-sdk/client-sso-oidc/-/client-sso-oidc-3.606.0.tgz",
     },
+    "@aws-sdk/client-sso-oidc@3.609.0-724a8583": {
+        "deps": [
+            {
+                "id": "@aws-crypto/sha256-browser@5.2.0",
+            },
+            {
+                "id": "@aws-crypto/sha256-js@5.2.0",
+            },
+            {
+                "id": "@aws-sdk/core@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/credential-provider-node@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/middleware-host-header@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/middleware-logger@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/middleware-recursion-detection@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/middleware-user-agent@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/region-config-resolver@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/types@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/util-endpoints@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/util-user-agent-browser@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/util-user-agent-node@3.609.0-514b98b2",
+            },
+            {
+                "id": "@smithy/config-resolver@3.0.4",
+            },
+            {
+                "id": "@smithy/core@2.2.4",
+            },
+            {
+                "id": "@smithy/fetch-http-handler@3.2.0",
+            },
+            {
+                "id": "@smithy/hash-node@3.0.3",
+            },
+            {
+                "id": "@smithy/invalid-dependency@3.0.3",
+            },
+            {
+                "id": "@smithy/middleware-content-length@3.0.3",
+            },
+            {
+                "id": "@smithy/middleware-endpoint@3.0.4",
+            },
+            {
+                "id": "@smithy/middleware-retry@3.0.7",
+            },
+            {
+                "id": "@smithy/middleware-serde@3.0.3",
+            },
+            {
+                "id": "@smithy/middleware-stack@3.0.3",
+            },
+            {
+                "id": "@smithy/node-config-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/node-http-handler@3.1.1",
+            },
+            {
+                "id": "@smithy/protocol-http@4.0.3",
+            },
+            {
+                "id": "@smithy/smithy-client@3.1.5",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "@smithy/url-parser@3.0.3",
+            },
+            {
+                "id": "@smithy/util-base64@3.0.0",
+            },
+            {
+                "id": "@smithy/util-body-length-browser@3.0.0",
+            },
+            {
+                "id": "@smithy/util-body-length-node@3.0.0",
+            },
+            {
+                "id": "@smithy/util-defaults-mode-browser@3.0.7",
+            },
+            {
+                "id": "@smithy/util-defaults-mode-node@3.0.7",
+            },
+            {
+                "id": "@smithy/util-endpoints@2.0.4",
+            },
+            {
+                "id": "@smithy/util-middleware@3.0.3",
+            },
+            {
+                "id": "@smithy/util-retry@3.0.3",
+            },
+            {
+                "id": "@smithy/util-utf8@3.0.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "extra_deps": {
+            "@aws-sdk/client-sso-oidc@3.609.0-724a8583": [
+                {
+                    "id": "@aws-sdk/client-sts@3.609.0",
+                },
+            ],
+            "@aws-sdk/client-sts@3.609.0": [
+                {
+                    "id": "@aws-sdk/client-sso-oidc@3.609.0-724a8583",
+                },
+            ],
+        },
+        "integrity": "sha512-0bNPAyPdkWkS9EGB2A9BZDkBNrnVCBzk5lYRezoT4K3/gi9w1DTYH5tuRdwaTZdxW19U1mq7CV0YJJARKO1L9Q==",
+        "name": "@aws-sdk/client-sso-oidc",
+        "url": "https://registry.npmjs.org/@aws-sdk/client-sso-oidc/-/client-sso-oidc-3.609.0.tgz",
+    },
     "@aws-sdk/client-sso@3.598.0": {
         "deps": [
             {
@@ -1026,6 +1323,127 @@ PACKAGES = {
         "integrity": "sha512-nOI5lqPYa+YZlrrzwAJywJSw3MKVjvu6Ge2fCqQUNYMfxFB0NAaDFnl0EPjXi+sEbtCuz/uWE77poHbqiZ+7Iw==",
         "name": "@aws-sdk/client-sso",
         "url": "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.598.0.tgz",
+    },
+    "@aws-sdk/client-sso@3.609.0": {
+        "deps": [
+            {
+                "id": "@aws-crypto/sha256-browser@5.2.0",
+            },
+            {
+                "id": "@aws-crypto/sha256-js@5.2.0",
+            },
+            {
+                "id": "@aws-sdk/core@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/middleware-host-header@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/middleware-logger@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/middleware-recursion-detection@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/middleware-user-agent@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/region-config-resolver@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/types@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/util-endpoints@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/util-user-agent-browser@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/util-user-agent-node@3.609.0-514b98b2",
+            },
+            {
+                "id": "@smithy/config-resolver@3.0.4",
+            },
+            {
+                "id": "@smithy/core@2.2.4",
+            },
+            {
+                "id": "@smithy/fetch-http-handler@3.2.0",
+            },
+            {
+                "id": "@smithy/hash-node@3.0.3",
+            },
+            {
+                "id": "@smithy/invalid-dependency@3.0.3",
+            },
+            {
+                "id": "@smithy/middleware-content-length@3.0.3",
+            },
+            {
+                "id": "@smithy/middleware-endpoint@3.0.4",
+            },
+            {
+                "id": "@smithy/middleware-retry@3.0.7",
+            },
+            {
+                "id": "@smithy/middleware-serde@3.0.3",
+            },
+            {
+                "id": "@smithy/middleware-stack@3.0.3",
+            },
+            {
+                "id": "@smithy/node-config-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/node-http-handler@3.1.1",
+            },
+            {
+                "id": "@smithy/protocol-http@4.0.3",
+            },
+            {
+                "id": "@smithy/smithy-client@3.1.5",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "@smithy/url-parser@3.0.3",
+            },
+            {
+                "id": "@smithy/util-base64@3.0.0",
+            },
+            {
+                "id": "@smithy/util-body-length-browser@3.0.0",
+            },
+            {
+                "id": "@smithy/util-body-length-node@3.0.0",
+            },
+            {
+                "id": "@smithy/util-defaults-mode-browser@3.0.7",
+            },
+            {
+                "id": "@smithy/util-defaults-mode-node@3.0.7",
+            },
+            {
+                "id": "@smithy/util-endpoints@2.0.4",
+            },
+            {
+                "id": "@smithy/util-middleware@3.0.3",
+            },
+            {
+                "id": "@smithy/util-retry@3.0.3",
+            },
+            {
+                "id": "@smithy/util-utf8@3.0.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-gqXGFDkIpKHCKAbeJK4aIDt3tiwJ26Rf5Tqw9JS6BYXsdMeOB8FTzqD9R+Yc1epHd8s5L94sdqXT5PapgxFZrg==",
+        "name": "@aws-sdk/client-sso",
+        "url": "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.609.0.tgz",
     },
     "@aws-sdk/client-sts@3.600.0": {
         "deps": [
@@ -1299,6 +1717,142 @@ PACKAGES = {
         "name": "@aws-sdk/client-sts",
         "url": "https://registry.npmjs.org/@aws-sdk/client-sts/-/client-sts-3.606.0.tgz",
     },
+    "@aws-sdk/client-sts@3.609.0": {
+        "deps": [
+            {
+                "id": "@aws-crypto/sha256-browser@5.2.0",
+            },
+            {
+                "id": "@aws-crypto/sha256-js@5.2.0",
+            },
+            {
+                "id": "@aws-sdk/core@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/credential-provider-node@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/middleware-host-header@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/middleware-logger@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/middleware-recursion-detection@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/middleware-user-agent@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/region-config-resolver@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/types@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/util-endpoints@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/util-user-agent-browser@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/util-user-agent-node@3.609.0-514b98b2",
+            },
+            {
+                "id": "@smithy/config-resolver@3.0.4",
+            },
+            {
+                "id": "@smithy/core@2.2.4",
+            },
+            {
+                "id": "@smithy/fetch-http-handler@3.2.0",
+            },
+            {
+                "id": "@smithy/hash-node@3.0.3",
+            },
+            {
+                "id": "@smithy/invalid-dependency@3.0.3",
+            },
+            {
+                "id": "@smithy/middleware-content-length@3.0.3",
+            },
+            {
+                "id": "@smithy/middleware-endpoint@3.0.4",
+            },
+            {
+                "id": "@smithy/middleware-retry@3.0.7",
+            },
+            {
+                "id": "@smithy/middleware-serde@3.0.3",
+            },
+            {
+                "id": "@smithy/middleware-stack@3.0.3",
+            },
+            {
+                "id": "@smithy/node-config-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/node-http-handler@3.1.1",
+            },
+            {
+                "id": "@smithy/protocol-http@4.0.3",
+            },
+            {
+                "id": "@smithy/smithy-client@3.1.5",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "@smithy/url-parser@3.0.3",
+            },
+            {
+                "id": "@smithy/util-base64@3.0.0",
+            },
+            {
+                "id": "@smithy/util-body-length-browser@3.0.0",
+            },
+            {
+                "id": "@smithy/util-body-length-node@3.0.0",
+            },
+            {
+                "id": "@smithy/util-defaults-mode-browser@3.0.7",
+            },
+            {
+                "id": "@smithy/util-defaults-mode-node@3.0.7",
+            },
+            {
+                "id": "@smithy/util-endpoints@2.0.4",
+            },
+            {
+                "id": "@smithy/util-middleware@3.0.3",
+            },
+            {
+                "id": "@smithy/util-retry@3.0.3",
+            },
+            {
+                "id": "@smithy/util-utf8@3.0.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "extra_deps": {
+            "@aws-sdk/client-sso-oidc@3.609.0-724a8583": [
+                {
+                    "id": "@aws-sdk/client-sts@3.609.0",
+                },
+            ],
+            "@aws-sdk/client-sts@3.609.0": [
+                {
+                    "id": "@aws-sdk/client-sso-oidc@3.609.0-724a8583",
+                },
+            ],
+        },
+        "integrity": "sha512-A0B3sDKFoFlGo8RYRjDBWHXpbgirer2bZBkCIzhSPHc1vOFHt/m2NcUoE2xnBKXJFrptL1xDkvo1P+XYp/BfcQ==",
+        "name": "@aws-sdk/client-sts",
+        "url": "https://registry.npmjs.org/@aws-sdk/client-sts/-/client-sts-3.609.0.tgz",
+    },
     "@aws-sdk/core@3.598.0": {
         "deps": [
             {
@@ -1327,6 +1881,34 @@ PACKAGES = {
         "name": "@aws-sdk/core",
         "url": "https://registry.npmjs.org/@aws-sdk/core/-/core-3.598.0.tgz",
     },
+    "@aws-sdk/core@3.609.0": {
+        "deps": [
+            {
+                "id": "@smithy/core@2.2.4",
+            },
+            {
+                "id": "@smithy/protocol-http@4.0.3",
+            },
+            {
+                "id": "@smithy/signature-v4@3.1.2",
+            },
+            {
+                "id": "@smithy/smithy-client@3.1.5",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "fast-xml-parser@4.2.5",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-ptqw+DTxLr01+pKjDUuo53SEDzI+7nFM3WfQaEo0yhDg8vWw8PER4sWj1Ysx67ksctnZesPUjqxd5SHbtdBxiA==",
+        "name": "@aws-sdk/core",
+        "url": "https://registry.npmjs.org/@aws-sdk/core/-/core-3.609.0.tgz",
+    },
     "@aws-sdk/credential-provider-env@3.598.0": {
         "deps": [
             {
@@ -1345,6 +1927,25 @@ PACKAGES = {
         "integrity": "sha512-vi1khgn7yXzLCcgSIzQrrtd2ilUM0dWodxj3PQ6BLfP0O+q1imO3hG1nq7DVyJtq7rFHs6+9N8G4mYvTkxby2w==",
         "name": "@aws-sdk/credential-provider-env",
         "url": "https://registry.npmjs.org/@aws-sdk/credential-provider-env/-/credential-provider-env-3.598.0.tgz",
+    },
+    "@aws-sdk/credential-provider-env@3.609.0": {
+        "deps": [
+            {
+                "id": "@aws-sdk/types@3.609.0",
+            },
+            {
+                "id": "@smithy/property-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-v69ZCWcec2iuV9vLVJMa6fAb5xwkzN4jYIT8yjo2c4Ia/j976Q+TPf35Pnz5My48Xr94EFcaBazrWedF+kwfuQ==",
+        "name": "@aws-sdk/credential-provider-env",
+        "url": "https://registry.npmjs.org/@aws-sdk/credential-provider-env/-/credential-provider-env-3.609.0.tgz",
     },
     "@aws-sdk/credential-provider-http@3.598.0": {
         "deps": [
@@ -1379,6 +1980,40 @@ PACKAGES = {
         "integrity": "sha512-N7cIafi4HVlQvEgvZSo1G4T9qb/JMLGMdBsDCT5XkeJrF0aptQWzTFH0jIdZcLrMYvzPcuEyO3yCBe6cy/ba0g==",
         "name": "@aws-sdk/credential-provider-http",
         "url": "https://registry.npmjs.org/@aws-sdk/credential-provider-http/-/credential-provider-http-3.598.0.tgz",
+    },
+    "@aws-sdk/credential-provider-http@3.609.0": {
+        "deps": [
+            {
+                "id": "@aws-sdk/types@3.609.0",
+            },
+            {
+                "id": "@smithy/fetch-http-handler@3.2.0",
+            },
+            {
+                "id": "@smithy/node-http-handler@3.1.1",
+            },
+            {
+                "id": "@smithy/property-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/protocol-http@4.0.3",
+            },
+            {
+                "id": "@smithy/smithy-client@3.1.5",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "@smithy/util-stream@3.0.5",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-GQQfB9Mk4XUZwaPsk4V3w8MqleS6ApkZKVQn3vTLAKa8Y7B2Imcpe5zWbKYjDd8MPpMWjHcBGFTVlDRFP4zwSQ==",
+        "name": "@aws-sdk/credential-provider-http",
+        "url": "https://registry.npmjs.org/@aws-sdk/credential-provider-http/-/credential-provider-http-3.609.0.tgz",
     },
     "@aws-sdk/credential-provider-ini@3.598.0-189b20e3": {
         "deps": [
@@ -1419,6 +2054,46 @@ PACKAGES = {
         "integrity": "sha512-/ppcIVUbRwDIwJDoYfp90X3+AuJo2mvE52Y1t2VSrvUovYn6N4v95/vXj6LS8CNDhz2jvEJYmu+0cTMHdhI6eA==",
         "name": "@aws-sdk/credential-provider-ini",
         "url": "https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.598.0.tgz",
+    },
+    "@aws-sdk/credential-provider-ini@3.609.0-9a531dd5": {
+        "deps": [
+            {
+                "id": "@aws-sdk/credential-provider-env@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/credential-provider-http@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/credential-provider-process@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/credential-provider-sso@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/credential-provider-web-identity@3.609.0-9a531dd5",
+            },
+            {
+                "id": "@aws-sdk/types@3.609.0",
+            },
+            {
+                "id": "@smithy/credential-provider-imds@3.1.3",
+            },
+            {
+                "id": "@smithy/property-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/shared-ini-file-loader@3.1.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-hwaBfXuBTv6/eAdEsDfGcteYUW6Km7lvvubbxEdxIuJNF3vswR7RMGIXaEC37hhPkTTgd3H0TONammhwZIfkog==",
+        "name": "@aws-sdk/credential-provider-ini",
+        "url": "https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.609.0.tgz",
     },
     "@aws-sdk/credential-provider-node@3.600.0": {
         "deps": [
@@ -1463,6 +2138,49 @@ PACKAGES = {
         "name": "@aws-sdk/credential-provider-node",
         "url": "https://registry.npmjs.org/@aws-sdk/credential-provider-node/-/credential-provider-node-3.600.0.tgz",
     },
+    "@aws-sdk/credential-provider-node@3.609.0": {
+        "deps": [
+            {
+                "id": "@aws-sdk/credential-provider-env@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/credential-provider-http@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/credential-provider-ini@3.609.0-9a531dd5",
+            },
+            {
+                "id": "@aws-sdk/credential-provider-process@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/credential-provider-sso@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/credential-provider-web-identity@3.609.0-9a531dd5",
+            },
+            {
+                "id": "@aws-sdk/types@3.609.0",
+            },
+            {
+                "id": "@smithy/credential-provider-imds@3.1.3",
+            },
+            {
+                "id": "@smithy/property-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/shared-ini-file-loader@3.1.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-4J8/JRuqfxJDGD9jTHVCBxCvYt7/Vgj2Stlhj930mrjFPO/yRw8ilAAZxBWe0JHPX3QwepCmh4ErZe53F5ysxQ==",
+        "name": "@aws-sdk/credential-provider-node",
+        "url": "https://registry.npmjs.org/@aws-sdk/credential-provider-node/-/credential-provider-node-3.609.0.tgz",
+    },
     "@aws-sdk/credential-provider-process@3.598.0": {
         "deps": [
             {
@@ -1484,6 +2202,28 @@ PACKAGES = {
         "integrity": "sha512-rM707XbLW8huMk722AgjVyxu2tMZee++fNA8TJVNgs1Ma02Wx6bBrfIvlyK0rCcIRb0WdQYP6fe3Xhiu4e8IBA==",
         "name": "@aws-sdk/credential-provider-process",
         "url": "https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.598.0.tgz",
+    },
+    "@aws-sdk/credential-provider-process@3.609.0": {
+        "deps": [
+            {
+                "id": "@aws-sdk/types@3.609.0",
+            },
+            {
+                "id": "@smithy/property-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/shared-ini-file-loader@3.1.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-Ux35nGOSJKZWUIM3Ny0ROZ8cqPRUEkh+tR3X2o9ydEbFiLq3eMMyEnHJqx4EeUjLRchidlm4CCid9GxMe5/gdw==",
+        "name": "@aws-sdk/credential-provider-process",
+        "url": "https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.609.0.tgz",
     },
     "@aws-sdk/credential-provider-sso@3.598.0": {
         "deps": [
@@ -1513,6 +2253,34 @@ PACKAGES = {
         "name": "@aws-sdk/credential-provider-sso",
         "url": "https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.598.0.tgz",
     },
+    "@aws-sdk/credential-provider-sso@3.609.0": {
+        "deps": [
+            {
+                "id": "@aws-sdk/client-sso@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/token-providers@3.609.0-b85bf663",
+            },
+            {
+                "id": "@aws-sdk/types@3.609.0",
+            },
+            {
+                "id": "@smithy/property-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/shared-ini-file-loader@3.1.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-oQPGDKMMIxjvTcm86g07RPYeC7mCNk+29dPpY15ZAPRpAF7F0tircsC3wT9fHzNaKShEyK5LuI5Kg/uxsdy+Iw==",
+        "name": "@aws-sdk/credential-provider-sso",
+        "url": "https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.609.0.tgz",
+    },
     "@aws-sdk/credential-provider-web-identity@3.598.0-189b20e3": {
         "deps": [
             {
@@ -1532,6 +2300,25 @@ PACKAGES = {
         "name": "@aws-sdk/credential-provider-web-identity",
         "url": "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.598.0.tgz",
     },
+    "@aws-sdk/credential-provider-web-identity@3.609.0-9a531dd5": {
+        "deps": [
+            {
+                "id": "@aws-sdk/types@3.609.0",
+            },
+            {
+                "id": "@smithy/property-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-U+PG8NhlYYF45zbr1km3ROtBMYqyyj/oK8NRp++UHHeuavgrP+4wJ4wQnlEaKvJBjevfo3+dlIBcaeQ7NYejWg==",
+        "name": "@aws-sdk/credential-provider-web-identity",
+        "url": "https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.609.0.tgz",
+    },
     "@aws-sdk/endpoint-cache@3.572.0": {
         "deps": [
             {
@@ -1544,28 +2331,6 @@ PACKAGES = {
         "integrity": "sha512-CzuRWMj/xtN9p9eP915nlPmlyniTzke732Ow/M60++gGgB3W+RtZyFftw3TEx+NzNhd1tH54dEcGiWdiNaBz3Q==",
         "name": "@aws-sdk/endpoint-cache",
         "url": "https://registry.npmjs.org/@aws-sdk/endpoint-cache/-/endpoint-cache-3.572.0.tgz",
-    },
-    "@aws-sdk/lib-dynamodb@3.602.0-44f25193": {
-        "deps": [
-            {
-                "id": "@aws-sdk/client-dynamodb@3.602.0",
-            },
-            {
-                "id": "@aws-sdk/util-dynamodb@3.602.0-44477c75",
-            },
-            {
-                "id": "@smithy/smithy-client@3.1.4",
-            },
-            {
-                "id": "@smithy/types@3.2.0",
-            },
-            {
-                "id": "tslib@2.6.3",
-            },
-        ],
-        "integrity": "sha512-6kKNyjP0WawAU1dDiA00eK2MfYH0eaviuc/ctQ7HkpWDAuCAfY7alKXAvks+6qCXf+T1SzucIUUj6zlG5i0a2w==",
-        "name": "@aws-sdk/lib-dynamodb",
-        "url": "https://registry.npmjs.org/@aws-sdk/lib-dynamodb/-/lib-dynamodb-3.602.0.tgz",
     },
     "@aws-sdk/middleware-endpoint-discovery@3.598.0": {
         "deps": [
@@ -1611,6 +2376,25 @@ PACKAGES = {
         "name": "@aws-sdk/middleware-host-header",
         "url": "https://registry.npmjs.org/@aws-sdk/middleware-host-header/-/middleware-host-header-3.598.0.tgz",
     },
+    "@aws-sdk/middleware-host-header@3.609.0": {
+        "deps": [
+            {
+                "id": "@aws-sdk/types@3.609.0",
+            },
+            {
+                "id": "@smithy/protocol-http@4.0.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-iTKfo158lc4jLDfYeZmYMIBHsn8m6zX+XB6birCSNZ/rrlzAkPbGE43CNdKfvjyWdqgLMRXF+B+OcZRvqhMXPQ==",
+        "name": "@aws-sdk/middleware-host-header",
+        "url": "https://registry.npmjs.org/@aws-sdk/middleware-host-header/-/middleware-host-header-3.609.0.tgz",
+    },
     "@aws-sdk/middleware-logger@3.598.0": {
         "deps": [
             {
@@ -1626,6 +2410,22 @@ PACKAGES = {
         "integrity": "sha512-bxBjf/VYiu3zfu8SYM2S9dQQc3tz5uBAOcPz/Bt8DyyK3GgOpjhschH/2XuUErsoUO1gDJqZSdGOmuHGZQn00Q==",
         "name": "@aws-sdk/middleware-logger",
         "url": "https://registry.npmjs.org/@aws-sdk/middleware-logger/-/middleware-logger-3.598.0.tgz",
+    },
+    "@aws-sdk/middleware-logger@3.609.0": {
+        "deps": [
+            {
+                "id": "@aws-sdk/types@3.609.0",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-S62U2dy4jMDhDFDK5gZ4VxFdWzCtLzwbYyFZx2uvPYTECkepLUfzLic2BHg2Qvtu4QjX+oGE3P/7fwaGIsGNuQ==",
+        "name": "@aws-sdk/middleware-logger",
+        "url": "https://registry.npmjs.org/@aws-sdk/middleware-logger/-/middleware-logger-3.609.0.tgz",
     },
     "@aws-sdk/middleware-recursion-detection@3.598.0": {
         "deps": [
@@ -1645,6 +2445,25 @@ PACKAGES = {
         "integrity": "sha512-vjT9BeFY9FeN0f8hm2l6F53tI0N5bUq6RcDkQXKNabXBnQxKptJRad6oP2X5y3FoVfBLOuDkQgiC2940GIPxtQ==",
         "name": "@aws-sdk/middleware-recursion-detection",
         "url": "https://registry.npmjs.org/@aws-sdk/middleware-recursion-detection/-/middleware-recursion-detection-3.598.0.tgz",
+    },
+    "@aws-sdk/middleware-recursion-detection@3.609.0": {
+        "deps": [
+            {
+                "id": "@aws-sdk/types@3.609.0",
+            },
+            {
+                "id": "@smithy/protocol-http@4.0.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-6sewsYB7/o/nbUfA99Aa/LokM+a/u4Wpm/X2o0RxOsDtSB795ObebLJe2BxY5UssbGaWkn7LswyfvrdZNXNj1w==",
+        "name": "@aws-sdk/middleware-recursion-detection",
+        "url": "https://registry.npmjs.org/@aws-sdk/middleware-recursion-detection/-/middleware-recursion-detection-3.609.0.tgz",
     },
     "@aws-sdk/middleware-sdk-ec2@3.598.0": {
         "deps": [
@@ -1724,6 +2543,28 @@ PACKAGES = {
         "name": "@aws-sdk/middleware-user-agent",
         "url": "https://registry.npmjs.org/@aws-sdk/middleware-user-agent/-/middleware-user-agent-3.598.0.tgz",
     },
+    "@aws-sdk/middleware-user-agent@3.609.0": {
+        "deps": [
+            {
+                "id": "@aws-sdk/types@3.609.0",
+            },
+            {
+                "id": "@aws-sdk/util-endpoints@3.609.0",
+            },
+            {
+                "id": "@smithy/protocol-http@4.0.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-nbq7MXRmeXm4IDqh+sJRAxGPAq0OfGmGIwKvJcw66hLoG8CmhhVMZmIAEBDFr57S+YajGwnLLRt+eMI05MMeVA==",
+        "name": "@aws-sdk/middleware-user-agent",
+        "url": "https://registry.npmjs.org/@aws-sdk/middleware-user-agent/-/middleware-user-agent-3.609.0.tgz",
+    },
     "@aws-sdk/region-config-resolver@3.598.0": {
         "deps": [
             {
@@ -1749,6 +2590,31 @@ PACKAGES = {
         "name": "@aws-sdk/region-config-resolver",
         "url": "https://registry.npmjs.org/@aws-sdk/region-config-resolver/-/region-config-resolver-3.598.0.tgz",
     },
+    "@aws-sdk/region-config-resolver@3.609.0": {
+        "deps": [
+            {
+                "id": "@aws-sdk/types@3.609.0",
+            },
+            {
+                "id": "@smithy/node-config-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "@smithy/util-config-provider@3.0.0",
+            },
+            {
+                "id": "@smithy/util-middleware@3.0.3",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-lMHBG8zg9GWYBc9/XVPKyuAUd7iKqfPP7z04zGta2kGNOKbUTeqmAdc1gJGku75p4kglIPlGBorOxti8DhRmKw==",
+        "name": "@aws-sdk/region-config-resolver",
+        "url": "https://registry.npmjs.org/@aws-sdk/region-config-resolver/-/region-config-resolver-3.609.0.tgz",
+    },
     "@aws-sdk/token-providers@3.598.0-72b8d25a": {
         "deps": [
             {
@@ -1771,6 +2637,28 @@ PACKAGES = {
         "name": "@aws-sdk/token-providers",
         "url": "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.598.0.tgz",
     },
+    "@aws-sdk/token-providers@3.609.0-b85bf663": {
+        "deps": [
+            {
+                "id": "@aws-sdk/types@3.609.0",
+            },
+            {
+                "id": "@smithy/property-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/shared-ini-file-loader@3.1.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-WvhW/7XSf+H7YmtiIigQxfDVZVZI7mbKikQ09YpzN7FeN3TmYib1+0tB+EE9TbICkwssjiFc71FEBEh4K9grKQ==",
+        "name": "@aws-sdk/token-providers",
+        "url": "https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.609.0.tgz",
+    },
     "@aws-sdk/types@3.598.0": {
         "deps": [
             {
@@ -1784,6 +2672,19 @@ PACKAGES = {
         "name": "@aws-sdk/types",
         "url": "https://registry.npmjs.org/@aws-sdk/types/-/types-3.598.0.tgz",
     },
+    "@aws-sdk/types@3.609.0": {
+        "deps": [
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-+Tqnh9w0h2LcrUsdXyT1F8mNhXz+tVYBtP19LpeEGntmvHwa2XzvLUCWpoIAIVsHp5+HdB2X9Sn0KAtmbFXc2Q==",
+        "name": "@aws-sdk/types",
+        "url": "https://registry.npmjs.org/@aws-sdk/types/-/types-3.609.0.tgz",
+    },
     "@aws-sdk/util-arn-parser@3.568.0": {
         "deps": [
             {
@@ -1793,38 +2694,6 @@ PACKAGES = {
         "integrity": "sha512-XUKJWWo+KOB7fbnPP0+g/o5Ulku/X53t7i/h+sPHr5xxYTJJ9CYnbToo95mzxe7xWvkLrsNtJ8L+MnNn9INs2w==",
         "name": "@aws-sdk/util-arn-parser",
         "url": "https://registry.npmjs.org/@aws-sdk/util-arn-parser/-/util-arn-parser-3.568.0.tgz",
-    },
-    "@aws-sdk/util-dynamodb@3.602.0-44477c75": {
-        "deps": [
-            {
-                "id": "@aws-sdk/client-dynamodb@3.602.0",
-            },
-            {
-                "id": "@smithy/types@3.3.0",
-            },
-            {
-                "id": "tslib@2.6.3",
-            },
-        ],
-        "integrity": "sha512-0QsRLE4cK0h9jseCbaBZpcLzBcOgPMdsEy4wIYvcXivHIdgt/JQxs329NF7EfWQU8h3PU5hRy3tiTBLuB4TmgQ==",
-        "name": "@aws-sdk/util-dynamodb",
-        "url": "https://registry.npmjs.org/@aws-sdk/util-dynamodb/-/util-dynamodb-3.602.0.tgz",
-    },
-    "@aws-sdk/util-dynamodb@3.606.0-44f25193": {
-        "deps": [
-            {
-                "id": "@aws-sdk/client-dynamodb@3.602.0",
-            },
-            {
-                "id": "@smithy/types@3.3.0",
-            },
-            {
-                "id": "tslib@2.6.3",
-            },
-        ],
-        "integrity": "sha512-2m6yPB634cgnjpSfkKWIqVSUC5SfgzBRotdwRqkCsfQDm66KX5pnhz8QMogB5D+O1q+Gd7ZypgAkQ7PgDWt5tA==",
-        "name": "@aws-sdk/util-dynamodb",
-        "url": "https://registry.npmjs.org/@aws-sdk/util-dynamodb/-/util-dynamodb-3.606.0.tgz",
     },
     "@aws-sdk/util-endpoints@3.598.0": {
         "deps": [
@@ -1844,6 +2713,25 @@ PACKAGES = {
         "integrity": "sha512-Qo9UoiVVZxcOEdiOMZg3xb1mzkTxrhd4qSlg5QQrfWPJVx/QOg+Iy0NtGxPtHtVZNHZxohYwDwV/tfsnDSE2gQ==",
         "name": "@aws-sdk/util-endpoints",
         "url": "https://registry.npmjs.org/@aws-sdk/util-endpoints/-/util-endpoints-3.598.0.tgz",
+    },
+    "@aws-sdk/util-endpoints@3.609.0": {
+        "deps": [
+            {
+                "id": "@aws-sdk/types@3.609.0",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "@smithy/util-endpoints@2.0.4",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-Rh+3V8dOvEeE1aQmUy904DYWtLUEJ7Vf5XBPlQ6At3pBhp+zpXbsnpZzVL33c8lW1xfj6YPwtO6gOeEsl1juCQ==",
+        "name": "@aws-sdk/util-endpoints",
+        "url": "https://registry.npmjs.org/@aws-sdk/util-endpoints/-/util-endpoints-3.609.0.tgz",
     },
     "@aws-sdk/util-format-url@3.598.0": {
         "deps": [
@@ -1893,6 +2781,25 @@ PACKAGES = {
         "name": "@aws-sdk/util-user-agent-browser",
         "url": "https://registry.npmjs.org/@aws-sdk/util-user-agent-browser/-/util-user-agent-browser-3.598.0.tgz",
     },
+    "@aws-sdk/util-user-agent-browser@3.609.0": {
+        "deps": [
+            {
+                "id": "@aws-sdk/types@3.609.0",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "bowser@2.11.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-fojPU+mNahzQ0YHYBsx0ZIhmMA96H+ZIZ665ObU9tl+SGdbLneVZVikGve+NmHTQwHzwkFsZYYnVKAkreJLAtA==",
+        "name": "@aws-sdk/util-user-agent-browser",
+        "url": "https://registry.npmjs.org/@aws-sdk/util-user-agent-browser/-/util-user-agent-browser-3.609.0.tgz",
+    },
     "@aws-sdk/util-user-agent-node@3.598.0-38b06b65": {
         "deps": [
             {
@@ -1911,6 +2818,25 @@ PACKAGES = {
         "integrity": "sha512-oyWGcOlfTdzkC6SVplyr0AGh54IMrDxbhg5RxJ5P+V4BKfcDoDcZV9xenUk9NsOi9MuUjxMumb9UJGkDhM1m0A==",
         "name": "@aws-sdk/util-user-agent-node",
         "url": "https://registry.npmjs.org/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.598.0.tgz",
+    },
+    "@aws-sdk/util-user-agent-node@3.609.0-514b98b2": {
+        "deps": [
+            {
+                "id": "@aws-sdk/types@3.609.0",
+            },
+            {
+                "id": "@smithy/node-config-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-DlZBwQ/HkZyf3pOWc7+wjJRk5R7x9YxHhs2szHwtv1IW30KMabjjjX0GMlGJ9LLkBHkbaaEY/w9Tkj12XRLhRg==",
+        "name": "@aws-sdk/util-user-agent-node",
+        "url": "https://registry.npmjs.org/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.609.0.tgz",
     },
     "@balena/dockerignore@1.0.2": {
         "integrity": "sha512-wMue2Sy4GAVTk6Ic4tJVcnfdau+gx2EnG7S+uAEe+TWJFqE4YoWN4/H8MSLj4eYJKxGg26lZwboEniNiNwZQ6Q==",
@@ -2100,6 +3026,100 @@ PACKAGES = {
         "name": "@npmcli/fs",
         "url": "https://registry.npmjs.org/@npmcli/fs/-/fs-3.1.1.tgz",
     },
+    "@octokit/auth-app@7.1.0": {
+        "deps": [
+            {
+                "id": "@octokit/auth-oauth-app@8.1.1",
+            },
+            {
+                "id": "@octokit/auth-oauth-user@5.1.1",
+            },
+            {
+                "id": "@octokit/request-error@6.1.1",
+            },
+            {
+                "id": "@octokit/request@9.1.1",
+            },
+            {
+                "id": "@octokit/types@13.5.0",
+            },
+            {
+                "id": "lru-cache@10.3.0",
+            },
+            {
+                "id": "universal-github-app-jwt@2.2.0",
+            },
+            {
+                "id": "universal-user-agent@7.0.2",
+            },
+        ],
+        "integrity": "sha512-cazGaJPSgeZ8NkVYeM/C5l/6IQ5vZnsI8p1aMucadCkt/bndI+q+VqwrlnWbASRmenjOkf1t1RpCKrif53U8gw==",
+        "name": "@octokit/auth-app",
+        "url": "https://registry.npmjs.org/@octokit/auth-app/-/auth-app-7.1.0.tgz",
+    },
+    "@octokit/auth-oauth-app@8.1.1": {
+        "deps": [
+            {
+                "id": "@octokit/auth-oauth-device@7.1.1",
+            },
+            {
+                "id": "@octokit/auth-oauth-user@5.1.1",
+            },
+            {
+                "id": "@octokit/request@9.1.1",
+            },
+            {
+                "id": "@octokit/types@13.5.0",
+            },
+            {
+                "id": "universal-user-agent@7.0.2",
+            },
+        ],
+        "integrity": "sha512-5UtmxXAvU2wfcHIPPDWzVSAWXVJzG3NWsxb7zCFplCWEmMCArSZV0UQu5jw5goLQXbFyOr5onzEH37UJB3zQQg==",
+        "name": "@octokit/auth-oauth-app",
+        "url": "https://registry.npmjs.org/@octokit/auth-oauth-app/-/auth-oauth-app-8.1.1.tgz",
+    },
+    "@octokit/auth-oauth-device@7.1.1": {
+        "deps": [
+            {
+                "id": "@octokit/oauth-methods@5.1.2",
+            },
+            {
+                "id": "@octokit/request@9.1.1",
+            },
+            {
+                "id": "@octokit/types@13.5.0",
+            },
+            {
+                "id": "universal-user-agent@7.0.2",
+            },
+        ],
+        "integrity": "sha512-HWl8lYueHonuyjrKKIup/1tiy0xcmQCdq5ikvMO1YwkNNkxb6DXfrPjrMYItNLyCP/o2H87WuijuE+SlBTT8eg==",
+        "name": "@octokit/auth-oauth-device",
+        "url": "https://registry.npmjs.org/@octokit/auth-oauth-device/-/auth-oauth-device-7.1.1.tgz",
+    },
+    "@octokit/auth-oauth-user@5.1.1": {
+        "deps": [
+            {
+                "id": "@octokit/auth-oauth-device@7.1.1",
+            },
+            {
+                "id": "@octokit/oauth-methods@5.1.2",
+            },
+            {
+                "id": "@octokit/request@9.1.1",
+            },
+            {
+                "id": "@octokit/types@13.5.0",
+            },
+            {
+                "id": "universal-user-agent@7.0.2",
+            },
+        ],
+        "integrity": "sha512-rRkMz0ErOppdvEfnemHJXgZ9vTPhBuC6yASeFaB7I2yLMd7QpjfrL1mnvRPlyKo+M6eeLxrKanXJ9Qte29SRsw==",
+        "name": "@octokit/auth-oauth-user",
+        "url": "https://registry.npmjs.org/@octokit/auth-oauth-user/-/auth-oauth-user-5.1.1.tgz",
+    },
     "@octokit/auth-token@4.0.0": {
         "integrity": "sha512-tY/msAuJo6ARbK6SPIxZrPBms3xPbfwBrulZe0Wtr/DIY9lje2HeV1uoebShn6mx7SjCHif6EjMvoREj+gZ+SA==",
         "name": "@octokit/auth-token",
@@ -2133,6 +3153,19 @@ PACKAGES = {
         "name": "@octokit/core",
         "url": "https://registry.npmjs.org/@octokit/core/-/core-5.2.0.tgz",
     },
+    "@octokit/endpoint@10.1.1": {
+        "deps": [
+            {
+                "id": "@octokit/types@13.5.0",
+            },
+            {
+                "id": "universal-user-agent@7.0.2",
+            },
+        ],
+        "integrity": "sha512-JYjh5rMOwXMJyUpj028cu0Gbp7qe/ihxfJMLc8VZBMMqSwLgOxDI1911gV4Enl1QSavAQNJcwmwBF9M0VvLh6Q==",
+        "name": "@octokit/endpoint",
+        "url": "https://registry.npmjs.org/@octokit/endpoint/-/endpoint-10.1.1.tgz",
+    },
     "@octokit/endpoint@9.0.5": {
         "deps": [
             {
@@ -2161,6 +3194,30 @@ PACKAGES = {
         "integrity": "sha512-r+oZUH7aMFui1ypZnAvZmn0KSqAUgE1/tUXIWaqUCa1758ts/Jio84GZuzsvUkme98kv0WFY8//n0J1Z+vsIsQ==",
         "name": "@octokit/graphql",
         "url": "https://registry.npmjs.org/@octokit/graphql/-/graphql-7.1.0.tgz",
+    },
+    "@octokit/oauth-authorization-url@7.1.1": {
+        "integrity": "sha512-ooXV8GBSabSWyhLUowlMIVd9l1s2nsOGQdlP2SQ4LnkEsGXzeCvbSbCPdZThXhEFzleGPwbapT0Sb+YhXRyjCA==",
+        "name": "@octokit/oauth-authorization-url",
+        "url": "https://registry.npmjs.org/@octokit/oauth-authorization-url/-/oauth-authorization-url-7.1.1.tgz",
+    },
+    "@octokit/oauth-methods@5.1.2": {
+        "deps": [
+            {
+                "id": "@octokit/oauth-authorization-url@7.1.1",
+            },
+            {
+                "id": "@octokit/request-error@6.1.1",
+            },
+            {
+                "id": "@octokit/request@9.1.1",
+            },
+            {
+                "id": "@octokit/types@13.5.0",
+            },
+        ],
+        "integrity": "sha512-C5lglRD+sBlbrhCUTxgJAFjWgJlmTx5bQ7Ch0+2uqRjYv7Cfb5xpX4WuSC9UgQna3sqRGBL9EImX9PvTpMaQ7g==",
+        "name": "@octokit/oauth-methods",
+        "url": "https://registry.npmjs.org/@octokit/oauth-methods/-/oauth-methods-5.1.2.tgz",
     },
     "@octokit/openapi-types@22.2.0": {
         "integrity": "sha512-QBhVjcUa9W7Wwhm6DBFu6ZZ+1/t/oYxqc2tp81Pi41YNuJinbFRx8B133qVOrAaBbF7D/m0Et6f9/pZt9Rc+tg==",
@@ -2219,6 +3276,16 @@ PACKAGES = {
         "name": "@octokit/request-error",
         "url": "https://registry.npmjs.org/@octokit/request-error/-/request-error-5.1.0.tgz",
     },
+    "@octokit/request-error@6.1.1": {
+        "deps": [
+            {
+                "id": "@octokit/types@13.5.0",
+            },
+        ],
+        "integrity": "sha512-1mw1gqT3fR/WFvnoVpY/zUM2o/XkMs/2AszUUG9I69xn0JFLv6PGkPhNk5lbfvROs79wiS0bqiJNxfCZcRJJdg==",
+        "name": "@octokit/request-error",
+        "url": "https://registry.npmjs.org/@octokit/request-error/-/request-error-6.1.1.tgz",
+    },
     "@octokit/request@8.4.0": {
         "deps": [
             {
@@ -2237,6 +3304,25 @@ PACKAGES = {
         "integrity": "sha512-9Bb014e+m2TgBeEJGEbdplMVWwPmL1FPtggHQRkV+WVsMggPtEkLKPlcVYm/o8xKLkpJ7B+6N8WfQMtDLX2Dpw==",
         "name": "@octokit/request",
         "url": "https://registry.npmjs.org/@octokit/request/-/request-8.4.0.tgz",
+    },
+    "@octokit/request@9.1.1": {
+        "deps": [
+            {
+                "id": "@octokit/endpoint@10.1.1",
+            },
+            {
+                "id": "@octokit/request-error@6.1.1",
+            },
+            {
+                "id": "@octokit/types@13.5.0",
+            },
+            {
+                "id": "universal-user-agent@7.0.2",
+            },
+        ],
+        "integrity": "sha512-pyAguc0p+f+GbQho0uNetNQMmLG1e80WjkIaqqgUkihqUp0boRU6nKItXO4VWnr+nbZiLGEyy4TeKRwqaLvYgw==",
+        "name": "@octokit/request",
+        "url": "https://registry.npmjs.org/@octokit/request/-/request-9.1.1.tgz",
     },
     "@octokit/rest@20.1.1": {
         "deps": [
@@ -2335,6 +3421,28 @@ PACKAGES = {
         "name": "@smithy/config-resolver",
         "url": "https://registry.npmjs.org/@smithy/config-resolver/-/config-resolver-3.0.3.tgz",
     },
+    "@smithy/config-resolver@3.0.4": {
+        "deps": [
+            {
+                "id": "@smithy/node-config-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "@smithy/util-config-provider@3.0.0",
+            },
+            {
+                "id": "@smithy/util-middleware@3.0.3",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-VwiOk7TwXoE7NlNguV/aPq1hFH72tqkHCw8eWXbr2xHspRyyv9DLpLXhq+Ieje+NwoqXrY0xyQjPXdOE6cGcHA==",
+        "name": "@smithy/config-resolver",
+        "url": "https://registry.npmjs.org/@smithy/config-resolver/-/config-resolver-3.0.4.tgz",
+    },
     "@smithy/core@2.2.3": {
         "deps": [
             {
@@ -2366,6 +3474,37 @@ PACKAGES = {
         "name": "@smithy/core",
         "url": "https://registry.npmjs.org/@smithy/core/-/core-2.2.3.tgz",
     },
+    "@smithy/core@2.2.4": {
+        "deps": [
+            {
+                "id": "@smithy/middleware-endpoint@3.0.4",
+            },
+            {
+                "id": "@smithy/middleware-retry@3.0.7",
+            },
+            {
+                "id": "@smithy/middleware-serde@3.0.3",
+            },
+            {
+                "id": "@smithy/protocol-http@4.0.3",
+            },
+            {
+                "id": "@smithy/smithy-client@3.1.5",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "@smithy/util-middleware@3.0.3",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-qdY3LpMOUyLM/gfjjMQZui+UTNS7kBRDWlvyIhVOql5dn2J3isk9qUTBtQ1CbDH8MTugHis1zu3h4rH+Qmmh4g==",
+        "name": "@smithy/core",
+        "url": "https://registry.npmjs.org/@smithy/core/-/core-2.2.4.tgz",
+    },
     "@smithy/credential-provider-imds@3.1.2": {
         "deps": [
             {
@@ -2387,6 +3526,108 @@ PACKAGES = {
         "integrity": "sha512-gqVmUaNoeqyrOAjgZg+rTmFLsphh/vS59LCMdFfVpthVS0jbfBzvBmEPktBd+y9ME4DYMGHFAMSYJDK8q0noOQ==",
         "name": "@smithy/credential-provider-imds",
         "url": "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-3.1.2.tgz",
+    },
+    "@smithy/credential-provider-imds@3.1.3": {
+        "deps": [
+            {
+                "id": "@smithy/node-config-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/property-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "@smithy/url-parser@3.0.3",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-U1Yrv6hx/mRK6k8AncuI6jLUx9rn0VVSd9NPEX6pyYFBfkSkChOc/n4zUb8alHUVg83TbI4OdZVo1X0Zfj3ijA==",
+        "name": "@smithy/credential-provider-imds",
+        "url": "https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-3.1.3.tgz",
+    },
+    "@smithy/eventstream-codec@3.1.2": {
+        "deps": [
+            {
+                "id": "@aws-crypto/crc32@5.2.0",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "@smithy/util-hex-encoding@3.0.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-0mBcu49JWt4MXhrhRAlxASNy0IjDRFU+aWNDRal9OtUJvJNiwDuyKMUONSOjLjSCeGwZaE0wOErdqULer8r7yw==",
+        "name": "@smithy/eventstream-codec",
+        "url": "https://registry.npmjs.org/@smithy/eventstream-codec/-/eventstream-codec-3.1.2.tgz",
+    },
+    "@smithy/eventstream-serde-browser@3.0.4": {
+        "deps": [
+            {
+                "id": "@smithy/eventstream-serde-universal@3.0.4",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-Eo4anLZX6ltGJTZ5yJMc80gZPYYwBn44g0h7oFq6et+TYr5dUsTpIcDbz2evsOKIZhZ7zBoFWHtBXQ4QQeb5xA==",
+        "name": "@smithy/eventstream-serde-browser",
+        "url": "https://registry.npmjs.org/@smithy/eventstream-serde-browser/-/eventstream-serde-browser-3.0.4.tgz",
+    },
+    "@smithy/eventstream-serde-config-resolver@3.0.3": {
+        "deps": [
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-NVTYjOuYpGfrN/VbRQgn31x73KDLfCXCsFdad8DiIc3IcdxL+dYA9zEQPyOP7Fy2QL8CPy2WE4WCUD+ZsLNfaQ==",
+        "name": "@smithy/eventstream-serde-config-resolver",
+        "url": "https://registry.npmjs.org/@smithy/eventstream-serde-config-resolver/-/eventstream-serde-config-resolver-3.0.3.tgz",
+    },
+    "@smithy/eventstream-serde-node@3.0.4": {
+        "deps": [
+            {
+                "id": "@smithy/eventstream-serde-universal@3.0.4",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-mjlG0OzGAYuUpdUpflfb9zyLrBGgmQmrobNT8b42ZTsGv/J03+t24uhhtVEKG/b2jFtPIHF74Bq+VUtbzEKOKg==",
+        "name": "@smithy/eventstream-serde-node",
+        "url": "https://registry.npmjs.org/@smithy/eventstream-serde-node/-/eventstream-serde-node-3.0.4.tgz",
+    },
+    "@smithy/eventstream-serde-universal@3.0.4": {
+        "deps": [
+            {
+                "id": "@smithy/eventstream-codec@3.1.2",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-Od9dv8zh3PgOD7Vj4T3HSuox16n0VG8jJIM2gvKASL6aCtcS8CfHZDWe1Ik3ZXW6xBouU+45Q5wgoliWDZiJ0A==",
+        "name": "@smithy/eventstream-serde-universal",
+        "url": "https://registry.npmjs.org/@smithy/eventstream-serde-universal/-/eventstream-serde-universal-3.0.4.tgz",
     },
     "@smithy/fetch-http-handler@3.1.0": {
         "deps": [
@@ -2410,6 +3651,28 @@ PACKAGES = {
         "name": "@smithy/fetch-http-handler",
         "url": "https://registry.npmjs.org/@smithy/fetch-http-handler/-/fetch-http-handler-3.1.0.tgz",
     },
+    "@smithy/fetch-http-handler@3.2.0": {
+        "deps": [
+            {
+                "id": "@smithy/protocol-http@4.0.3",
+            },
+            {
+                "id": "@smithy/querystring-builder@3.0.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "@smithy/util-base64@3.0.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-vFvDxMrc6sO5Atec8PaISckMcAwsCrRhYxwUylg97bRT2KZoumOF7qk5+6EVUtuM1IG9AJV5aqXnHln9ZdXHpg==",
+        "name": "@smithy/fetch-http-handler",
+        "url": "https://registry.npmjs.org/@smithy/fetch-http-handler/-/fetch-http-handler-3.2.0.tgz",
+    },
     "@smithy/hash-node@3.0.2": {
         "deps": [
             {
@@ -2429,6 +3692,25 @@ PACKAGES = {
         "name": "@smithy/hash-node",
         "url": "https://registry.npmjs.org/@smithy/hash-node/-/hash-node-3.0.2.tgz",
     },
+    "@smithy/hash-node@3.0.3": {
+        "deps": [
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "@smithy/util-buffer-from@3.0.0",
+            },
+            {
+                "id": "@smithy/util-utf8@3.0.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-2ctBXpPMG+B3BtWSGNnKELJ7SH9e4TNefJS0cd2eSkOOROeBnnVBnAy9LtJ8tY4vUEoe55N4CNPxzbWvR39iBw==",
+        "name": "@smithy/hash-node",
+        "url": "https://registry.npmjs.org/@smithy/hash-node/-/hash-node-3.0.3.tgz",
+    },
     "@smithy/invalid-dependency@3.0.2": {
         "deps": [
             {
@@ -2441,6 +3723,19 @@ PACKAGES = {
         "integrity": "sha512-+BAY3fMhomtq470tswXyrdVBSUhiLuhBVT+rOmpbz5e04YX+s1dX4NxTLzZGwBjCpeWZNtTxP8zbIvvFk81gUg==",
         "name": "@smithy/invalid-dependency",
         "url": "https://registry.npmjs.org/@smithy/invalid-dependency/-/invalid-dependency-3.0.2.tgz",
+    },
+    "@smithy/invalid-dependency@3.0.3": {
+        "deps": [
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-ID1eL/zpDULmHJbflb864k72/SNOZCADRc9i7Exq3RUNJw6raWUSlFEQ+3PX3EYs++bTxZB2dE9mEHTQLv61tw==",
+        "name": "@smithy/invalid-dependency",
+        "url": "https://registry.npmjs.org/@smithy/invalid-dependency/-/invalid-dependency-3.0.3.tgz",
     },
     "@smithy/is-array-buffer@2.2.0": {
         "deps": [
@@ -2494,6 +3789,22 @@ PACKAGES = {
         "name": "@smithy/middleware-content-length",
         "url": "https://registry.npmjs.org/@smithy/middleware-content-length/-/middleware-content-length-3.0.2.tgz",
     },
+    "@smithy/middleware-content-length@3.0.3": {
+        "deps": [
+            {
+                "id": "@smithy/protocol-http@4.0.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-Dbz2bzexReYIQDWMr+gZhpwBetNXzbhnEMhYKA6urqmojO14CsXjnsoPYO8UL/xxcawn8ZsuVU61ElkLSltIUQ==",
+        "name": "@smithy/middleware-content-length",
+        "url": "https://registry.npmjs.org/@smithy/middleware-content-length/-/middleware-content-length-3.0.3.tgz",
+    },
     "@smithy/middleware-endpoint@3.0.3": {
         "deps": [
             {
@@ -2521,6 +3832,34 @@ PACKAGES = {
         "integrity": "sha512-ARAXHodhj4tttKa9y75zvENdSoHq6VGsSi7XS3+yLutrnxttJs6N10UMInCC1yi3/bopT8xug3iOP/y9R6sKJQ==",
         "name": "@smithy/middleware-endpoint",
         "url": "https://registry.npmjs.org/@smithy/middleware-endpoint/-/middleware-endpoint-3.0.3.tgz",
+    },
+    "@smithy/middleware-endpoint@3.0.4": {
+        "deps": [
+            {
+                "id": "@smithy/middleware-serde@3.0.3",
+            },
+            {
+                "id": "@smithy/node-config-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/shared-ini-file-loader@3.1.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "@smithy/url-parser@3.0.3",
+            },
+            {
+                "id": "@smithy/util-middleware@3.0.3",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-whUJMEPwl3ANIbXjBXZVdJNgfV2ZU8ayln7xUM47rXL2txuenI7jQ/VFFwCzy5lCmXScjp6zYtptW5Evud8e9g==",
+        "name": "@smithy/middleware-endpoint",
+        "url": "https://registry.npmjs.org/@smithy/middleware-endpoint/-/middleware-endpoint-3.0.4.tgz",
     },
     "@smithy/middleware-retry@3.0.6": {
         "deps": [
@@ -2556,6 +3895,40 @@ PACKAGES = {
         "name": "@smithy/middleware-retry",
         "url": "https://registry.npmjs.org/@smithy/middleware-retry/-/middleware-retry-3.0.6.tgz",
     },
+    "@smithy/middleware-retry@3.0.7": {
+        "deps": [
+            {
+                "id": "@smithy/node-config-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/protocol-http@4.0.3",
+            },
+            {
+                "id": "@smithy/service-error-classification@3.0.3",
+            },
+            {
+                "id": "@smithy/smithy-client@3.1.5",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "@smithy/util-middleware@3.0.3",
+            },
+            {
+                "id": "@smithy/util-retry@3.0.3",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+            {
+                "id": "uuid@9.0.1",
+            },
+        ],
+        "integrity": "sha512-f5q7Y09G+2h5ivkSx5CHvlAT4qRR3jBFEsfXyQ9nFNiWQlr8c48blnu5cmbTQ+p1xmIO14UXzKoF8d7Tm0Gsjw==",
+        "name": "@smithy/middleware-retry",
+        "url": "https://registry.npmjs.org/@smithy/middleware-retry/-/middleware-retry-3.0.7.tgz",
+    },
     "@smithy/middleware-serde@3.0.2": {
         "deps": [
             {
@@ -2569,6 +3942,19 @@ PACKAGES = {
         "name": "@smithy/middleware-serde",
         "url": "https://registry.npmjs.org/@smithy/middleware-serde/-/middleware-serde-3.0.2.tgz",
     },
+    "@smithy/middleware-serde@3.0.3": {
+        "deps": [
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-puUbyJQBcg9eSErFXjKNiGILJGtiqmuuNKEYNYfUD57fUl4i9+mfmThtQhvFXU0hCVG0iEJhvQUipUf+/SsFdA==",
+        "name": "@smithy/middleware-serde",
+        "url": "https://registry.npmjs.org/@smithy/middleware-serde/-/middleware-serde-3.0.3.tgz",
+    },
     "@smithy/middleware-stack@3.0.2": {
         "deps": [
             {
@@ -2581,6 +3967,19 @@ PACKAGES = {
         "integrity": "sha512-6fRcxomlNKBPIy/YjcnC7YHpMAjRvGUYlYVJAfELqZjkW0vQegNcImjY7T1HgYA6u3pAcCxKVBLYnkTw8z/l0A==",
         "name": "@smithy/middleware-stack",
         "url": "https://registry.npmjs.org/@smithy/middleware-stack/-/middleware-stack-3.0.2.tgz",
+    },
+    "@smithy/middleware-stack@3.0.3": {
+        "deps": [
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-r4klY9nFudB0r9UdSMaGSyjyQK5adUyPnQN/ZM6M75phTxOdnc/AhpvGD1fQUvgmqjQEBGCwpnPbDm8pH5PapA==",
+        "name": "@smithy/middleware-stack",
+        "url": "https://registry.npmjs.org/@smithy/middleware-stack/-/middleware-stack-3.0.3.tgz",
     },
     "@smithy/node-config-provider@3.1.2": {
         "deps": [
@@ -2600,6 +3999,25 @@ PACKAGES = {
         "integrity": "sha512-388fEAa7+6ORj/BDC70peg3fyFBTTXJyXfXJ0Bwd6FYsRltePr2oGzIcm5AuC1WUSLtZ/dF+hYOnfTMs04rLvA==",
         "name": "@smithy/node-config-provider",
         "url": "https://registry.npmjs.org/@smithy/node-config-provider/-/node-config-provider-3.1.2.tgz",
+    },
+    "@smithy/node-config-provider@3.1.3": {
+        "deps": [
+            {
+                "id": "@smithy/property-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/shared-ini-file-loader@3.1.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-rxdpAZczzholz6CYZxtqDu/aKTxATD5DAUDVj7HoEulq+pDSQVWzbg0btZDlxeFfa6bb2b5tUvgdX5+k8jUqcg==",
+        "name": "@smithy/node-config-provider",
+        "url": "https://registry.npmjs.org/@smithy/node-config-provider/-/node-config-provider-3.1.3.tgz",
     },
     "@smithy/node-http-handler@3.1.0": {
         "deps": [
@@ -2623,6 +4041,28 @@ PACKAGES = {
         "name": "@smithy/node-http-handler",
         "url": "https://registry.npmjs.org/@smithy/node-http-handler/-/node-http-handler-3.1.0.tgz",
     },
+    "@smithy/node-http-handler@3.1.1": {
+        "deps": [
+            {
+                "id": "@smithy/abort-controller@3.1.1",
+            },
+            {
+                "id": "@smithy/protocol-http@4.0.3",
+            },
+            {
+                "id": "@smithy/querystring-builder@3.0.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-L71NLyPeP450r2J/mfu1jMc//Z1YnqJt2eSNw7uhiItaONnBLDA68J5jgxq8+MBDsYnFwNAIc7dBG1ImiWBiwg==",
+        "name": "@smithy/node-http-handler",
+        "url": "https://registry.npmjs.org/@smithy/node-http-handler/-/node-http-handler-3.1.1.tgz",
+    },
     "@smithy/property-provider@3.1.2": {
         "deps": [
             {
@@ -2636,6 +4076,19 @@ PACKAGES = {
         "name": "@smithy/property-provider",
         "url": "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-3.1.2.tgz",
     },
+    "@smithy/property-provider@3.1.3": {
+        "deps": [
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-zahyOVR9Q4PEoguJ/NrFP4O7SMAfYO1HLhB18M+q+Z4KFd4V2obiMnlVoUFzFLSPeVt1POyNWneHHrZaTMoc/g==",
+        "name": "@smithy/property-provider",
+        "url": "https://registry.npmjs.org/@smithy/property-provider/-/property-provider-3.1.3.tgz",
+    },
     "@smithy/protocol-http@4.0.2": {
         "deps": [
             {
@@ -2648,6 +4101,19 @@ PACKAGES = {
         "integrity": "sha512-X/90xNWIOqSR2tLUyWxVIBdatpm35DrL44rI/xoeBWUuanE0iyCXJpTcnqlOpnEzgcu0xCKE06+g70TTu2j7RQ==",
         "name": "@smithy/protocol-http",
         "url": "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-4.0.2.tgz",
+    },
+    "@smithy/protocol-http@4.0.3": {
+        "deps": [
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-x5jmrCWwQlx+Zv4jAtc33ijJ+vqqYN+c/ZkrnpvEe/uDas7AT7A/4Rc2CdfxgWv4WFGmEqODIrrUToPN6DDkGw==",
+        "name": "@smithy/protocol-http",
+        "url": "https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-4.0.3.tgz",
     },
     "@smithy/querystring-builder@3.0.2": {
         "deps": [
@@ -2694,6 +4160,19 @@ PACKAGES = {
         "name": "@smithy/querystring-parser",
         "url": "https://registry.npmjs.org/@smithy/querystring-parser/-/querystring-parser-3.0.2.tgz",
     },
+    "@smithy/querystring-parser@3.0.3": {
+        "deps": [
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-zahM1lQv2YjmznnfQsWbYojFe55l0SLG/988brlLv1i8z3dubloLF+75ATRsqPBboUXsW6I9CPGE5rQgLfY0vQ==",
+        "name": "@smithy/querystring-parser",
+        "url": "https://registry.npmjs.org/@smithy/querystring-parser/-/querystring-parser-3.0.3.tgz",
+    },
     "@smithy/service-error-classification@3.0.2": {
         "deps": [
             {
@@ -2703,6 +4182,16 @@ PACKAGES = {
         "integrity": "sha512-cu0WV2XRttItsuXlcM0kq5MKdphbMMmSd2CXF122dJ75NrFE0o7rruXFGfxAp3BKzgF/DMxX+PllIA/cj4FHMw==",
         "name": "@smithy/service-error-classification",
         "url": "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-3.0.2.tgz",
+    },
+    "@smithy/service-error-classification@3.0.3": {
+        "deps": [
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+        ],
+        "integrity": "sha512-Jn39sSl8cim/VlkLsUhRFq/dKDnRUFlfRkvhOJaUbLBXUsLRLNf9WaxDv/z9BjuQ3A6k/qE8af1lsqcwm7+DaQ==",
+        "name": "@smithy/service-error-classification",
+        "url": "https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-3.0.3.tgz",
     },
     "@smithy/shared-ini-file-loader@3.1.2": {
         "deps": [
@@ -2716,6 +4205,19 @@ PACKAGES = {
         "integrity": "sha512-tgnXrXbLMO8vo6VeuqabMw/eTzQHlLmZx0TC0TjtjJghnD0Xl4pEnJtBjTJr6XF5fHMNrt5BcczDXHJT9yNQnA==",
         "name": "@smithy/shared-ini-file-loader",
         "url": "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-3.1.2.tgz",
+    },
+    "@smithy/shared-ini-file-loader@3.1.3": {
+        "deps": [
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-Z8Y3+08vgoDgl4HENqNnnzSISAaGrF2RoKupoC47u2wiMp+Z8P/8mDh1CL8+8ujfi2U5naNvopSBmP/BUj8b5w==",
+        "name": "@smithy/shared-ini-file-loader",
+        "url": "https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-3.1.3.tgz",
     },
     "@smithy/signature-v4@3.1.1": {
         "deps": [
@@ -2745,6 +4247,34 @@ PACKAGES = {
         "name": "@smithy/signature-v4",
         "url": "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-3.1.1.tgz",
     },
+    "@smithy/signature-v4@3.1.2": {
+        "deps": [
+            {
+                "id": "@smithy/is-array-buffer@3.0.0",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "@smithy/util-hex-encoding@3.0.0",
+            },
+            {
+                "id": "@smithy/util-middleware@3.0.3",
+            },
+            {
+                "id": "@smithy/util-uri-escape@3.0.0",
+            },
+            {
+                "id": "@smithy/util-utf8@3.0.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-3BcPylEsYtD0esM4Hoyml/+s7WP2LFhcM3J2AGdcL2vx9O60TtfpDOL72gjb4lU8NeRPeKAwR77YNyyGvMbuEA==",
+        "name": "@smithy/signature-v4",
+        "url": "https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-3.1.2.tgz",
+    },
     "@smithy/smithy-client@3.1.4": {
         "deps": [
             {
@@ -2769,6 +4299,31 @@ PACKAGES = {
         "integrity": "sha512-y6xJROGrIoitjpwXLY7P9luDHvuT9jWpAluliuSFdBymFxcl6iyQjo9U/JhYfRHFNTruqsvKOrOESVuPGEcRmQ==",
         "name": "@smithy/smithy-client",
         "url": "https://registry.npmjs.org/@smithy/smithy-client/-/smithy-client-3.1.4.tgz",
+    },
+    "@smithy/smithy-client@3.1.5": {
+        "deps": [
+            {
+                "id": "@smithy/middleware-endpoint@3.0.4",
+            },
+            {
+                "id": "@smithy/middleware-stack@3.0.3",
+            },
+            {
+                "id": "@smithy/protocol-http@4.0.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "@smithy/util-stream@3.0.5",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-x9bL9Mx2CT2P1OiUlHM+ZNpbVU6TgT32f9CmTRzqIHA7M4vYrROCWEoC3o4xHNJASoGd4Opos3cXYPgh+/m4Ww==",
+        "name": "@smithy/smithy-client",
+        "url": "https://registry.npmjs.org/@smithy/smithy-client/-/smithy-client-3.1.5.tgz",
     },
     "@smithy/types@3.2.0": {
         "deps": [
@@ -2805,6 +4360,22 @@ PACKAGES = {
         "integrity": "sha512-pRiPHrgibeAr4avtXDoBHmTLtthwA4l8jKYRfZjNgp+bBPyxDMPRg2TMJaYxqbKemvrOkHu9MIBTv2RkdNfD6w==",
         "name": "@smithy/url-parser",
         "url": "https://registry.npmjs.org/@smithy/url-parser/-/url-parser-3.0.2.tgz",
+    },
+    "@smithy/url-parser@3.0.3": {
+        "deps": [
+            {
+                "id": "@smithy/querystring-parser@3.0.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-pw3VtZtX2rg+s6HMs6/+u9+hu6oY6U7IohGhVNnjbgKy86wcIsSZwgHrFR+t67Uyxvp4Xz3p3kGXXIpTNisq8A==",
+        "name": "@smithy/url-parser",
+        "url": "https://registry.npmjs.org/@smithy/url-parser/-/url-parser-3.0.3.tgz",
     },
     "@smithy/util-base64@3.0.0": {
         "deps": [
@@ -2900,6 +4471,28 @@ PACKAGES = {
         "name": "@smithy/util-defaults-mode-browser",
         "url": "https://registry.npmjs.org/@smithy/util-defaults-mode-browser/-/util-defaults-mode-browser-3.0.6.tgz",
     },
+    "@smithy/util-defaults-mode-browser@3.0.7": {
+        "deps": [
+            {
+                "id": "@smithy/property-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/smithy-client@3.1.5",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "bowser@2.11.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-Q2txLyvQyGfmjsaDbVV7Sg8psefpFcrnlGapDzXGFRPFKRBeEg6OvFK8FljqjeHSaCZ6/UuzQExUPqBR/2qlDA==",
+        "name": "@smithy/util-defaults-mode-browser",
+        "url": "https://registry.npmjs.org/@smithy/util-defaults-mode-browser/-/util-defaults-mode-browser-3.0.7.tgz",
+    },
     "@smithy/util-defaults-mode-node@3.0.6": {
         "deps": [
             {
@@ -2928,6 +4521,34 @@ PACKAGES = {
         "name": "@smithy/util-defaults-mode-node",
         "url": "https://registry.npmjs.org/@smithy/util-defaults-mode-node/-/util-defaults-mode-node-3.0.6.tgz",
     },
+    "@smithy/util-defaults-mode-node@3.0.7": {
+        "deps": [
+            {
+                "id": "@smithy/config-resolver@3.0.4",
+            },
+            {
+                "id": "@smithy/credential-provider-imds@3.1.3",
+            },
+            {
+                "id": "@smithy/node-config-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/property-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/smithy-client@3.1.5",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-F4Qcj1fG6MGi2BSWCslfsMSwllws/WzYONBGtLybyY+halAcXdWhcew+mej8M5SKd5hqPYp4f7b+ABQEaeytgg==",
+        "name": "@smithy/util-defaults-mode-node",
+        "url": "https://registry.npmjs.org/@smithy/util-defaults-mode-node/-/util-defaults-mode-node-3.0.7.tgz",
+    },
     "@smithy/util-endpoints@2.0.3": {
         "deps": [
             {
@@ -2943,6 +4564,22 @@ PACKAGES = {
         "integrity": "sha512-Dyi+pfLglDHSGsKSYunuUUSFM5V0tz7UDgv1Ex97yg+Xkn0Eb0rH0rcvl1n0MaJ11fac3HKDOH0DkALyQYCQag==",
         "name": "@smithy/util-endpoints",
         "url": "https://registry.npmjs.org/@smithy/util-endpoints/-/util-endpoints-2.0.3.tgz",
+    },
+    "@smithy/util-endpoints@2.0.4": {
+        "deps": [
+            {
+                "id": "@smithy/node-config-provider@3.1.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-ZAtNf+vXAsgzgRutDDiklU09ZzZiiV/nATyqde4Um4priTmasDH+eLpp3tspL0hS2dEootyFMhu1Y6Y+tzpWBQ==",
+        "name": "@smithy/util-endpoints",
+        "url": "https://registry.npmjs.org/@smithy/util-endpoints/-/util-endpoints-2.0.4.tgz",
     },
     "@smithy/util-hex-encoding@3.0.0": {
         "deps": [
@@ -2967,6 +4604,19 @@ PACKAGES = {
         "name": "@smithy/util-middleware",
         "url": "https://registry.npmjs.org/@smithy/util-middleware/-/util-middleware-3.0.2.tgz",
     },
+    "@smithy/util-middleware@3.0.3": {
+        "deps": [
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-l+StyYYK/eO3DlVPbU+4Bi06Jjal+PFLSMmlWM1BEwyLxZ3aKkf1ROnoIakfaA7mC6uw3ny7JBkau4Yc+5zfWw==",
+        "name": "@smithy/util-middleware",
+        "url": "https://registry.npmjs.org/@smithy/util-middleware/-/util-middleware-3.0.3.tgz",
+    },
     "@smithy/util-retry@3.0.2": {
         "deps": [
             {
@@ -2982,6 +4632,22 @@ PACKAGES = {
         "integrity": "sha512-HUVOb1k8p/IH6WFUjsLa+L9H1Zi/FAAB2CDOpWuffI1b2Txi6sknau8kNfC46Xrt39P1j2KDzCE1UlLa2eW5+A==",
         "name": "@smithy/util-retry",
         "url": "https://registry.npmjs.org/@smithy/util-retry/-/util-retry-3.0.2.tgz",
+    },
+    "@smithy/util-retry@3.0.3": {
+        "deps": [
+            {
+                "id": "@smithy/service-error-classification@3.0.3",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-AFw+hjpbtVApzpNDhbjNG5NA3kyoMs7vx0gsgmlJF4s+yz1Zlepde7J58zpIRIsdjc+emhpAITxA88qLkPF26w==",
+        "name": "@smithy/util-retry",
+        "url": "https://registry.npmjs.org/@smithy/util-retry/-/util-retry-3.0.3.tgz",
     },
     "@smithy/util-stream@3.0.4": {
         "deps": [
@@ -3013,6 +4679,37 @@ PACKAGES = {
         "integrity": "sha512-CcMioiaOOsEVdb09pS7ux1ij7QcQ2jE/cE1+iin1DXMeRgAEQN/47m7Xztu7KFQuQsj0A5YwB2UN45q97CqKCg==",
         "name": "@smithy/util-stream",
         "url": "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-3.0.4.tgz",
+    },
+    "@smithy/util-stream@3.0.5": {
+        "deps": [
+            {
+                "id": "@smithy/fetch-http-handler@3.2.0",
+            },
+            {
+                "id": "@smithy/node-http-handler@3.1.1",
+            },
+            {
+                "id": "@smithy/types@3.3.0",
+            },
+            {
+                "id": "@smithy/util-base64@3.0.0",
+            },
+            {
+                "id": "@smithy/util-buffer-from@3.0.0",
+            },
+            {
+                "id": "@smithy/util-hex-encoding@3.0.0",
+            },
+            {
+                "id": "@smithy/util-utf8@3.0.0",
+            },
+            {
+                "id": "tslib@2.6.3",
+            },
+        ],
+        "integrity": "sha512-xC3L5PKMAT/Bh8fmHNXP9sdQ4+4aKVUU3EEJ2CF/lLk7R+wtMJM+v/1B4en7jO++Wa5spGzFDBCl0QxgbUc5Ug==",
+        "name": "@smithy/util-stream",
+        "url": "https://registry.npmjs.org/@smithy/util-stream/-/util-stream-3.0.5.tgz",
     },
     "@smithy/util-uri-escape@3.0.0": {
         "deps": [
@@ -3076,6 +4773,36 @@ PACKAGES = {
         "name": "@types/aws-lambda",
         "url": "https://registry.npmjs.org/@types/aws-lambda/-/aws-lambda-8.10.140.tgz",
     },
+    "@types/cfn-response@1.0.8": {
+        "deps": [
+            {
+                "id": "@types/aws-lambda@8.10.140",
+            },
+        ],
+        "integrity": "sha512-b9YttPRwTVcn/r65BcxrXqrVXpBtns3IlwPgE5XfzFoXBSBhimw7ZTbpvdsP39nsxVTmvV7IUN34/9FBQyfe2w==",
+        "name": "@types/cfn-response",
+        "url": "https://registry.npmjs.org/@types/cfn-response/-/cfn-response-1.0.8.tgz",
+    },
+    "@types/jsonwebtoken@9.0.6": {
+        "deps": [
+            {
+                "id": "@types/node@20.14.10",
+            },
+        ],
+        "integrity": "sha512-/5hndP5dCjloafCXns6SZyESp3Ldq7YjH3zwzwczYnjxIT0Fqzk5ROSYVGfFyczIue7IUEj8hkvLbPoLQ18vQw==",
+        "name": "@types/jsonwebtoken",
+        "url": "https://registry.npmjs.org/@types/jsonwebtoken/-/jsonwebtoken-9.0.6.tgz",
+    },
+    "@types/node@20.14.10": {
+        "deps": [
+            {
+                "id": "undici-types@5.26.5",
+            },
+        ],
+        "integrity": "sha512-MdiXf+nDuMvY0gJKxyfZ7/6UFsETO7mGKF54MVD/ekJS6HdFtpZFBgrh6Pseu64XTb2MLyFPlbW6hj8HYRQNOQ==",
+        "name": "@types/node",
+        "url": "https://registry.npmjs.org/@types/node/-/node-20.14.10.tgz",
+    },
     "@types/node@20.14.8": {
         "deps": [
             {
@@ -3085,6 +4812,34 @@ PACKAGES = {
         "integrity": "sha512-DO+2/jZinXfROG7j7WKFn/3C6nFwxy2lLpgLjEXJz+0XKphZlTLJ14mo8Vfg8X5BWN6XjyESXq+LcYdT7tR3bA==",
         "name": "@types/node",
         "url": "https://registry.npmjs.org/@types/node/-/node-20.14.8.tgz",
+    },
+    "@types/prop-types@15.7.12": {
+        "integrity": "sha512-5zvhXYtRNRluoE/jAp4GVsSduVUzNWKkOZrCDBWYtE7biZywwdC2AcEzg+cSMLFRfVgeAFqpfNabiPjxFddV1Q==",
+        "name": "@types/prop-types",
+        "url": "https://registry.npmjs.org/@types/prop-types/-/prop-types-15.7.12.tgz",
+    },
+    "@types/react-dom@18.3.0": {
+        "deps": [
+            {
+                "id": "@types/react@18.3.3",
+            },
+        ],
+        "integrity": "sha512-EhwApuTmMBmXuFOikhQLIBUn6uFg81SwLMOAUgodJF14SOBOCMdU04gDoYi0WOJJHD144TL32z4yDqCW3dnkQg==",
+        "name": "@types/react-dom",
+        "url": "https://registry.npmjs.org/@types/react-dom/-/react-dom-18.3.0.tgz",
+    },
+    "@types/react@18.3.3": {
+        "deps": [
+            {
+                "id": "@types/prop-types@15.7.12",
+            },
+            {
+                "id": "csstype@3.1.3",
+            },
+        ],
+        "integrity": "sha512-hti/R0pS0q1/xx+TsI73XIqk26eBsISZ2R0wUijXIngRK9R/e7Xw/cXVxQK7R5JjW+SV4zGcn5hXjudkN/pLIw==",
+        "name": "@types/react",
+        "url": "https://registry.npmjs.org/@types/react/-/react-18.3.3.tgz",
     },
     "@typescript-eslint/eslint-plugin@7.13.1-44f25193": {
         "deps": [
@@ -3584,6 +5339,11 @@ PACKAGES = {
         "name": "braces",
         "url": "https://registry.npmjs.org/braces/-/braces-3.0.3.tgz",
     },
+    "buffer-equal-constant-time@1.0.1": {
+        "integrity": "sha512-zRpUiDwd/xk6ADqPMATG8vc9VPrkck7T07OIx0gnjmJAnHnTVXNQG3vfvWNuiZIkwu9KrKdA1iJKfsfTVxE6NA==",
+        "name": "buffer-equal-constant-time",
+        "url": "https://registry.npmjs.org/buffer-equal-constant-time/-/buffer-equal-constant-time-1.0.1.tgz",
+    },
     "cacache@18.0.3": {
         "deps": [
             {
@@ -3685,6 +5445,11 @@ PACKAGES = {
         "name": "constructs",
         "url": "https://registry.npmjs.org/constructs/-/constructs-10.3.0.tgz",
     },
+    "core-js@3.37.1": {
+        "integrity": "sha512-Xn6qmxrQZyB0FFY8E3bgRXei3lWDJHhvI+u0q9TKIYM49G8pAr0FgnnrFRAmsbptZL1yxRADVXn+x5AGsbBfyw==",
+        "name": "core-js",
+        "url": "https://registry.npmjs.org/core-js/-/core-js-3.37.1.tgz",
+    },
     "cross-spawn@7.0.3": {
         "deps": [
             {
@@ -3700,6 +5465,11 @@ PACKAGES = {
         "integrity": "sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==",
         "name": "cross-spawn",
         "url": "https://registry.npmjs.org/cross-spawn/-/cross-spawn-7.0.3.tgz",
+    },
+    "csstype@3.1.3": {
+        "integrity": "sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==",
+        "name": "csstype",
+        "url": "https://registry.npmjs.org/csstype/-/csstype-3.1.3.tgz",
     },
     "debug@4.3.5-c9e1a4b5": {
         "deps": [
@@ -3745,6 +5515,16 @@ PACKAGES = {
         "integrity": "sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==",
         "name": "eastasianwidth",
         "url": "https://registry.npmjs.org/eastasianwidth/-/eastasianwidth-0.2.0.tgz",
+    },
+    "ecdsa-sig-formatter@1.0.11": {
+        "deps": [
+            {
+                "id": "safe-buffer@5.2.1",
+            },
+        ],
+        "integrity": "sha512-nagl3RYrbNv6kQkeJIpt6NJZy8twLB/2vtz6yN9Z4vRKHN4/QZJIEbqohALSgwKdnksuY3k5Addp5lg8sVoVcQ==",
+        "name": "ecdsa-sig-formatter",
+        "url": "https://registry.npmjs.org/ecdsa-sig-formatter/-/ecdsa-sig-formatter-1.0.11.tgz",
     },
     "emoji-regex@8.0.0": {
         "integrity": "sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==",
@@ -4453,6 +6233,11 @@ PACKAGES = {
         "name": "jackspeak",
         "url": "https://registry.npmjs.org/jackspeak/-/jackspeak-3.4.0.tgz",
     },
+    "js-tokens@4.0.0": {
+        "integrity": "sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==",
+        "name": "js-tokens",
+        "url": "https://registry.npmjs.org/js-tokens/-/js-tokens-4.0.0.tgz",
+    },
     "js-yaml@3.14.1": {
         "deps": [
             {
@@ -4534,6 +6319,72 @@ PACKAGES = {
         "name": "jsonschema",
         "url": "https://registry.npmjs.org/jsonschema/-/jsonschema-1.4.1.tgz",
     },
+    "jsonwebtoken@9.0.2": {
+        "deps": [
+            {
+                "id": "jws@3.2.2",
+            },
+            {
+                "id": "lodash.includes@4.3.0",
+            },
+            {
+                "id": "lodash.isboolean@3.0.3",
+            },
+            {
+                "id": "lodash.isinteger@4.0.4",
+            },
+            {
+                "id": "lodash.isnumber@3.0.3",
+            },
+            {
+                "id": "lodash.isplainobject@4.0.6",
+            },
+            {
+                "id": "lodash.isstring@4.0.1",
+            },
+            {
+                "id": "lodash.once@4.1.1",
+            },
+            {
+                "id": "ms@2.1.3",
+            },
+            {
+                "id": "semver@7.6.2",
+            },
+        ],
+        "integrity": "sha512-PRp66vJ865SSqOlgqS8hujT5U4AOgMfhrwYIuIhfKaoSCZcirrmASQr8CX7cUg+RMih+hgznrjp99o+W4pJLHQ==",
+        "name": "jsonwebtoken",
+        "url": "https://registry.npmjs.org/jsonwebtoken/-/jsonwebtoken-9.0.2.tgz",
+    },
+    "jwa@1.4.1": {
+        "deps": [
+            {
+                "id": "buffer-equal-constant-time@1.0.1",
+            },
+            {
+                "id": "ecdsa-sig-formatter@1.0.11",
+            },
+            {
+                "id": "safe-buffer@5.2.1",
+            },
+        ],
+        "integrity": "sha512-qiLX/xhEEFKUAJ6FiBMbes3w9ATzyk5W7Hvzpa/SLYdxNtng+gcurvrI7TbACjIXlsJyr05/S1oUhZrc63evQA==",
+        "name": "jwa",
+        "url": "https://registry.npmjs.org/jwa/-/jwa-1.4.1.tgz",
+    },
+    "jws@3.2.2": {
+        "deps": [
+            {
+                "id": "jwa@1.4.1",
+            },
+            {
+                "id": "safe-buffer@5.2.1",
+            },
+        ],
+        "integrity": "sha512-YHlZCB6lMTllWDtSPHz/ZXTsi8S00usEV6v1tjq8tOUZzw7DpSDWVXjXDre6ed1w/pd495ODpHZYSdkRTsa0HA==",
+        "name": "jws",
+        "url": "https://registry.npmjs.org/jws/-/jws-3.2.2.tgz",
+    },
     "keyv@4.5.4": {
         "deps": [
             {
@@ -4567,20 +6418,70 @@ PACKAGES = {
         "name": "locate-path",
         "url": "https://registry.npmjs.org/locate-path/-/locate-path-6.0.0.tgz",
     },
+    "lodash.includes@4.3.0": {
+        "integrity": "sha512-W3Bx6mdkRTGtlJISOvVD/lbqjTlPPUDTMnlXZFnVwi9NKJ6tiAk6LVdlhZMm17VZisqhKcgzpO5Wz91PCt5b0w==",
+        "name": "lodash.includes",
+        "url": "https://registry.npmjs.org/lodash.includes/-/lodash.includes-4.3.0.tgz",
+    },
+    "lodash.isboolean@3.0.3": {
+        "integrity": "sha512-Bz5mupy2SVbPHURB98VAcw+aHh4vRV5IPNhILUCsOzRmsTmSQ17jIuqopAentWoehktxGd9e/hbIXq980/1QJg==",
+        "name": "lodash.isboolean",
+        "url": "https://registry.npmjs.org/lodash.isboolean/-/lodash.isboolean-3.0.3.tgz",
+    },
+    "lodash.isinteger@4.0.4": {
+        "integrity": "sha512-DBwtEWN2caHQ9/imiNeEA5ys1JoRtRfY3d7V9wkqtbycnAmTvRRmbHKDV4a0EYc678/dia0jrte4tjYwVBaZUA==",
+        "name": "lodash.isinteger",
+        "url": "https://registry.npmjs.org/lodash.isinteger/-/lodash.isinteger-4.0.4.tgz",
+    },
+    "lodash.isnumber@3.0.3": {
+        "integrity": "sha512-QYqzpfwO3/CWf3XP+Z+tkQsfaLL/EnUlXWVkIk5FUPc4sBdTehEqZONuyRt2P67PXAk+NXmTBcc97zw9t1FQrw==",
+        "name": "lodash.isnumber",
+        "url": "https://registry.npmjs.org/lodash.isnumber/-/lodash.isnumber-3.0.3.tgz",
+    },
+    "lodash.isplainobject@4.0.6": {
+        "integrity": "sha512-oSXzaWypCMHkPC3NvBEaPHf0KsA5mvPrOPgQWDsbg8n7orZ290M0BmC/jgRZ4vcJ6DTAhjrsSYgdsW/F+MFOBA==",
+        "name": "lodash.isplainobject",
+        "url": "https://registry.npmjs.org/lodash.isplainobject/-/lodash.isplainobject-4.0.6.tgz",
+    },
+    "lodash.isstring@4.0.1": {
+        "integrity": "sha512-0wJxfxH1wgO3GrbuP+dTTk7op+6L41QCXbGINEmD+ny/G/eCqGzxyCsh7159S+mgDDcoarnBw6PC1PS5+wUGgw==",
+        "name": "lodash.isstring",
+        "url": "https://registry.npmjs.org/lodash.isstring/-/lodash.isstring-4.0.1.tgz",
+    },
     "lodash.merge@4.6.2": {
         "integrity": "sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==",
         "name": "lodash.merge",
         "url": "https://registry.npmjs.org/lodash.merge/-/lodash.merge-4.6.2.tgz",
+    },
+    "lodash.once@4.1.1": {
+        "integrity": "sha512-Sb487aTOCr9drQVL8pIxOzVhafOjZN9UU54hiN8PU3uAiSV7lx1yYNpbNmex2PK6dSJoNTSJUUswT651yww3Mg==",
+        "name": "lodash.once",
+        "url": "https://registry.npmjs.org/lodash.once/-/lodash.once-4.1.1.tgz",
     },
     "lodash.truncate@4.4.2": {
         "integrity": "sha512-jttmRe7bRse52OsWIMDLaXxWqRAmtIUccAQ3garviCqJjafXOfNMO0yMfNpdD6zbGaTU0P5Nz7e7gAT6cKmJRw==",
         "name": "lodash.truncate",
         "url": "https://registry.npmjs.org/lodash.truncate/-/lodash.truncate-4.4.2.tgz",
     },
+    "loose-envify@1.4.0": {
+        "deps": [
+            {
+                "id": "js-tokens@4.0.0",
+            },
+        ],
+        "integrity": "sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==",
+        "name": "loose-envify",
+        "url": "https://registry.npmjs.org/loose-envify/-/loose-envify-1.4.0.tgz",
+    },
     "lru-cache@10.2.2": {
         "integrity": "sha512-9hp3Vp2/hFQUiIwKo8XCeFVnrg8Pk3TYNPIR7tJADKi5YfcF7vEaK7avFHTlSy3kOKYaJQaalfEo6YuXdceBOQ==",
         "name": "lru-cache",
         "url": "https://registry.npmjs.org/lru-cache/-/lru-cache-10.2.2.tgz",
+    },
+    "lru-cache@10.3.0": {
+        "integrity": "sha512-CQl19J/g+Hbjbv4Y3mFNNXFEL/5t/KCg8POCuUqd4rMKjGG+j1ybER83hxV58zL+dFI1PTkt3GNFSHRt+d8qEQ==",
+        "name": "lru-cache",
+        "url": "https://registry.npmjs.org/lru-cache/-/lru-cache-10.3.0.tgz",
     },
     "make-fetch-happen@13.0.1": {
         "deps": [
@@ -4794,6 +6695,11 @@ PACKAGES = {
         "integrity": "sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==",
         "name": "ms",
         "url": "https://registry.npmjs.org/ms/-/ms-2.1.2.tgz",
+    },
+    "ms@2.1.3": {
+        "integrity": "sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==",
+        "name": "ms",
+        "url": "https://registry.npmjs.org/ms/-/ms-2.1.3.tgz",
     },
     "natural-compare@1.4.0": {
         "integrity": "sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==",
@@ -5041,6 +6947,35 @@ PACKAGES = {
         "name": "queue-microtask",
         "url": "https://registry.npmjs.org/queue-microtask/-/queue-microtask-1.2.3.tgz",
     },
+    "react-dom@18.3.1-44f25193": {
+        "deps": [
+            {
+                "id": "@types/react@18.3.3",
+            },
+            {
+                "id": "loose-envify@1.4.0",
+            },
+            {
+                "id": "react@18.3.1",
+            },
+            {
+                "id": "scheduler@0.23.2",
+            },
+        ],
+        "integrity": "sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==",
+        "name": "react-dom",
+        "url": "https://registry.npmjs.org/react-dom/-/react-dom-18.3.1.tgz",
+    },
+    "react@18.3.1": {
+        "deps": [
+            {
+                "id": "loose-envify@1.4.0",
+            },
+        ],
+        "integrity": "sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==",
+        "name": "react",
+        "url": "https://registry.npmjs.org/react/-/react-18.3.1.tgz",
+    },
     "require-from-string@2.0.2": {
         "integrity": "sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==",
         "name": "require-from-string",
@@ -5081,10 +7016,25 @@ PACKAGES = {
         "name": "run-parallel",
         "url": "https://registry.npmjs.org/run-parallel/-/run-parallel-1.2.0.tgz",
     },
+    "safe-buffer@5.2.1": {
+        "integrity": "sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==",
+        "name": "safe-buffer",
+        "url": "https://registry.npmjs.org/safe-buffer/-/safe-buffer-5.2.1.tgz",
+    },
     "safer-buffer@2.1.2": {
         "integrity": "sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==",
         "name": "safer-buffer",
         "url": "https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz",
+    },
+    "scheduler@0.23.2": {
+        "deps": [
+            {
+                "id": "loose-envify@1.4.0",
+            },
+        ],
+        "integrity": "sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==",
+        "name": "scheduler",
+        "url": "https://registry.npmjs.org/scheduler/-/scheduler-0.23.2.tgz",
     },
     "semver@7.6.2": {
         "integrity": "sha512-FNAIBWCx9qcRhoHcgcJ0gvU7SN1lYU2ZXuSfl04bSC5OpvDHFyJCjdNHomPXxjQlCBU67YW64PzY7/VIEH7F2w==",
@@ -5305,6 +7255,21 @@ PACKAGES = {
         "name": "tar",
         "url": "https://registry.npmjs.org/tar/-/tar-6.2.1.tgz",
     },
+    "temporal-polyfill@0.2.5": {
+        "deps": [
+            {
+                "id": "temporal-spec@0.2.4",
+            },
+        ],
+        "integrity": "sha512-ye47xp8Cb0nDguAhrrDS1JT1SzwEV9e26sSsrWzVu+yPZ7LzceEcH0i2gci9jWfOfSCCgM3Qv5nOYShVUUFUXA==",
+        "name": "temporal-polyfill",
+        "url": "https://registry.npmjs.org/temporal-polyfill/-/temporal-polyfill-0.2.5.tgz",
+    },
+    "temporal-spec@0.2.4": {
+        "integrity": "sha512-lDMFv4nKQrSjlkHKAlHVqKrBG4DyFfa9F74cmBZ3Iy3ed8yvWnlWSIdi4IKfSqwmazAohBNwiN64qGx4y5Q3IQ==",
+        "name": "temporal-spec",
+        "url": "https://registry.npmjs.org/temporal-spec/-/temporal-spec-0.2.4.tgz",
+    },
     "text-table@0.2.0": {
         "integrity": "sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==",
         "name": "text-table",
@@ -5385,10 +7350,20 @@ PACKAGES = {
         "name": "unique-slug",
         "url": "https://registry.npmjs.org/unique-slug/-/unique-slug-4.0.0.tgz",
     },
+    "universal-github-app-jwt@2.2.0": {
+        "integrity": "sha512-G5o6f95b5BggDGuUfKDApKaCgNYy2x7OdHY0zSMF081O0EJobw+1130VONhrA7ezGSV2FNOGyM+KQpQZAr9bIQ==",
+        "name": "universal-github-app-jwt",
+        "url": "https://registry.npmjs.org/universal-github-app-jwt/-/universal-github-app-jwt-2.2.0.tgz",
+    },
     "universal-user-agent@6.0.1": {
         "integrity": "sha512-yCzhz6FN2wU1NiiQRogkTQszlQSlpWaw8SvVegAc+bDxbzHgh1vX8uIe8OYyMH6DwH+sdTJsgMl36+mSMdRJIQ==",
         "name": "universal-user-agent",
         "url": "https://registry.npmjs.org/universal-user-agent/-/universal-user-agent-6.0.1.tgz",
+    },
+    "universal-user-agent@7.0.2": {
+        "integrity": "sha512-0JCqzSKnStlRRQfCdowvqy3cy0Dvtlb8xecj/H8JFZuCze4rwjPZQOgvFvn0Ws/usCHQFGpyr+pB9adaGwXn4Q==",
+        "name": "universal-user-agent",
+        "url": "https://registry.npmjs.org/universal-user-agent/-/universal-user-agent-7.0.2.tgz",
     },
     "universalify@2.0.1": {
         "integrity": "sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw==",
@@ -5504,6 +7479,10 @@ ROOTS = [
         "name": "@aws-sdk/client-ec2",
     },
     {
+        "id": "@aws-sdk/client-lambda@3.609.0",
+        "name": "@aws-sdk/client-lambda",
+    },
+    {
         "id": "@aws-sdk/client-sqs@3.600.0",
         "name": "@aws-sdk/client-sqs",
     },
@@ -5512,16 +7491,16 @@ ROOTS = [
         "name": "@aws-sdk/client-ssm",
     },
     {
-        "id": "@aws-sdk/lib-dynamodb@3.602.0-44f25193",
-        "name": "@aws-sdk/lib-dynamodb",
+        "id": "@aws-sdk/client-sts@3.609.0",
+        "name": "@aws-sdk/client-sts",
     },
     {
         "id": "@aws-sdk/util-arn-parser@3.568.0",
         "name": "@aws-sdk/util-arn-parser",
     },
     {
-        "id": "@aws-sdk/util-dynamodb@3.606.0-44f25193",
-        "name": "@aws-sdk/util-dynamodb",
+        "id": "@octokit/auth-app@7.1.0",
+        "name": "@octokit/auth-app",
     },
     {
         "id": "@octokit/request-error@5.1.0",
@@ -5544,6 +7523,10 @@ ROOTS = [
         "name": "@octokit/webhooks-types",
     },
     {
+        "id": "@smithy/types@3.3.0",
+        "name": "@smithy/types",
+    },
+    {
         "id": "@types/argparse@2.0.16",
         "name": "@types/argparse",
     },
@@ -5552,8 +7535,24 @@ ROOTS = [
         "name": "@types/aws-lambda",
     },
     {
+        "id": "@types/cfn-response@1.0.8",
+        "name": "@types/cfn-response",
+    },
+    {
+        "id": "@types/jsonwebtoken@9.0.6",
+        "name": "@types/jsonwebtoken",
+    },
+    {
         "id": "@types/node@20.14.8",
         "name": "@types/node",
+    },
+    {
+        "id": "@types/react-dom@18.3.0",
+        "name": "@types/react-dom",
+    },
+    {
+        "id": "@types/react@18.3.3",
+        "name": "@types/react",
     },
     {
         "id": "@typescript-eslint/eslint-plugin@7.13.1-44f25193",
@@ -5592,8 +7591,16 @@ ROOTS = [
         "name": "constructs",
     },
     {
+        "id": "core-js@3.37.1",
+        "name": "core-js",
+    },
+    {
         "id": "eslint@8.57.0",
         "name": "eslint",
+    },
+    {
+        "id": "jsonwebtoken@9.0.2",
+        "name": "jsonwebtoken",
     },
     {
         "id": "prettier-plugin-organize-imports@3.2.4-44f25193",
@@ -5606,6 +7613,22 @@ ROOTS = [
     {
         "id": "prettier@3.3.2",
         "name": "prettier",
+    },
+    {
+        "id": "react-dom@18.3.1-44f25193",
+        "name": "react-dom",
+    },
+    {
+        "id": "react@18.3.1",
+        "name": "react",
+    },
+    {
+        "id": "temporal-polyfill@0.2.5",
+        "name": "temporal-polyfill",
+    },
+    {
+        "id": "temporal-spec@0.2.4",
+        "name": "temporal-spec",
     },
     {
         "id": "tslib@2.6.3",

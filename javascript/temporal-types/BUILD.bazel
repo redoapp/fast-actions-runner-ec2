@@ -1,0 +1,25 @@
+load("@better_rules_javascript//commonjs:rules.bzl", "cjs_root")
+load("@better_rules_javascript//typescript:rules.bzl", "ts_import")
+
+package(default_visibility = ["//visibility:public"])
+
+ts_import(
+    name = "lib",
+    declarations = ["index.d.ts"],
+    root = ":root",
+)
+
+genrule(
+    name = "index",
+    srcs = ["@npm//temporal-spec:lib"],
+    outs = ["index.d.ts"],
+    cmd = """
+        cp $</global.d.ts $@
+    """,
+)
+
+cjs_root(
+    name = "root",
+    package_name = "@types/temporal",
+    descriptors = ["package.json"],
+)

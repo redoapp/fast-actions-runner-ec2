@@ -22,14 +22,19 @@ nodejs_install(
 
 nodejs_modules_package(
     name = "node_modules",
-    links = [target for target in ROOTS if target != "//:root"],
-    deps = [":npm_%s" % dep["name"] for dep in NPM_ROOTS],
+    links = [target for target in ROOTS if target not in ("//:root", "//javascript/temporal-types:root")],
+    deps = [":temporal_types"] + [":npm_%s" % dep["name"] for dep in NPM_ROOTS],
 )
 
 cjs_root(
     name = "root",
     package_name = "@redotech/tools-nodejs",
     descriptors = ["package.json"],
+)
+
+js_import_ts(
+    name = "temporal_types",
+    dep = "//javascript/temporal-types:lib",
 )
 
 [

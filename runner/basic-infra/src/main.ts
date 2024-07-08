@@ -1,16 +1,12 @@
 import { CdkStack } from "@redotech/cdk-util/construct";
-import { Context, Namespace } from "@redotech/cdk-util/context";
 import { App, DefaultStackSynthesizer } from "aws-cdk-lib/core";
-import { basicStack } from "./basic";
+import { clusterTemplate } from "./cluster";
+import { provisionerTemplate } from "./provisioner";
 
 const app = new App({
   defaultStackSynthesizer: new DefaultStackSynthesizer({
     generateBootstrapVersionRule: false,
   }),
 });
-basicStack(
-  new Context(
-    new CdkStack(app, "Basic"),
-    Namespace.EMPTY.child("FastGithubEc2Runner"),
-  ),
-);
+clusterTemplate(new CdkStack(app, "Cluster"));
+provisionerTemplate(new CdkStack(app, "Provisioner"));

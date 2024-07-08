@@ -1,5 +1,6 @@
 load("@better_rules_javascript//commonjs:rules.bzl", "cjs_root")
-load("@better_rules_javascript//typescript:rules.bzl", "ts_import")
+load("@better_rules_javascript//javascript:rules.bzl", "js_library")
+load("@better_rules_javascript//typescript:rules.bzl", "ts_import", "ts_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -14,8 +15,25 @@ genrule(
     tools = ["//tools/ajv:cli"],
 )
 
-ts_import(
+ts_library(
     name = "lib",
+    srcs = glob(["src/**/*.ts"]),
+    compiler = "//tools/typescript:tsc",
+    config = "tsconfig.json",
+    config_dep = ":tsconfig",
+    declaration_prefix = "lib",
+    js_prefix = "lib",
+    root = ":root",
+    strip_prefix = "src",
+    deps = [
+        ":ajv",
+        "@npm//@octokit/webhooks-methods:lib",
+        "@npm//@octokit/webhooks-types:lib",
+    ],
+)
+
+ts_import(
+    name = "ajv",
     compile_deps = ["@npm//ajv:lib"],
     declarations = glob(["src/**/*.d.ts"]),
     js = [":event_validate"],
@@ -30,4 +48,11 @@ cjs_root(
     name = "root",
     package_name = "@redotech/github-webhook",
     descriptors = ["package.json"],
+)
+
+js_library(
+    name = "tsconfig",
+    srcs = ["tsconfig.json"],
+    root = ":root",
+    deps = ["//tools/typescript:lib"],
 )
