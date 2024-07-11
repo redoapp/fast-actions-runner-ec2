@@ -33,7 +33,7 @@ ts_library(
 
 cjs_root(
     name = "root",
-    package_name = "@redotech/fast-actions-ec2-runner-provision",
+    package_name = "@redotech/fare-provision",
     descriptors = ["package.json"],
 )
 

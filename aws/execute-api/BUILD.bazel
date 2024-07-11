@@ -14,13 +14,15 @@ pkg_deb(
     description = "AWS API Gateway Execute API",
     maintainer = "Redo Tech",
     package = "aws-execute-api",
-    version = "1.0.0",
+    package_file_name = "aws-execute-api",
+    version_file = "//bazel/rules:build_embed_label",
 )
 
 pkg_files(
     name = "execs",
     srcs = [
         "aws-execute-api",
+        "imds-client",
     ],
     attributes = pkg_attributes(mode = "0755"),
     renames = {

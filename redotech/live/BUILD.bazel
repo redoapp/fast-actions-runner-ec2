@@ -5,7 +5,7 @@ package(default_visibility = ["//visibility:public"])
 sh_binary(
     name = "test_deploy",
     data = [
-        "//runner/publish",
+        "//fare/publish",
     ],
     main = "test-deploy.sh",
 )

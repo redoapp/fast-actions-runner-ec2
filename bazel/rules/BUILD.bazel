@@ -1,3 +1,5 @@
+load(":rules.bzl", "status")
+
 package(default_visibility = ["//visibility:public"])
 
 exports_files(["query-targets.sh.tpl"])
@@ -5,4 +7,9 @@ exports_files(["query-targets.sh.tpl"])
 config_setting(
     name = "stamp",
     values = {"stamp": "1"},
+)
+
+status(
+    name = "build_embed_label",
+    key = "BUILD_EMBED_LABEL",
 )

@@ -53,7 +53,9 @@ build --test_output=errors
 test --build_tests_only
 
 # Publish
-build --//aws/artifact:s3_url=https://redotech-fast-actions-ec2-runner-artifact.s3.us-east-1.amazonaws.com/dev/
+build --//aws/artifact:region=us-east-1
+build --//aws/artifact:s3_bucket=redotech-fast-actions-ec2-runner-artifact
+build --//aws/artifact:s3_key_prefix=dev/
 
 # User settings
 try-import %workspace%/user.bazelrc

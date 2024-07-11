@@ -14,7 +14,8 @@ pkg_deb(
     description = "AWS CLI Installer",
     maintainer = "Redo Tech",
     package = "awscli-installer",
-    version = "1.0.0",
+    package_file_name = "awscli-installer.deb",
+    version_file = "//bazel/rules:build_embed_label",
 )
 
 pkg_files(

@@ -1,0 +1,15 @@
+{
+  "name": "@redotech/fare-app",
+  "exports": {
+    "./*": "./lib/*.js"
+  },
+  "private": true,
+  "typesVersions": {
+    "*": {
+      "*": [
+        "lib/*",
+        "src/*"
+      ]
+    }
+  }
+}

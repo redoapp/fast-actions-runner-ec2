@@ -43,6 +43,6 @@
     "tslib": "^2.6",
     "typescript": "~5.2"
   },
-  "name": "@redotech/fast-actions-ec2-runner",
+  "name": "@redotech/fare",
   "private": true
 }

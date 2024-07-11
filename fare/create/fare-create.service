@@ -1,0 +1,11 @@
+[Install]
+RequiredBy=actions-runner.service
+
+[Service]
+ExecStart=/usr/lib/fare-create/create
+Type=oneshot
+
+[Unit]
+After=network.target
+Before=actions-runner.service
+Description=Create GitHub Actions Runner on EC2

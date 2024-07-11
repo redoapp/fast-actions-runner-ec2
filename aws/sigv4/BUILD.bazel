@@ -11,6 +11,7 @@ pkg_deb(
     description = "Sigv4",
     maintainer = "Redo Tech",
     package = "sigv4",
+    package_file_name = "sigv4.deb",
     version = "0.1.0",
 )
 

@@ -4,6 +4,6 @@ package(default_visibility = ["//visibility:public"])
 
 sh_binary(
     name = "runner_publish",
-    data = ["//runner/publish"],
+    data = ["//fare/publish"],
     main = "runner-publish.sh",
 )

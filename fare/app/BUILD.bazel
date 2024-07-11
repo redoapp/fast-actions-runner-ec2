@@ -1,0 +1,52 @@
+load("@better_rules_javascript//commonjs:rules.bzl", "cjs_root")
+load("@better_rules_javascript//javascript:rules.bzl", "js_library")
+load("@better_rules_javascript//typescript:rules.bzl", "ts_library")
+load("//aws/rules:rules.bzl", "lambda_nodejs_function")
+
+package(default_visibility = ["//visibility:public"])
+
+lambda_nodejs_function(
+    name = "function",
+    dep = "lib",
+)
+
+ts_library(
+    name = "lib",
+    srcs = glob([
+        "src/**/*.ts",
+        "src/**/*.tsx",
+    ]),
+    compiler = "//tools/typescript:tsc",
+    config = "tsconfig.json",
+    config_dep = ":tsconfig",
+    declaration_prefix = "lib",
+    js_prefix = "lib",
+    root = ":root",
+    strip_prefix = "src",
+    deps = [
+        "//aws/function:lib",
+        "@npm//@aws-sdk/client-ssm:lib",
+        "@npm//@octokit/rest:lib",
+        "@npm//@types/aws-lambda:lib",
+        "@npm//@types/jsonwebtoken:lib",
+        "@npm//@types/node:lib",
+        "@npm//@types/react:lib",
+        "@npm//@types/react-dom:lib",
+        "@npm//jsonwebtoken:lib",
+        "@npm//react:lib",
+        "@npm//react-dom:lib",
+    ],
+)
+
+cjs_root(
+    name = "root",
+    package_name = "@redotech/fare-provision",
+    descriptors = ["package.json"],
+)
+
+js_library(
+    name = "tsconfig",
+    srcs = ["tsconfig.json"],
+    root = ":root",
+    deps = ["//tools/typescript:lib"],
+)

@@ -1713,9 +1713,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@redotech/fast-actions-ec2-runner@workspace:.":
+"@redotech/fare@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@redotech/fast-actions-ec2-runner@workspace:."
+  resolution: "@redotech/fare@workspace:."
   dependencies:
     "@aws-sdk/client-dynamodb": ^3
     "@aws-sdk/client-ec2": ^3

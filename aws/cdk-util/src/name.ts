@@ -1,25 +1,39 @@
-import { Construct } from "constructs";
-import { Namespace } from "./context";
+import { Fn } from "aws-cdk-lib/core";
+import { Construct, IConstruct } from "constructs";
 
-const NAMESPACE_KEY = "Namespace";
+export class Name {
+  constructor(readonly parts: string[]) {}
 
-export function setName(construct: Construct, namespace: Namespace) {
-  construct.node.setContext(NAMESPACE_KEY, {
-    construct,
-    value: namespace,
-  });
+  child(part: string) {
+    return new Name([...this.parts, part]);
+  }
+
+  static readonly EMPTY = new Name([]);
+
+  toString() {
+    return Fn.join("/", this.parts);
+  }
 }
 
-export function getName(construct: Construct): Namespace {
-  const context = construct.node.tryGetContext(NAMESPACE_KEY) || {
-    construct: construct.node.root,
-    value: Namespace.EMPTY.child(construct.node.root.node.id),
-  };
+const NAME_KEY = "Namespace";
+
+interface NameContext {
+  construct: IConstruct;
+  value: Name;
+}
+
+export function setName(construct: Construct, value: Name) {
+  construct.node.setContext(NAME_KEY, { construct, value });
+}
+
+export function getName(construct: Construct): Name {
+  const context: NameContext | undefined =
+    construct.node.tryGetContext(NAME_KEY);
   return construct.node.scopes.reduce(
     (name, construct) =>
-      construct === context.construct
+      construct === context?.construct
         ? context.value
         : name.child(construct.node.id),
-    Namespace.EMPTY,
+    Name.EMPTY,
   );
 }

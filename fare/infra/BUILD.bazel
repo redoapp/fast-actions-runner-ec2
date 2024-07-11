@@ -1,0 +1,74 @@
+load("@better_rules_javascript//commonjs:rules.bzl", "cjs_root")
+load("@better_rules_javascript//javascript:rules.bzl", "js_library")
+load("@better_rules_javascript//nodejs:rules.bzl", "nodejs_binary")
+load("@better_rules_javascript//typescript:rules.bzl", "ts_library")
+load("//aws/cdk-rules:rules.bzl", "cdk_project", "cdk_synth")
+load("//shell/rules:rules.bzl", "sh_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+cdk_synth(
+    name = "app_cf",
+    project = ":cdk",
+    stack = "App",
+)
+
+cdk_synth(
+    name = "base_cf",
+    project = ":cdk",
+    stack = "Base",
+)
+
+nodejs_binary(
+    name = "bin",
+    dep = ":lib",
+    main = "lib/main.js",
+)
+
+cdk_project(
+    name = "cdk",
+    bin = ":bin",
+    cdk = "//tools/cdk",
+    config = "cdk.json",
+)
+
+ts_library(
+    name = "lib",
+    srcs = glob(["src/**/*.ts"]),
+    compiler = "//tools/typescript:tsc",
+    config = "tsconfig.json",
+    config_dep = ":tsconfig",
+    declaration_prefix = "lib",
+    js_prefix = "lib",
+    root = ":root",
+    strip_prefix = "src",
+    deps = [
+        "//aws/cdk-util:lib",
+        "//github/util:lib",
+        "//javascript/temporal-types:lib",
+        "@better_rules_javascript//bazel/runfiles:lib",
+        "@npm//@types/node:lib",
+        "@npm//aws-cdk-lib:lib",
+        "@npm//constructs:lib",
+        "@npm//temporal-polyfill:lib",
+    ],
+)
+
+cdk_synth(
+    name = "provisioner_cf",
+    project = ":cdk",
+    stack = "Provisioner",
+)
+
+cjs_root(
+    name = "root",
+    package_name = "@redotech/fare-infra",
+    descriptors = ["package.json"],
+)
+
+js_library(
+    name = "tsconfig",
+    srcs = ["tsconfig.json"],
+    root = ":root",
+    deps = ["//tools/typescript:lib"],
+)

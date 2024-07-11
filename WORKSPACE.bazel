@@ -1,4 +1,4 @@
-workspace(name = "redotech_fast_actions_ec2_runner")
+workspace(name = "redotech_fast_actions_runner_ec2")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 

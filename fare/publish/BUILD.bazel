@@ -1,0 +1,26 @@
+load("//shell/rules:rules.bzl", "sh_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+sh_binary(
+    name = "publish",
+    data = [
+        "//actions/runner:deb",
+        "//aws/artifact:region_file",
+        "//aws/artifact:s3_bucket_file",
+        "//aws/artifact:s3_key_prefix_file",
+        "//aws/cf-resource:function",
+        "//aws/cli-installer:deb",
+        "//aws/imds-client:deb",
+        "//aws/network:deb",
+        "//fare/app:function",
+        "//fare/basic-infra:cluster_cf",
+        "//fare/basic-infra:provisioner_cf",
+        "//fare/cf-resource:function",
+        "//fare/create:deb",
+        "//fare/infra:app_cf",
+        "//fare/infra:provisioner_cf",
+        "//fare/provision:function",
+    ],
+    main = "publish.sh",
+)
