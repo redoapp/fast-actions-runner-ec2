@@ -6,5 +6,7 @@ node_modules
 user.bazelrc
 
 /bazel-*
+/data
+/user
 
 !.vscode/extensions.json

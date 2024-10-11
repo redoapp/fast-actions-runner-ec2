@@ -10,9 +10,10 @@ export function envArnRead(name: string): ARN {
 }
 
 export function envNumberRead(name: string): number {
-  const value = +envStringRead(name);
+  const string = envStringRead(name);
+  const value = +string;
   if (isNaN(value)) {
-    throw new Error(`Invalid number for ${name}`);
+    throw new Error(`Invalid number for ${name}: ${string}`);
   }
   return value;
 }

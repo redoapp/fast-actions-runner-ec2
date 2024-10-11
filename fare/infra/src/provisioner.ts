@@ -1,22 +1,31 @@
-import {
-  cloudformationStackNameMaxLength,
-  cloudformationStackNameMinLength,
-  cloudformationStackNamePattern,
-} from "@redotech/cdk-util/cf";
 import { githubNameLengthMax, githubNamePattern } from "@redotech/github-util";
-import { CfnPolicy } from "aws-cdk-lib/aws-iam";
-import { CfnParameter, CustomResource, Fn, Stack } from "aws-cdk-lib/core";
+import {
+  Aws,
+  CfnCondition,
+  CfnParameter,
+  CustomResource,
+  Fn,
+  Stack,
+} from "aws-cdk-lib/core";
 import { Construct } from "constructs";
 import { durationMinLength, durationPattern } from "./temporal";
 
 export function provisionerTemplate(stack: Stack) {
-  const baseStackNameParam = new CfnParameter(stack, "BaseStackName", {
-    allowedPattern: cloudformationStackNamePattern,
-    description: "Base stack name",
-    minLength: cloudformationStackNameMinLength,
-    maxLength: cloudformationStackNameMaxLength,
+  const idParam = new CfnParameter(stack, "Id", {
+    description: "Provisioner ID",
+    minLength: 1,
   });
-  const baseStackName = baseStackNameParam.valueAsString;
+  const id = idParam.valueAsString;
+
+  const provisionerFunctionArnParam = new CfnParameter(
+    stack,
+    "ProvisionerFunctionArn",
+    {
+      description: "Provisioner function ARN",
+      minLength: 1,
+    },
+  );
+  const provisionerFunctionArn = provisionerFunctionArnParam.valueAsString;
 
   const {
     launchTemplateArn,
@@ -53,7 +62,7 @@ export function provisionerTemplate(stack: Stack) {
     ParameterGroups: [
       {
         Label: { default: "Base" },
-        Parameters: [baseStackNameParam.logicalId],
+        Parameters: [provisionerFunctionArnParam.logicalId],
       },
       githubParamGroup,
       runnerParamGroup,
@@ -61,7 +70,9 @@ export function provisionerTemplate(stack: Stack) {
       scalingParamGroup,
     ],
     ParameterLabels: {
-      [baseStackNameParam.logicalId]: { default: "Base stack" },
+      [provisionerFunctionArnParam.logicalId]: {
+        default: "Provisioner function ARN",
+      },
       ...githubParamLabels,
       ...runnerParamLabels,
       ...scalingParamLabels,
@@ -70,9 +81,8 @@ export function provisionerTemplate(stack: Stack) {
   });
 
   provisionerStack(stack, {
-    provisionerFunctionArn: Fn.importValue(
-      `${baseStackName}:ProvisionerFunctionArn`,
-    ),
+    id,
+    provisionerFunctionArn,
     orgName,
     repoName,
     roleArn,
@@ -136,13 +146,15 @@ export function ec2Params(scope: Construct) {
 export function githubParams(scope: Construct) {
   const orgNameParam = new CfnParameter(scope, "OrgName", {
     allowedPattern: githubNamePattern,
+    default: "",
     description: "GitHub organization name, mutually exclusive with user name",
     maxLength: githubNameLengthMax,
   });
   const orgName = orgNameParam.valueAsString;
 
-  const userNameParam = new CfnParameter(scope, "userName", {
+  const userNameParam = new CfnParameter(scope, "UserName", {
     allowedPattern: githubNamePattern,
+    default: "",
     description: "GitHub user name, mutually exclusive with organization name",
     maxLength: githubNameLengthMax,
   });
@@ -252,6 +264,7 @@ export function scalingParams(scope: Construct) {
 export function provisionerStack(
   scope: Construct,
   {
+    id,
     idleTimeout,
     launchTemplateArn,
     launchTemplateVersion,
@@ -266,6 +279,7 @@ export function provisionerStack(
     userName,
   }: {
     userName: string;
+    id: string;
     idleTimeout: string;
     launchTemplateArn: string;
     launchTemplateVersion: string;
@@ -279,41 +293,31 @@ export function provisionerStack(
     runnerLabels: string[];
   },
 ) {
+  const orgNameEmpty = new CfnCondition(scope, "OrgNameEmpty", {
+    expression: Fn.conditionEquals(orgName, ""),
+  });
+  const repoNameEmpty = new CfnCondition(scope, "RepoNameEmpty", {
+    expression: Fn.conditionEquals(repoName, ""),
+  });
+  const userNameEmpty = new CfnCondition(scope, "UserNameEmpty", {
+    expression: Fn.conditionEquals(userName, ""),
+  });
+
   new CustomResource(scope, "Resource", {
     serviceToken: provisionerFunctionArn,
     properties: {
       CountMax: runnerCountMax,
+      Id: id,
       IdleTimeout: idleTimeout,
       Labels: runnerLabels,
       LaunchTemplateArn: launchTemplateArn,
       LaunchTemplateVersion: launchTemplateVersion,
       LaunchTimeout: launchTimeout,
-      OrgName: orgName,
-      RepoName: repoName,
+      OrgName: Fn.conditionIf(orgNameEmpty.logicalId, Aws.NO_VALUE, orgName),
+      RepoName: Fn.conditionIf(repoNameEmpty.logicalId, Aws.NO_VALUE, repoName),
       RoleArn: roleArn,
       RunnerGroupId: runnerGroupId,
-      UserName: userName,
+      UserName: Fn.conditionIf(userNameEmpty.logicalId, Aws.NO_VALUE, userName),
     },
-  });
-
-  new CfnPolicy(scope, "Policy", {
-    policyDocument: {
-      Statement: [
-        {
-          Action: [
-            "ec2:CreateTags",
-            "ec2:DescribeInstances",
-            "ec2:RunInstances",
-            "ec2:StartInstances",
-            "ec2:StopInstances",
-            "ec2:TerminateInstances",
-          ],
-          Effect: "Allow",
-          Resource: "*",
-        },
-      ],
-      Version: "2012-10-17",
-    },
-    policyName: scope.toString(),
   });
 }

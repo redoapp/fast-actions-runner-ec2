@@ -1,12 +1,17 @@
+/**
+ * @file
+ * Start provisioner sync for all provisioners.
+ */
+
 import "./polyfill";
 
 import { DynamoDBClient, paginateScan } from "@aws-sdk/client-dynamodb";
 import { InvokeCommand, LambdaClient } from "@aws-sdk/client-lambda";
-import { stringRead } from "@redotech/dynamodb/common";
+import { stringAttributeFormat } from "@redotech/dynamodb/attribute";
 import { envStringRead } from "@redotech/lambda/env";
-import {} from "@redotech/sqs";
+import { ProvisionerSyncEvent } from "./provisioner-sync";
 
-const provisionSyncName = envStringRead("PROVISION_SYNC_NAME");
+const provisionerSyncName = envStringRead("PROVISIONER_SYNC_NAME");
 
 const provisionerTableName = envStringRead("PROVISIONER_TABLE_NAME");
 
@@ -18,11 +23,12 @@ export const handler = async () => {
   for await (const provisioner of provisioners({
     dynamodbClient,
   })) {
+    const event: ProvisionerSyncEvent = { provisionerId: provisioner.id };
     await lambdaClient.send(
       new InvokeCommand({
-        FunctionName: provisionSyncName,
+        FunctionName: provisionerSyncName,
         InvocationType: "Event",
-        Payload: JSON.stringify({ provisonerId: provisioner.id }),
+        Payload: JSON.stringify(event),
       }),
     );
   }
@@ -42,7 +48,7 @@ async function* provisioners({
     { ProjectionExpression: "Id", TableName: provisionerTableName },
   )) {
     for (const item of output.Items!) {
-      const id = stringRead(item.Id);
+      const id = stringAttributeFormat.read(item.Id);
       yield { id };
     }
   }

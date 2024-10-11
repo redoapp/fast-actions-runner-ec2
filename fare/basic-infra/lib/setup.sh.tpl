@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set -euo pipefail
 
 deb_install() {
@@ -14,10 +15,10 @@ deb_install imds-client.deb
 
 deb_install aws-execute-api.deb
 
-deb_install actions-runner-ec2.deb
+deb_install fare-create.deb
+
 deb_install actions-runner.deb
 
-SetupBase64=
 setup_base64="${SetupBase64}"
 
 if [ ! -z "$setup_base64" ]; then

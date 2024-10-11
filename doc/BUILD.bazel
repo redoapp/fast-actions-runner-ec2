@@ -1,0 +1,33 @@
+load("//aws/cfn-rules:rules.bzl", "cfn_mermaid")
+load("//shell/rules:rules.bzl", "sh_binary")
+
+cfn_mermaid(
+    name = "app",
+    src = "//fare/infra:app_cf",
+)
+
+cfn_mermaid(
+    name = "basic_cluster",
+    src = "//fare/basic-infra:cluster_cf",
+)
+
+cfn_mermaid(
+    name = "basic_provisioner",
+    src = "//fare/basic-infra:provisioner_cf",
+)
+
+sh_binary(
+    name = "gen",
+    data = [
+        ":app",
+        ":basic_cluster",
+        ":basic_provisioner",
+        ":provisioner",
+    ],
+    main = "gen.sh",
+)
+
+cfn_mermaid(
+    name = "provisioner",
+    src = "//fare/infra:provisioner_cf",
+)

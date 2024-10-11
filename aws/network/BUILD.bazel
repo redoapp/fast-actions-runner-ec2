@@ -12,7 +12,7 @@ pkg_deb(
     package = "aws-network",
     package_file_name = "aws-network.deb",
     postinst = "deb/postinst",
-    version_file = "//bazel/rules:build_embed_label",
+    version_file = "//tools/deb:version",
 )
 
 pkg_files(
@@ -21,6 +21,7 @@ pkg_files(
         "metadata-secure.service",
     ],
     attributes = pkg_attributes(mode = "0755"),
+    renames = {"metadata-secure.service": "/etc/systemd/system/metadata-secure.service"},
 )
 
 pkg_files(

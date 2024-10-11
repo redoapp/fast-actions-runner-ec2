@@ -1,16 +1,39 @@
-load("//shell/rules:rules.bzl", "sh_binary")
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+load("@better_rules_javascript//commonjs:rules.bzl", "cjs_root")
+load("@better_rules_javascript//javascript:rules.bzl", "js_library")
+load("@better_rules_javascript//typescript:rules.bzl", "ts_library")
+load("//file/rules:rules.bzl", "digest")
+load("//bazel/rules:rules.bzl", "build_setting_file")
 
 package(default_visibility = ["//visibility:public"])
 
-sh_binary(
-    name = "publish",
-    data = [
+DIGESTS = {
+    "actions_runner_deb_digest": "//actions/runner:deb",
+    "aws_cf_resource_function_digest": "//aws/cf-resource:function",
+    "aws_cli_installer_deb_digest": "//aws/cli-installer:deb",
+    "aws_execute_api_digest": "//aws/execute-api:deb",
+    "aws_imds_client_deb_digest": "//aws/imds-client:deb",
+    "aws_network_deb_digest": "//aws/network:deb",
+    "fare_app_function_digest": "//fare/app:function",
+    "fare_basic_infra_cluster_cf_digest": "//fare/basic-infra:cluster_cf",
+    "fare_basic_infra_provisioner_cf_digest": "//fare/basic-infra:provisioner_cf",
+    "fare_cf_resource_function_digest": "//fare/cf-resource:function",
+    "fare_create_deb_digest": "//fare/create:deb",
+    "fare_infra_app_cf_digest": "//fare/infra:app_cf",
+    "fare_infra_provisioner_cf_digest": "//fare/infra:provisioner_cf",
+    "fare_provision_function_digest": "//fare/provision:function",
+}
+
+filegroup(
+    name = "data",
+    srcs = [
+        ":region_file",
+        ":s3_bucket_file",
+        ":s3_key_prefix_file",
         "//actions/runner:deb",
-        "//aws/artifact:region_file",
-        "//aws/artifact:s3_bucket_file",
-        "//aws/artifact:s3_key_prefix_file",
         "//aws/cf-resource:function",
         "//aws/cli-installer:deb",
+        "//aws/execute-api:deb",
         "//aws/imds-client:deb",
         "//aws/network:deb",
         "//fare/app:function",
@@ -21,6 +44,82 @@ sh_binary(
         "//fare/infra:app_cf",
         "//fare/infra:provisioner_cf",
         "//fare/provision:function",
-    ],
-    main = "publish.sh",
+    ] + [":%s" % name for name in DIGESTS],
 )
+
+ts_library(
+    name = "lib",
+    srcs = glob(["src/**/*.ts"]),
+    compiler = "//tools/typescript:tsc",
+    config = "tsconfig.json",
+    config_dep = ":tsconfig",
+    declaration_prefix = "lib",
+    js_prefix = "lib",
+    root = ":root",
+    strip_prefix = "src",
+    deps = [
+        "//terraform/util:lib",
+        "@npm//@cdktf/provider-aws:lib",
+        "@npm//@types/node:lib",
+        "@npm//cdktf:lib",
+        "@npm//constructs:lib",
+    ],
+)
+
+string_flag(
+    name = "region",
+    build_setting_default = "example-region",
+)
+
+build_setting_file(
+    name = "region_file",
+    out = "region.txt",
+    content = ":region",
+)
+
+string_flag(
+    name = "s3_bucket",
+    build_setting_default = "example-bucket",
+)
+
+build_setting_file(
+    name = "s3_bucket_file",
+    out = "s3-bucket.txt",
+    content = ":s3_bucket",
+)
+
+string_flag(
+    name = "s3_key_prefix",
+    build_setting_default = "",
+)
+
+build_setting_file(
+    name = "s3_key_prefix_file",
+    out = "s3-key-prefix.txt",
+    content = ":s3_key_prefix",
+)
+
+cjs_root(
+    name = "root",
+    package_name = "@redotech/fare-publish",
+    descriptors = ["package.json"],
+)
+
+js_library(
+    name = "tsconfig",
+    srcs = ["tsconfig.json"],
+    root = ":root",
+    deps = ["//tools/typescript:lib"],
+)
+
+[
+    digest(
+        name = "%s" % name,
+        src = src,
+        encoding = "hex",
+    )
+    for [
+        name,
+        src,
+    ] in DIGESTS.items()
+]

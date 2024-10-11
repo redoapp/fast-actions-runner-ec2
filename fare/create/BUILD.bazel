@@ -17,7 +17,7 @@ pkg_deb(
     package = "fare-create",
     package_file_name = "fare-create.deb",
     postinst = "deb/postinst",
-    version_file = "//bazel/rules:build_embed_label",
+    version_file = "//tools/deb:version",
 )
 
 pkg_files(

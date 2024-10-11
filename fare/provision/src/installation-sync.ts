@@ -1,4 +1,9 @@
-require("temporal-polyfill/global");
+/**
+ * @file
+ * Refresh job statuses for all installations.
+ */
+
+import "./polyfill";
 
 import {
   DynamoDBClient,
@@ -7,12 +12,10 @@ import {
 } from "@aws-sdk/client-dynamodb";
 import { Octokit } from "@octokit/rest";
 import {
-  instantWrite,
-  numberRead,
-  numberWrite,
-  stringRead,
-  stringWrite,
-} from "@redotech/dynamodb/common";
+  instantAttributeFormat,
+  numberAttributeFormat,
+  stringAttributeFormat,
+} from "@redotech/dynamodb/attribute";
 import { envNumberRead, envStringRead } from "@redotech/lambda/env";
 import { Handler } from "aws-lambda";
 import { appGithubClient } from "./github";
@@ -55,22 +58,23 @@ async function jobsRefresh({
     { client: dynamodbClient },
     {
       TableName: jobTableName,
-      IndexName: "InstallationId",
       KeyConditionExpression: "InstallationId = :installationId",
       FilterExpression: "#status = :status",
+      IndexName: "InstallationId",
       ProjectionExpression: "OrgName, RepoName, Id, UserName",
       ExpressionAttributeValues: {
-        ":installationId": numberWrite(installationId),
-        ":status": stringWrite(JobStatus.PENDING),
+        ":installationId": numberAttributeFormat.write(installationId),
+        ":status": stringAttributeFormat.write(JobStatus.PENDING),
       },
       ExpressionAttributeNames: { "#status": "Status" },
     },
   )) {
     for (const item of output.Items!) {
-      const jobId = numberRead(item.Id);
-      const repoName = stringRead(item.RepoName);
-      const orgName = item.OrgName && stringRead(item.OrgName);
-      const userName = item.UserName && stringRead(item.UserName);
+      const jobId = numberAttributeFormat.read(item.Id);
+      const repoName = stringAttributeFormat.read(item.RepoName);
+      const orgName = item.OrgName && stringAttributeFormat.read(item.OrgName);
+      const userName =
+        item.UserName && stringAttributeFormat.read(item.UserName);
       const job = await installationGithubClient.actions.getJobForWorkflowRun({
         owner: orgName ?? userName,
         repo: repoName,
@@ -81,16 +85,16 @@ async function jobsRefresh({
       }
       await dynamodbClient.send(
         new UpdateItemCommand({
-          ConditionExpression: "#status <> :status",
+          ConditionExpression: "#status <> :completed",
           TableName: jobTableName,
-          Key: { Id: numberWrite(jobId) },
+          Key: { Id: numberAttributeFormat.write(jobId) },
           UpdateExpression: "SET ExpiresAt = :expiresAt, #status = :status",
           ExpressionAttributeNames: { "#status": "Status" },
           ExpressionAttributeValues: {
-            ":expiresAt": instantWrite(
+            ":expiresAt": instantAttributeFormat.write(
               Temporal.Now.instant().add({ minutes: 1 }),
             ),
-            ":status": stringWrite(JobStatus.COMPLETED),
+            ":completed": stringAttributeFormat.write(JobStatus.COMPLETED),
           },
         }),
       );

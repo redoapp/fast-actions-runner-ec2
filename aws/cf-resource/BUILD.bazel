@@ -7,7 +7,7 @@ package(default_visibility = ["//visibility:public"])
 
 lambda_nodejs_function(
     name = "function",
-    dep = "lib",
+    dep = ":lib",
 )
 
 ts_library(
@@ -21,9 +21,9 @@ ts_library(
     root = ":root",
     strip_prefix = "src",
     deps = [
+        "//aws/cf-response:lib",
         "@npm//@aws-sdk/client-ssm:lib",
         "@npm//@types/aws-lambda:lib",
-        "@npm//@types/cfn-response:lib",
         "@npm//@types/node:lib",
     ],
 )

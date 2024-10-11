@@ -70,8 +70,8 @@ def _cdk_project_impl(ctx):
 
 cdk_project = rule(
     attrs = {
-        "bin": attr.label(cfg = "exec", executable = True, mandatory = True),
-        "cdk": attr.label(cfg = "exec", executable = True, mandatory = True),
+        "bin": attr.label(cfg = "target", executable = True, mandatory = True),
+        "cdk": attr.label(cfg = "target", executable = True, mandatory = True),
         "config": attr.label(allow_single_file = ["cdk.json"], mandatory = True),
         "_bash_runfiles": attr.label(
             default = "@bazel_tools//tools/bash/runfiles",

@@ -1,0 +1,11 @@
+load("@rules_terraform//terraform:rules.bzl", "tf_providers_resolve")
+
+package(default_visibility = ["//visibility:public"])
+
+tf_providers_resolve(
+    name = "providers_resolve",
+    path = "providers.bzl",
+    providers = {
+        "aws": "registry.terraform.io/hashicorp/aws/5.65.0",
+    },
+)

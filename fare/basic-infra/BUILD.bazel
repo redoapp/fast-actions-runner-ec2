@@ -47,7 +47,6 @@ ts_library(
         "@npm//@types/node:lib",
         "@npm//aws-cdk-lib:lib",
         "@npm//constructs:lib",
-        "@npm//yaml:lib",
     ],
 )
 

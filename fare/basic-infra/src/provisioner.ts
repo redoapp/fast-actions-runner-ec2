@@ -13,8 +13,12 @@ import {
   scalingParams,
 } from "@redotech/fare-infra/provisioner";
 import { CfnLaunchTemplate } from "aws-cdk-lib/aws-ec2";
-import { CfnRole, CfnRolePolicy } from "aws-cdk-lib/aws-iam";
-import { Aws, CfnParameter, Fn, Stack } from "aws-cdk-lib/core";
+import {
+  CfnInstanceProfile,
+  CfnRole,
+  CfnRolePolicy,
+} from "aws-cdk-lib/aws-iam";
+import { Aws, CfnCondition, CfnParameter, Fn, Stack } from "aws-cdk-lib/core";
 import { Construct } from "constructs";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -26,6 +30,20 @@ export function provisionerTemplate(stack: Stack) {
   });
   const ami = amiParam.valueAsString;
 
+  const clusterStackNameParam = new CfnParameter(stack, "ClusterStackName", {
+    allowedPattern: cloudformationStackNamePattern,
+    description: "Cluster stack name",
+    minLength: cloudformationStackNameMinLength,
+    maxLength: cloudformationStackNameMaxLength,
+  });
+  const clusterStackName = clusterStackNameParam.valueAsString;
+
+  const idParam = new CfnParameter(stack, "Id", {
+    description: "Provisioner ID",
+    minLength: 1,
+  });
+  const id = idParam.valueAsString;
+
   const {
     artifactRegion,
     artifactS3Bucket,
@@ -33,14 +51,6 @@ export function provisionerTemplate(stack: Stack) {
     paramGroup: artifactParamGroup,
     paramLabels: artifactParamLabels,
   } = artifactParams(stack, { includeRegion: true });
-
-  const baseStackNameParam = new CfnParameter(stack, "BaseStackName", {
-    allowedPattern: cloudformationStackNamePattern,
-    description: "Base stack name",
-    minLength: cloudformationStackNameMinLength,
-    maxLength: cloudformationStackNameMaxLength,
-  });
-  const baseStackName = baseStackNameParam.valueAsString;
 
   const {
     orgName,
@@ -65,6 +75,12 @@ export function provisionerTemplate(stack: Stack) {
     paramLabels: scalingParamLabels,
   } = scalingParams(stack);
 
+  const roleArnParam = new CfnParameter(stack, "RoleArn", {
+    default: "",
+    description: "IAM role ARN for instances",
+  });
+  const roleArn = roleArnParam.valueAsString;
+
   const instanceTypeParam = new CfnParameter(stack, "InstanceType", {
     description: "Instance size",
     default: "m5.large",
@@ -72,9 +88,9 @@ export function provisionerTemplate(stack: Stack) {
   const instanceType = instanceTypeParam.valueAsString;
 
   const keyPairParam = new CfnParameter(stack, "KeyPair", {
-    description: "Key pair name",
     default: "",
-    type: "AWS::EC2::KeyPair::KeyName",
+    description: "Key pair name",
+    type: "String",
   });
   const keyPair = keyPairParam.valueAsString;
 
@@ -96,7 +112,7 @@ export function provisionerTemplate(stack: Stack) {
     ParameterGroups: [
       {
         Label: { default: "Base" },
-        Parameters: [baseStackNameParam.logicalId],
+        Parameters: [clusterStackNameParam.logicalId],
       },
       artifactParamGroup,
       githubParamGroup,
@@ -104,7 +120,7 @@ export function provisionerTemplate(stack: Stack) {
       scalingParamGroup,
     ],
     ParameterLabels: {
-      [baseStackNameParam.logicalId]: { default: "Base stack" },
+      [clusterStackNameParam.logicalId]: { default: "Base stack" },
       ...artifactParamLabels,
       ...githubParamLabels,
       ...runnerParamLabels,
@@ -117,23 +133,24 @@ export function provisionerTemplate(stack: Stack) {
     artifactS3Bucket,
     artifactS3KeyPrefix,
     ami,
-    baseRoleArn: Fn.importValue(`${baseStackName}:RoleArn`),
+    baseRoleArn: Fn.importValue(`${clusterStackName}:RoleArn`),
     orgName,
     repoName,
+    id,
     idleTimeout,
-    instanceProfile: Fn.importValue(`${baseStackName}:InstanceProfileName`),
+    roleArn,
     instanceType,
     launchTimeout,
     keyPair,
     provisionerFunctionArn: Fn.importValue(
-      `${baseStackName}:ProvisionerFunctionArn`,
+      `${clusterStackName}:ProvisionerFunctionArn`,
     ),
     runnerCountMax,
     runnerGroupId,
     runnerLabels,
-    securityGroupId: Fn.importValue(`${baseStackName}:SecurityGroupId`),
+    securityGroupId: Fn.importValue(`${clusterStackName}:SecurityGroupId`),
     setupScriptB64,
-    subnetId: Fn.importValue(`${baseStackName}:SubnetId`),
+    subnetId: Fn.importValue(`${clusterStackName}:SubnetId`),
     userName,
     volumeSizeGib,
   });
@@ -148,9 +165,10 @@ export function provisionerStack(
     ami,
     baseRoleArn,
     idleTimeout,
-    instanceProfile,
+    roleArn,
     instanceType,
     keyPair,
+    id,
     launchTimeout,
     orgName,
     provisionerFunctionArn,
@@ -169,8 +187,9 @@ export function provisionerStack(
     artifactS3KeyPrefix: string;
     ami: string;
     baseRoleArn: string;
+    id: string;
     idleTimeout: string;
-    instanceProfile: string;
+    roleArn: string;
     instanceType: string;
     keyPair: string;
     launchTimeout: string;
@@ -197,7 +216,7 @@ export function provisionerStack(
       baseRoleArn,
       securityGroupId,
       instanceType,
-      instanceProfile,
+      roleArn,
       keyName: keyPair,
       setupScriptB64,
       subnetId,
@@ -206,6 +225,7 @@ export function provisionerStack(
   );
 
   baseProvisionerStack(new Construct(scope, "Provisioner"), {
+    id,
     orgName,
     repoName,
     idleTimeout,
@@ -230,7 +250,7 @@ export function instanceStack(
     artifactS3KeyPrefix,
     instanceType,
     keyName,
-    instanceProfile,
+    roleArn,
     baseRoleArn,
     securityGroupId,
     setupScriptB64,
@@ -244,7 +264,7 @@ export function instanceStack(
     baseRoleArn: string;
     instanceType: string;
     keyName: string;
-    instanceProfile: string;
+    roleArn: string;
     securityGroupId: string;
     setupScriptB64: string;
     subnetId: string;
@@ -252,6 +272,36 @@ export function instanceStack(
   },
 ) {
   const setup = readFileSync(join(__dirname, "setup.sh.tpl"), "utf-8");
+
+  const keyNameEmpty = new CfnCondition(scope, "KeyNameEmpty", {
+    expression: Fn.conditionEquals(keyName, ""),
+  });
+
+  const roleEmpty = new CfnCondition(scope, "RoleEmpty", {
+    expression: Fn.conditionEquals(roleArn, ""),
+  });
+
+  const instanceRole = new CfnRole(scope, "InstanceRole", {
+    assumeRolePolicyDocument: {
+      Statement: [
+        {
+          Action: "sts:AssumeRole",
+          Effect: "Allow",
+          Principal: { Service: "ec2.amazonaws.com" },
+        },
+      ],
+      Version: "2012-10-17",
+    },
+    description: getName(scope).toString(),
+    tags: [{ key: "Name", value: getName(scope).toString() }],
+  });
+  instanceRole.cfnOptions.condition = roleEmpty;
+
+  const instanceProfile = new CfnInstanceProfile(scope, "InstanceProfile", {
+    roles: [
+      Fn.conditionIf(roleEmpty.logicalId, instanceRole.ref, roleArn).toString(),
+    ],
+  });
 
   const launchTemplate = new CfnLaunchTemplate(scope, "LaunchTemplate", {
     launchTemplateData: {
@@ -262,9 +312,13 @@ export function instanceStack(
         },
       ],
       imageId: amiId,
-      iamInstanceProfile: { name: instanceProfile },
+      iamInstanceProfile: { name: instanceProfile.ref },
       instanceType,
-      keyName,
+      keyName: Fn.conditionIf(
+        keyNameEmpty.logicalId,
+        Aws.NO_VALUE,
+        keyName,
+      ).toString(),
       networkInterfaces: [
         {
           associatePublicIpAddress: true,
@@ -309,7 +363,6 @@ export function instanceStack(
       Version: "2012-10-17",
     },
     description: getName(scope).toString(),
-    roleName: iamPolicyName(getName(scope)),
     tags: [{ key: "Name", value: getName(scope).toString() }],
   });
 
@@ -317,6 +370,7 @@ export function instanceStack(
     policyDocument: {
       Statement: [
         {
+          // TODO: limit by resource tags
           Action: [
             "ec2:CreateTags",
             "ec2:DescribeInstances",
@@ -327,6 +381,11 @@ export function instanceStack(
           ],
           Effect: "Allow",
           Resource: "*",
+        },
+        {
+          Action: "iam:PassRole",
+          Effect: "Allow",
+          Resource: instanceRole.attrArn,
         },
       ],
       Version: "2012-10-17",

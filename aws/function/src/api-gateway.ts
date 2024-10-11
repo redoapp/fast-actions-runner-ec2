@@ -7,10 +7,13 @@ export function bodyString(event: APIGatewayProxyEventV2) {
     : event.body!;
 }
 
-export function reportError(handler: () => Promise<APIGatewayProxyResultV2>) {
+export async function reportError(
+  handler: () => Promise<APIGatewayProxyResultV2>,
+) {
   try {
-    return handler();
+    return await handler();
   } catch (e) {
+    console.error(e);
     return {
       body: inspect(e),
       headers: { "Content-Type": "text/plain" },

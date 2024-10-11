@@ -1,13 +1,10 @@
+import { sendFailure, sendSuccess } from "@redotech/cf-response";
 import { CloudFormationCustomResourceHandler } from "aws-lambda";
-import { FAILED, send } from "cfn-response";
 import { SecretGeneratorAction, secretGenerator } from "./secret";
 
 const secretGenerator_ = secretGenerator();
 
-export const handler: CloudFormationCustomResourceHandler = async (
-  event,
-  context,
-) => {
+export const handler: CloudFormationCustomResourceHandler = async (event) => {
   try {
     await secretGenerator_({
       action:
@@ -19,8 +16,9 @@ export const handler: CloudFormationCustomResourceHandler = async (
     });
   } catch (e) {
     console.error(e);
-    send(event, context, FAILED);
+    const message = e instanceof Error ? e.message : String(e);
+    await sendFailure(event, { reason: message });
     return;
   }
-  send(event, context, "SUCCESS");
+  await sendSuccess(event);
 };

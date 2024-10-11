@@ -8,6 +8,7 @@ def file_repositories():
             ".bazel-npm-cache.json",
             ".git",
             ".yarn",
+            "data",
             "node_modules",
         ],
         root_file = "//:WORKSPACE.bazel",
