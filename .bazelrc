@@ -54,7 +54,7 @@ test --build_tests_only
 
 # Publish
 build --//aws/artifact:region=us-east-1
-build --//aws/artifact:s3_bucket=redotech-fast-actions-ec2-runner-artifact
+build --//aws/artifact:s3_bucket=redotech-fast-actions-runner-ec2-artifact
 build --//aws/artifact:s3_key_prefix=dev/
 
 # User settings

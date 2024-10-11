@@ -18,7 +18,7 @@ export const handler: LambdaFunctionURLHandler = async (event) => {
       statusCode: 401,
     };
   }
-  const manifest_ = manifest({ appName, callbackUrl, webhookUrl });
+  const manifest_ = manifest({ appName, callbackUrl, orgName, webhookUrl });
   const html_ = html(
     <ManifestPage
       appName={appName}
@@ -30,6 +30,7 @@ export const handler: LambdaFunctionURLHandler = async (event) => {
   return {
     body: html_,
     headers: { "Content-Type": "text/html; charset=utf-8" },
+    statusCode: 200,
   };
 };
 
@@ -48,15 +49,20 @@ export interface ManifestProvider {
 function manifest({
   callbackUrl,
   appName,
+  orgName,
   webhookUrl,
 }: {
   appName: string;
   callbackUrl: string;
+  orgName: string | undefined;
   webhookUrl: string;
 }) {
   return {
     default_events: ["workflow_job"],
-    default_permissions: { runners: "write" },
+    default_permissions: {
+      actions: "read",
+      ...(orgName ? { organization_self_hosted_runners: "write" } : undefined),
+    },
     hook_attributes: { url: webhookUrl },
     name: appName,
     public: false,
@@ -100,13 +106,12 @@ function ManifestPage({
       </head>
       <body>
         <form action={url.toString()} method="post">
-          Create a GitHub app for {appName}:
+          <span>Create a GitHub app for {appName}:</span>
           <input
             name="manifest"
             type="hidden"
             value={JSON.stringify(manifest)}
           />
-          <br />
           <input type="submit" value="Submit" />
         </form>
       </body>

@@ -1,6 +1,7 @@
 {
   "name": "@redotech/lambda",
   "exports": {
+    ".": "./lib/index.js",
     "./*": "./lib/*.js"
   },
   "private": true,

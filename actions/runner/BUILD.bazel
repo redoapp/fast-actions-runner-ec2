@@ -18,7 +18,7 @@ pkg_deb(
     postinst = "deb/postinst",
     postrm = "deb/postrm",
     preinst = "deb/preinst",
-    version_file = "//bazel/rules:build_embed_label",
+    version_file = "//tools/deb:version",
 )
 
 pkg_files(

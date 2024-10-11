@@ -3,7 +3,7 @@ WantedBy=network.target
 
 [Service]
 Environment=METADATA_USERS=root
-ExecStartPre=/usr/sbin/metadata-secure down
+ExecStartPre=-/usr/sbin/metadata-secure down
 ExecStart=/usr/sbin/metadata-secure up
 ExecStop=/usr/sbin/metadata-secure down
 Type=oneshot

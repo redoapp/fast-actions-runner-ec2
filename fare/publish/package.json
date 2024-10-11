@@ -1,0 +1,16 @@
+{
+  "name": "@redotech/fare-publish",
+  "exports": {
+    ".": "./lib/index.js",
+    "./*": "./lib/*.js"
+  },
+  "private": true,
+  "typesVersions": {
+    "*": {
+      "*": [
+        "lib/*",
+        "src/*"
+      ]
+    }
+  }
+}

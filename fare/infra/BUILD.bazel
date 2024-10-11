@@ -3,9 +3,17 @@ load("@better_rules_javascript//javascript:rules.bzl", "js_library")
 load("@better_rules_javascript//nodejs:rules.bzl", "nodejs_binary")
 load("@better_rules_javascript//typescript:rules.bzl", "ts_library")
 load("//aws/cdk-rules:rules.bzl", "cdk_project", "cdk_synth")
+load("//file/rules:rules.bzl", "digest")
 load("//shell/rules:rules.bzl", "sh_binary")
 
 package(default_visibility = ["//visibility:public"])
+
+DIGESTS = {
+    "aws_cf_resource_function_digest": "//aws/cf-resource:function",
+    "fare_app_function_digest": "//fare/app:function",
+    "fare_cf_resource_function_digest": "//fare/cf-resource:function",
+    "fare_provision_function_digest": "//fare/provision:function",
+}
 
 cdk_synth(
     name = "app_cf",
@@ -21,6 +29,7 @@ cdk_synth(
 
 nodejs_binary(
     name = "bin",
+    data = [":%s" % name for name in DIGESTS],
     dep = ":lib",
     main = "lib/main.js",
 )
@@ -44,6 +53,7 @@ ts_library(
     strip_prefix = "src",
     deps = [
         "//aws/cdk-util:lib",
+        "//aws/function:lib",
         "//github/util:lib",
         "//javascript/temporal-types:lib",
         "@better_rules_javascript//bazel/runfiles:lib",
@@ -72,3 +82,14 @@ js_library(
     root = ":root",
     deps = ["//tools/typescript:lib"],
 )
+
+[
+    digest(
+        name = name,
+        src = src,
+    )
+    for [
+        name,
+        src,
+    ] in DIGESTS.items()
+]

@@ -4,8 +4,8 @@ import {
   UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import { AssumeRoleCommand, STSClient } from "@aws-sdk/client-sts";
-import { credentialsRead, credentialsWrite } from "@redotech/dynamodb/aws";
-import { stringRead, stringWrite } from "@redotech/dynamodb/common";
+import { stringAttributeFormat } from "@redotech/dynamodb/attribute";
+import { credentialsAttributeFormat } from "@redotech/dynamodb/aws";
 import {
   AwsCredentialIdentity,
   AwsCredentialIdentityProvider,
@@ -27,9 +27,9 @@ export function awsCredentialsProvider({
   return async () => {
     const output = await dynamodbClient.send(
       new GetItemCommand({
-        Key: { Id: stringWrite(provisionerId) },
+        Key: { Id: stringAttributeFormat.write(provisionerId) },
         TableName: provisionerTableName,
-        ProjectionExpression: "AwsCredentials, AwsRole",
+        ProjectionExpression: "AwsCredentials, RoleArn",
       }),
     );
     const item = output.Item;
@@ -38,7 +38,7 @@ export function awsCredentialsProvider({
     }
 
     if (item.AwsCredentials) {
-      const credentials = credentialsRead(item.AwsCredentials);
+      const credentials = credentialsAttributeFormat.read(item.AwsCredentials);
       if (
         !credentials.expiration ||
         Temporal.Instant.compare(
@@ -52,7 +52,7 @@ export function awsCredentialsProvider({
 
     const stsOutput = await stsClient.send(
       new AssumeRoleCommand({
-        RoleArn: stringRead(item.AwsRole),
+        RoleArn: stringAttributeFormat.read(item.RoleArn),
         RoleSessionName: provisionerId,
       }),
     );
@@ -68,11 +68,11 @@ export function awsCredentialsProvider({
     await dynamodbClient.send(
       new UpdateItemCommand({
         ConditionExpression: "attribute_exists(Id)",
-        Key: { Id: stringWrite(provisionerId) },
+        Key: { Id: stringAttributeFormat.write(provisionerId) },
         TableName: provisionerTableName,
         UpdateExpression: "SET AwsCredentials = :awsCredentials",
         ExpressionAttributeValues: {
-          ":awsCredentials": credentialsWrite(credentials),
+          ":awsCredentials": credentialsAttributeFormat.write(credentials),
         },
       }),
     );
@@ -81,8 +81,8 @@ export function awsCredentialsProvider({
   };
 }
 
-export const provisionerIdTag = "FastActionsRunnerEc2:ProvisionerId";
-
 export const createRegionTag = "FastActionsRunnerEc2:Create:Region";
 
 export const createUrlTag = "FastActionsRunnerEc2:Create:Url";
+
+export const provisionerIdTag = "FastActionsRunnerEc2:ProvisionerId";

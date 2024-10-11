@@ -7,7 +7,7 @@ package(default_visibility = ["//visibility:public"])
 
 lambda_nodejs_function(
     name = "function",
-    dep = "lib",
+    dep = ":lib",
 )
 
 ts_library(

@@ -2,10 +2,10 @@ import { DynamoDBClient, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
 import { RequestError } from "@octokit/request-error";
 import { RestEndpointMethodTypes } from "@octokit/rest";
 import {
-  instantWrite,
-  numberWrite,
-  stringWrite,
-} from "@redotech/dynamodb/common";
+  instantAttributeFormat,
+  numberAttributeFormat,
+  stringAttributeFormat,
+} from "@redotech/dynamodb/attribute";
 import { InstallationClient } from "./github";
 import { RunnerStatus } from "./instance";
 
@@ -61,14 +61,16 @@ export async function runnerRefresh({
         "Id = :id" + (activeAt ? " AND ActiveAt <= :oldActiveAt" : ""),
       ExpressionAttributeValues: {
         ...(status === RunnerStatus.ACTIVE && {
-          ":activeAt": instantWrite(updatedAt),
+          ":activeAt": instantAttributeFormat.write(updatedAt),
         }),
-        ...(activeAt && { ":oldActiveAt": instantWrite(activeAt) }),
-        ":id": numberWrite(id),
-        ":status": stringWrite(status),
+        ...(activeAt && {
+          ":oldActiveAt": instantAttributeFormat.write(activeAt),
+        }),
+        ":id": numberAttributeFormat.write(id),
+        ":status": stringAttributeFormat.write(status),
       },
       ExpressionAttributeNames: { "#status": "Status" },
-      Key: { Name: stringWrite(runnerName) },
+      Key: { Name: stringAttributeFormat.write(runnerName) },
       TableName: instanceTableName,
       UpdateExpression:
         "SET #status = :status" +

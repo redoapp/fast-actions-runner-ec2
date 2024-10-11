@@ -9,20 +9,20 @@ pkg_deb(
     data = ":tar",
     depends = [
         "curl",
+        "imds-client",
         "sigv4",
     ],
     description = "AWS API Gateway Execute API",
     maintainer = "Redo Tech",
     package = "aws-execute-api",
-    package_file_name = "aws-execute-api",
-    version_file = "//bazel/rules:build_embed_label",
+    package_file_name = "aws-execute-api.deb",
+    version_file = "//tools/deb:version",
 )
 
 pkg_files(
     name = "execs",
     srcs = [
         "aws-execute-api",
-        "imds-client",
     ],
     attributes = pkg_attributes(mode = "0755"),
     renames = {

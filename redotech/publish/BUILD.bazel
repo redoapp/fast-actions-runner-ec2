@@ -1,0 +1,62 @@
+load("@better_rules_javascript//commonjs:rules.bzl", "cjs_root")
+load("@better_rules_javascript//javascript:rules.bzl", "js_library")
+load("@better_rules_javascript//nodejs:rules.bzl", "nodejs_binary")
+load("@better_rules_javascript//typescript:rules.bzl", "ts_library")
+load("@rules_terraform//cdktf:rules.bzl", "cdktf_project", "tf_import_cdktf")
+
+package(default_visibility = ["//visibility:public"])
+
+cdktf_project(
+    name = "cdktf",
+    bin = ":bin",
+    config = "cdktf.json",
+)
+
+tf_import_cdktf(
+    name = "publish",
+    data_dir = "/data/redotech/publish/publish",
+    providers = [
+        "@terraform_aws//:provider",
+    ],
+    stack = "Publish",
+    synth = ":cdktf.synth",
+)
+
+nodejs_binary(
+    name = "bin",
+    dep = ":lib",
+    main = "lib/main.js",
+)
+
+ts_library(
+    name = "lib",
+    srcs = glob(["src/**/*.ts"]),
+    compiler = "//tools/typescript:tsc",
+    config = "tsconfig.json",
+    config_dep = ":tsconfig",
+    declaration_prefix = "lib",
+    js_prefix = "lib",
+    root = ":root",
+    strip_prefix = "src",
+    deps = [
+        "//fare/publish:lib",
+        "//terraform/util:lib",
+        "@npm//@cdktf/provider-aws:lib",
+        "@npm//@types/node:lib",
+        "@npm//cdktf:lib",
+        "@npm//constructs:lib",
+    ],
+)
+
+cjs_root(
+    name = "root",
+    package_name = "@redotech/publish",
+    descriptors = ["package.json"],
+)
+
+js_library(
+    name = "tsconfig",
+    srcs = ["tsconfig.json"],
+    root = ":root",
+    deps = ["//tools/typescript:lib"],
+)

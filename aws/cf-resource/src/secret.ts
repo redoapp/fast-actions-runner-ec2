@@ -5,7 +5,6 @@ import {
   SSMClient,
 } from "@aws-sdk/client-ssm";
 import { randomBytes } from "node:crypto";
-import { promisify } from "node:util";
 
 export enum SecretGeneratorAction {
   CREATE,
@@ -30,7 +29,7 @@ export function secretGenerator(): SecretGenerator {
   return async ({ action, name, size }) => {
     switch (action) {
       case SecretGeneratorAction.CREATE: {
-        const secret = await promisify(randomBytes)(size);
+        const secret = randomBytes(size);
         await ssm.send(
           new PutParameterCommand({
             Name: name,

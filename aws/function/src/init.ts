@@ -36,7 +36,9 @@ async function resolveEnv() {
       output.Parameters!.map((param) => [param.Name!, param.Value!]),
     );
     for (const [name, param] of envVars) {
-      process.env[name] = paramValues.get(param!)!;
+      const envVar = name.slice(0, -"_SSM".length);
+      console.log(`Resolved env var ${envVar} from ${param}`);
+      process.env[envVar] = paramValues.get(param!)!;
     }
   }
 }

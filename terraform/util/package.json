@@ -1,0 +1,18 @@
+{
+  "exports": {
+    "./*": "./lib/*.js"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "lib/*",
+        "src/*"
+      ]
+    }
+  },
+  "name": "@redotech/terraform-util",
+  "private": true,
+  "sideEffects": [
+    "*.css"
+  ]
+}

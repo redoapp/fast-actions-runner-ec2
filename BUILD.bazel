@@ -9,6 +9,11 @@ alias(
 )
 
 alias(
+    name = "doc_gen",
+    actual = "//doc:gen",
+)
+
+alias(
     name = "lint",
     actual = "//tools/lint",
 )

@@ -14,7 +14,7 @@ pkg_deb(
     maintainer = "Redo Tech",
     package = "imds-client",
     package_file_name = "imds-client.deb",
-    version_file = "//bazel/rules:build_embed_label",
+    version_file = "//tools/deb:version",
 )
 
 pkg_files(

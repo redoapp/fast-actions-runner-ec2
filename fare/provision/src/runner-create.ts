@@ -9,14 +9,12 @@ import { DescribeInstancesCommand, EC2Client } from "@aws-sdk/client-ec2";
 import { parse } from "@aws-sdk/util-arn-parser";
 import { RestEndpointMethodTypes } from "@octokit/rest";
 import { instanceResourceRead } from "@redotech/aws-util/ec2";
-import { arnRead } from "@redotech/dynamodb/aws";
 import {
-  numberRead,
-  numberWrite,
-  stringRead,
-  stringSetRead,
-  stringWrite,
-} from "@redotech/dynamodb/common";
+  numberAttributeFormat,
+  stringAttributeFormat,
+  stringSetAttributeFormat,
+} from "@redotech/dynamodb/attribute";
+import { arnAttributeFormat } from "@redotech/dynamodb/aws";
 import { envNumberRead, envStringRead } from "@redotech/lambda/env";
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { appGithubClient, provisionerInstallationClient } from "./github";
@@ -81,7 +79,7 @@ async function authorize({
 }): Promise<void> {
   const output = await dynamodbClient.send(
     new GetItemCommand({
-      Key: { Id: stringWrite(provisionerId) },
+      Key: { Id: stringAttributeFormat.write(provisionerId) },
       TableName: provisionerTableName,
       ProjectionExpression: "LaunchTemplateArn, Id",
     }),
@@ -91,7 +89,7 @@ async function authorize({
     throw new Error("No provisioner found");
   }
 
-  const launchTemplateArn = arnRead(item.LaunchTemplateArn);
+  const launchTemplateArn = arnAttributeFormat.read(item.LaunchTemplateArn);
 
   const ec2Client = new EC2Client({ region: launchTemplateArn.region });
   const describeOutput = await ec2Client.send(
@@ -120,7 +118,7 @@ async function createRunner({
 }): Promise<{ config: string }> {
   const provisionerOutput = await dynamodbClient.send(
     new GetItemCommand({
-      Key: { Id: stringWrite(provisionerId) },
+      Key: { Id: stringAttributeFormat.write(provisionerId) },
       TableName: provisionerTableName,
       ProjectionExpression:
         "Labels, OrgName, RepoName, RunnerGroupId, UserName",
@@ -131,11 +129,11 @@ async function createRunner({
     throw new Error("No provisioner found");
   }
 
-  const labels = stringSetRead(item.Labels);
-  const orgName = item.OrgName && stringRead(item.OrgName);
-  const repoName = item.RepoName && stringRead(item.RepoName);
-  const runnerGroupId = numberRead(item.RunnerGroupId);
-  const userName = item.UserName && stringRead(item.UserName);
+  const labels = stringSetAttributeFormat.read(item.Labels);
+  const orgName = item.OrgName && stringAttributeFormat.read(item.OrgName);
+  const repoName = item.RepoName && stringAttributeFormat.read(item.RepoName);
+  const runnerGroupId = numberAttributeFormat.read(item.RunnerGroupId);
+  const userName = item.UserName && stringAttributeFormat.read(item.UserName);
 
   const installationClient = await provisionerInstallationClient({
     dynamodbClient,
@@ -170,13 +168,13 @@ async function createRunner({
     new PutItemCommand({
       ConditionExpression: "#status <> :disabled",
       ExpressionAttributeValues: {
-        ":disabled": stringWrite(InstanceStatus.DISABLED),
+        ":disabled": stringAttributeFormat.write(InstanceStatus.DISABLED),
       },
       ExpressionAttributeNames: { "#status": "Status" },
       Item: {
-        Id: numberWrite(response.data.runner.id),
-        Name: stringWrite(instanceId),
-        ProvisionerId: stringWrite(provisionerId),
+        Id: numberAttributeFormat.write(response.data.runner.id),
+        Name: stringAttributeFormat.write(instanceId),
+        ProvisionerId: stringAttributeFormat.write(provisionerId),
       },
       TableName: instanceTableName,
     }),

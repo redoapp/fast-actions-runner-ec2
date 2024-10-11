@@ -1,72 +1,54 @@
+import "./polyfill";
+
 import {
   DeleteItemCommand,
   DynamoDBClient,
   UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
-import { ARN } from "@aws-sdk/util-arn-parser";
-import { arnWrite } from "@redotech/dynamodb/aws";
+import { parse } from "@aws-sdk/util-arn-parser";
+import { sendFailure, sendSuccess } from "@redotech/cf-response";
 import {
-  durationWrite,
-  numberWrite,
-  stringSetWrite,
-  stringWrite,
-} from "@redotech/dynamodb/common";
+  durationAttributeFormat,
+  numberAttributeFormat,
+  stringAttributeFormat,
+  stringSetAttributeFormat,
+} from "@redotech/dynamodb/attribute";
+import { arnAttributeFormat } from "@redotech/dynamodb/aws";
+import { CloudFormationCustomResourceHandler } from "aws-lambda";
 
-export enum ProvisionerAction {
-  CREATE,
-  DELETE,
-  UPDATE,
-}
+const provisionerTableName = process.env.PROVISIONER_TABLE_NAME!;
 
-export interface ProvisionerManager {
-  (params: {
-    action: ProvisionerAction;
-    countMax: number;
-    id: string;
-    idleTimeout: Temporal.Duration;
-    labels: Set<string>;
-    launchTemplateArn: ARN;
-    launchTemplateVersion: string;
-    roleArn: ARN | undefined;
-    launchTimeout: Temporal.Duration;
-    orgName: string | undefined;
-    userName: string | undefined;
-    repoName: string | undefined;
-  }): Promise<void>;
-}
+export const handler: CloudFormationCustomResourceHandler = async (event) => {
+  try {
+    const resourceProperties = event.ResourceProperties;
+    const countMax = resourceProperties.CountMax;
+    const id = resourceProperties.Id;
+    const idleTimeout = Temporal.Duration.from(resourceProperties.IdleTimeout);
+    const labels = new Set<string>(resourceProperties.Labels);
+    const launchTemplateArn = parse(resourceProperties.LaunchTemplateArn);
+    const launchTemplateVersion = resourceProperties.LaunchTemplateVersion;
+    const roleArn = parse(event.ResourceProperties.RoleArn);
+    const launchTimeout = Temporal.Duration.from(
+      resourceProperties.LaunchTimeout,
+    );
+    const orgName = resourceProperties.OrgName;
+    const userName = resourceProperties.UserName;
+    const repoName = resourceProperties.RepoName;
+    const runnerGroupId = resourceProperties.RunnerGroupId;
 
-export function provisionerManager({
-  provisionerTableName,
-}: {
-  provisionerTableName: string;
-}): ProvisionerManager {
-  const dynamodbClient = new DynamoDBClient();
-  return async ({
-    action,
-    countMax,
-    id,
-    idleTimeout,
-    labels,
-    launchTemplateArn,
-    launchTemplateVersion,
-    launchTimeout,
-    orgName,
-    repoName,
-    roleArn,
-    userName,
-  }) => {
+    const dynamodbClient = new DynamoDBClient();
     try {
-      switch (action) {
-        case ProvisionerAction.CREATE:
-        case ProvisionerAction.UPDATE:
-          await dynamodbClient.send(
+      switch (event.RequestType) {
+        case "Create":
+        case "Update": {
+          const result = await dynamodbClient.send(
             new UpdateItemCommand({
               ConditionExpression:
-                action === ProvisionerAction.CREATE
+                event.RequestType === "Create"
                   ? "attribute_not_exists(Id)"
                   : undefined,
+              Key: { Id: stringAttributeFormat.write(id) },
               TableName: provisionerTableName,
-              Key: { Id: stringWrite(id) },
               UpdateExpression:
                 "SET" +
                 " CountMax = :countMax" +
@@ -75,39 +57,54 @@ export function provisionerManager({
                 ", LaunchTemplateArn = :launchTemplateArn" +
                 ", LaunchTemplateVersion = :launchTemplateVersion" +
                 ", LaunchTimeout = :launchTimeout" +
-                ", Owner = :owner, " +
-                (roleArn !== undefined ? ", RoleArn = :roleArn" : "") +
-                (orgName !== undefined ? ", Org = :org" : "") +
-                (userName !== undefined ? ", UserName = :useNamer" : "") +
-                (repoName !== undefined ? ", RepoName = :repoName" : ""),
+                ", RoleArn = :roleArn" +
+                ", RunnerGroupId = :runnerGroupId" +
+                ", #owner = :owner" +
+                (orgName !== undefined ? ", OrgName = :orgName" : "") +
+                (userName !== undefined ? ", UserName = :userName" : "") +
+                (repoName !== undefined ? ", RepoName = :repoName" : "") +
+                "\n" +
+                "REMOVE dummy" +
+                (orgName !== undefined ? "" : ", OrgName") +
+                (userName !== undefined ? "" : ", UserName") +
+                (repoName !== undefined ? "" : ", RepoName"),
+              ExpressionAttributeNames: { "#owner": "Owner" },
               ExpressionAttributeValues: {
-                ":countMax": numberWrite(countMax),
-                ":id": stringWrite(id),
-                ":idleTimeout": durationWrite(idleTimeout),
-                ":labels": stringSetWrite(labels),
-                ":launchTemplateArn": arnWrite(launchTemplateArn),
-                ":launchTemplateVersion": stringWrite(launchTemplateVersion),
-                ":launchTimeout": durationWrite(launchTimeout),
-                ":owner": stringWrite((orgName ?? userName)!),
-                ...(roleArn !== undefined && { ":roleArn": arnWrite(roleArn) }),
+                ":countMax": numberAttributeFormat.write(countMax),
+                ":idleTimeout": durationAttributeFormat.write(idleTimeout),
+                ":labels": stringSetAttributeFormat.write(labels),
+                ":launchTemplateArn":
+                  arnAttributeFormat.write(launchTemplateArn),
+                ":launchTemplateVersion": stringAttributeFormat.write(
+                  launchTemplateVersion,
+                ),
+                ":launchTimeout": durationAttributeFormat.write(launchTimeout),
+                ":runnerGroupId": numberAttributeFormat.write(runnerGroupId),
+                ":owner": stringAttributeFormat.write((orgName ?? userName)!),
+                ":roleArn": arnAttributeFormat.write(roleArn),
                 ...(orgName !== undefined && {
-                  ":orgName": stringWrite(orgName),
+                  ":orgName": stringAttributeFormat.write(orgName),
                 }),
                 ...(userName !== undefined && {
-                  ":userName": stringWrite(userName),
+                  ":userName": stringAttributeFormat.write(userName),
                 }),
                 ...(repoName !== undefined && {
-                  ":repoName": stringWrite(repoName),
+                  ":repoName": stringAttributeFormat.write(repoName),
                 }),
               },
+              ReturnValues: "ALL_NEW",
             }),
           );
+          if (!result.Attributes) {
+            throw new Error(`Existing provisioner with ID ${id}`);
+          }
           break;
-        case ProvisionerAction.DELETE:
+        }
+        case "Delete":
           await dynamodbClient.send(
             new DeleteItemCommand({
+              Key: { Id: stringAttributeFormat.write(id) },
               TableName: provisionerTableName,
-              Key: { Id: stringWrite(id) },
             }),
           );
           break;
@@ -115,5 +112,11 @@ export function provisionerManager({
     } finally {
       dynamodbClient.destroy();
     }
-  };
-}
+  } catch (e) {
+    console.error(e);
+    const message = e instanceof Error ? e.message : String(e);
+    await sendFailure(event, { reason: message });
+    return;
+  }
+  await sendSuccess(event);
+};

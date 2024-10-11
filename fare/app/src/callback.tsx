@@ -21,7 +21,7 @@ const ssmClient = new SSMClient();
 
 export const handler: LambdaFunctionURLHandler = async (event) => {
   const code = event.queryStringParameters!.code;
-  if (!code) {
+  if (code === undefined) {
     return {
       body: "Missing code",
       headers: { "Content-Type": "text/plain" },
@@ -29,45 +29,52 @@ export const handler: LambdaFunctionURLHandler = async (event) => {
     };
   }
 
-  const state = event.queryStringParameters!.state || "";
-  verify(state, secret);
+  const state = event.queryStringParameters!.state;
+  if (state === undefined) {
+    return {
+      body: "Missing state",
+      headers: { "Content-Type": "text/plain" },
+      statusCode: 400,
+    };
+  }
+  try {
+    verify(state, secret);
+  } catch (e) {
+    return {
+      body: `Invalid state: ${e}`,
+      headers: { "Content-Type": "text/plain" },
+      statusCode: 400,
+    };
+  }
 
   const response = await githubClient.apps.createFromManifest({ code });
 
-  const setGithubAppId = async () => {
-    await ssmClient.send(
-      new PutParameterCommand({
-        Name: githubAppIdName,
-        Value: response.data.id.toString(),
-        Type: "String",
-      }),
-    );
-  };
-
-  const setGithubPrivateKey = async () => {
-    await ssmClient.send(
-      new PutParameterCommand({
-        Name: githubPrivateKeyName,
-        Value: response.data.pem,
-        Type: "SecureString",
-      }),
-    );
-  };
-
-  const setWebhookSecret = async () => {
-    await ssmClient.send(
-      new PutParameterCommand({
-        Name: webhookSecretName,
-        Value: response.data.webhook_secret!,
-        Type: "SecureString",
-      }),
-    );
-  };
+  const githubAppId = response.data.id.toString();
+  const githubPrivateKey = response.data.pem;
+  const webhookSecret = response.data.webhook_secret!;
 
   await Promise.all([
-    setGithubAppId(),
-    setGithubPrivateKey(),
-    setWebhookSecret(),
+    ssmClient.send(
+      new PutParameterCommand({
+        Name: githubAppIdName,
+        Value: githubAppId,
+        Type: "String",
+      }),
+    ),
+    ssmClient.send(
+      new PutParameterCommand({
+        Name: githubPrivateKeyName,
+        Value: githubPrivateKey,
+        Type: "SecureString",
+      }),
+    ),
+    ssmClient.send(
+      new PutParameterCommand({
+        Name: webhookSecretName,
+        Value: webhookSecret,
+        Type: "SecureString",
+      }),
+    ),
   ]);
 
   const html_ = html(<Complete appName={appName} />);
@@ -75,6 +82,7 @@ export const handler: LambdaFunctionURLHandler = async (event) => {
   return {
     body: html_,
     headers: { "Content-Type": "text/html; charset=utf-8" },
+    statusCode: 200,
   };
 };
 

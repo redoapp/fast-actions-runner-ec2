@@ -1,0 +1,3 @@
+{
+  "extends": "@redotech/tools-typescript/tsconfig.common.json"
+}

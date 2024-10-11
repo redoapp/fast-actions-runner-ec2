@@ -1,16 +1,21 @@
-require("temporal-polyfill/global");
+/**
+ * @file
+ * Refresh instance/runner statuses for all provisioners.
+ */
+
+import "./polyfill";
 
 import {
   DynamoDBClient,
   GetItemCommand,
   paginateQuery,
 } from "@aws-sdk/client-dynamodb";
+import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import {
-  instantRead,
-  numberRead,
-  stringRead,
-  stringWrite,
-} from "@redotech/dynamodb/common";
+  instantAttributeFormat,
+  numberAttributeFormat,
+  stringAttributeFormat,
+} from "@redotech/dynamodb/attribute";
 import { envNumberRead, envStringRead } from "@redotech/lambda/env";
 import { Handler } from "aws-lambda";
 import {
@@ -26,11 +31,15 @@ const githubPrivateKey = envStringRead("GITHUB_PRIVATE_KEY");
 
 const instanceTableName = envStringRead("INSTANCE_TABLE_NAME");
 
+const provisionQueueUrl = envStringRead("PROVISION_QUEUE_URL");
+
 const provisionerTableName = envStringRead("PROVISIONER_TABLE_NAME");
 
 const dynamodbClient = new DynamoDBClient();
 
 const githubClient = appGithubClient(githubAppId, githubPrivateKey);
+
+const sqsClient = new SQSClient({});
 
 export interface ProvisionerSyncEvent {
   provisionerId: string;
@@ -59,7 +68,7 @@ async function runnersRefresh({
   const output = await dynamodbClient.send(
     new GetItemCommand({
       TableName: provisionerTableName,
-      Key: { Id: stringWrite(provisionerId) },
+      Key: { Id: stringAttributeFormat.write(provisionerId) },
       ProjectionExpression: "RepoName",
     }),
   );
@@ -68,13 +77,13 @@ async function runnersRefresh({
     throw new Error(`Provisioner ${provisionerId} not found`);
   }
 
-  const repoName = item.UserName && stringRead(item.RepoName);
+  const repoName = item.UserName && stringAttributeFormat.read(item.RepoName);
 
   for await (const output of paginateQuery(
     { client: dynamodbClient },
     {
       ExpressionAttributeValues: {
-        ":provisionerId": stringWrite(provisionerId),
+        ":provisionerId": stringAttributeFormat.write(provisionerId),
       },
       FilterExpression: "attribute_exists(RunnerId)",
       IndexName: "ProvisionerId",
@@ -84,9 +93,9 @@ async function runnersRefresh({
     },
   )) {
     for (const item of output.Items!) {
-      const activeAt = instantRead(item.ActiveAt);
-      const id = stringRead(item.Id);
-      const runnerId = numberRead(item.RunnerId);
+      const activeAt = instantAttributeFormat.read(item.ActiveAt);
+      const id = stringAttributeFormat.read(item.Id);
+      const runnerId = numberAttributeFormat.read(item.RunnerId);
 
       await runnerRefresh({
         activeAt,
@@ -99,4 +108,13 @@ async function runnersRefresh({
       });
     }
   }
+
+  await sqsClient.send(
+    new SendMessageCommand({
+      MessageBody: "_",
+      MessageDeduplicationId: `${provisionerId}/${process.hrtime.bigint().toString(16)}`,
+      MessageGroupId: provisionerId,
+      QueueUrl: provisionQueueUrl,
+    }),
+  );
 }

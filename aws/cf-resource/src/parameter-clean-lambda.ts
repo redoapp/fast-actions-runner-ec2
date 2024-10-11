@@ -1,19 +1,17 @@
+import { sendFailure, sendSuccess } from "@redotech/cf-response";
 import { CloudFormationCustomResourceHandler } from "aws-lambda";
-import { FAILED, SUCCESS, send } from "cfn-response";
 import { parameterCleaner } from "./parameter-clean";
 
 const cleaner = parameterCleaner();
 
-export const handler: CloudFormationCustomResourceHandler = async (
-  event,
-  context,
-) => {
+export const handler: CloudFormationCustomResourceHandler = async (event) => {
   try {
     await cleaner({ name: event.ResourceProperties.Name });
   } catch (e) {
     console.error(e);
-    send(event, context, FAILED);
+    const message = e instanceof Error ? e.message : String(e);
+    await sendFailure(event, { reason: message });
     return;
   }
-  send(event, context, SUCCESS);
+  await sendSuccess(event);
 };
