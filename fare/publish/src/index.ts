@@ -230,7 +230,7 @@ function fareArtifacts(
   new S3Object(scope, "ProvisionerTemplate", {
     bucket: bucket.bucket,
     contentType: "application/yaml",
-    key: "fare-provisioner.template.yaml",
+    key: `${keyPrefix}fare-provisioner.template.yaml`,
     source: rlocation(
       scope,
       "redotech_fast_actions_runner_ec2/fare/infra/provisioner_cf.yaml",

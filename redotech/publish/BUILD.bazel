@@ -3,6 +3,7 @@ load("@better_rules_javascript//javascript:rules.bzl", "js_library")
 load("@better_rules_javascript//nodejs:rules.bzl", "nodejs_binary")
 load("@better_rules_javascript//typescript:rules.bzl", "ts_library")
 load("@rules_terraform//cdktf:rules.bzl", "cdktf_project", "tf_import_cdktf")
+load("//aws/artifact:rules.bzl", "aws_artifact")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -13,12 +14,33 @@ cdktf_project(
 )
 
 tf_import_cdktf(
-    name = "publish",
-    data_dir = "/data/redotech/publish/publish",
+    name = "fare_publish_base",
+    data_dir = "/data/redotech/publish/fare-publish-base",
     providers = [
         "@terraform_aws//:provider",
     ],
-    stack = "Publish",
+    stack = "FarePublishBase",
+    synth = ":cdktf.synth",
+)
+
+aws_artifact(
+    name = "fare_artifacts",
+    srcs = ["//fare/publish:data"],
+    region = "us-east-1",
+    s3_bucket = "redotech-fare-artifact",
+)
+
+tf_import_cdktf(
+    name = "fare_publish",
+    data = [
+        ":fare_artifacts",
+        "//bazel/rules:build_embed_label",
+    ],
+    data_dir = "/data/redotech/publish/fare-publish",
+    providers = [
+        "@terraform_aws//:provider",
+    ],
+    stack = "FarePublish",
     synth = ":cdktf.synth",
 )
 

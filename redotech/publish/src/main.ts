@@ -3,7 +3,7 @@ import { S3Bucket } from "@cdktf/provider-aws/lib/s3-bucket";
 import { farePublishBaseStack, farePublishStack } from "@redotech/fare-publish";
 import { Stack } from "@redotech/terraform-util/construct";
 import { rlocation } from "@redotech/terraform-util/runfiles";
-import { App, Fn, S3Backend, TerraformStack } from "cdktf";
+import { App, Fn, S3Backend } from "cdktf";
 import { Construct } from "constructs";
 
 const app = new App();
@@ -13,7 +13,7 @@ const STATE_BUCKET = "redotech-terraform-state";
 const STATE_TABLE = "terraform-state";
 
 function awsProvider(scope: Construct, tags: { [name: string]: string }) {
-  new AwsProvider(scope, "Aws", {
+  new AwsProvider(scope, "AwsProvider", {
     region: REGION,
     defaultTags: [
       { tags: { Provider: "Terraform", Stack: scope.node.id, ...tags } },
@@ -31,30 +31,37 @@ function backend(scope: Construct) {
 }
 
 function farePublishBase() {
-  const fare = new Stack(app, "Fare");
+  const scope = new Stack(app, "FarePublishBase");
 
-  backend(fare);
-  awsProvider(fare, { Environment: "FarePublishBase" });
+  backend(scope);
+  awsProvider(scope, { Environment: "FarePublish" });
 
-  const { bucket } = farePublishBaseStack(fare, {
-    bucketName: "fast-actions-runner-ec2-artifact",
+  const { bucket } = farePublishBaseStack(scope, {
+    bucketName: Fn.file(
+      rlocation(
+        scope,
+        "redotech_fast_actions_runner_ec2/aws/artifact/s3-bucket.txt",
+      ),
+    ),
   });
   return { bucket };
 }
 
 function farePublish({ bucket }: { bucket: S3Bucket }) {
-  const scope = new TerraformStack(app, "Fare");
+  const scope = new Stack(app, "FarePublish");
 
   awsProvider(scope, { Environment: "FarePublish" });
 
+  const buildEmbedLabel = Fn.file(
+    rlocation(
+      scope,
+      "redotech_fast_actions_runner_ec2/bazel/rules/build_embed_label.txt",
+    ),
+  );
+
   farePublishStack(scope, {
     bucket,
-    keyPrefix: Fn.file(
-      rlocation(
-        scope,
-        "redotech_fast_actions_runner_ec2/fare/publish/s3-key-prefix.text",
-      ),
-    ),
+    keyPrefix: `${buildEmbedLabel}/`,
   });
 }
 

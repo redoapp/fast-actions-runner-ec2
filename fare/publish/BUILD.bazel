@@ -30,9 +30,6 @@ filegroup(
     name = "data",
     srcs = [
         ":packages",
-        ":region_file",
-        ":s3_bucket_file",
-        ":s3_key_prefix_file",
         "//actions/runner:deb",
         "//aws/cf-resource:function",
         "//aws/cli-installer:deb",
@@ -79,39 +76,6 @@ apt_packages_index(
         "//aws/network:deb",
         "//fare/create:deb",
     ],
-)
-
-string_flag(
-    name = "region",
-    build_setting_default = "example-region",
-)
-
-build_setting_file(
-    name = "region_file",
-    out = "region.txt",
-    content = ":region",
-)
-
-string_flag(
-    name = "s3_bucket",
-    build_setting_default = "example-bucket",
-)
-
-build_setting_file(
-    name = "s3_bucket_file",
-    out = "s3-bucket.txt",
-    content = ":s3_bucket",
-)
-
-string_flag(
-    name = "s3_key_prefix",
-    build_setting_default = "",
-)
-
-build_setting_file(
-    name = "s3_key_prefix_file",
-    out = "s3-key-prefix.txt",
-    content = ":s3_key_prefix",
 )
 
 cjs_root(
