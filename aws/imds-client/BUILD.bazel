@@ -14,6 +14,7 @@ pkg_deb(
     maintainer = "Redo Tech",
     package = "imds-client",
     package_file_name = "imds-client.deb",
+    section = "contrib/utils",
     version_file = "//tools/deb:version",
 )
 

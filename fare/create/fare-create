@@ -3,7 +3,8 @@ set -euo pipefail
 
 create_runner_region="$(imds tags/instance/FastActionsRunnerEc2:Create:Region)"
 create_runner_url="$(imds tags/instance/FastActionsRunnerEc2:Create:Url)"
-config="$(AWS_REGION="$create_runner_region" aws-execute-api "$create_runner_url")"
+instance_id="$(imds instance-id)"
+config="$(AWS_REGION="$create_runner_region" awscurl -X POST "$create_runner_url$instance_id")"
 
 cat >/var/tmp/fare-create.env <<EOL
 ACTIONS_RUNNER_INPUT_JITCONFIG=$config

@@ -60,7 +60,6 @@ async function jobsRefresh({
       TableName: jobTableName,
       KeyConditionExpression: "InstallationId = :installationId",
       FilterExpression: "#status = :status",
-      IndexName: "InstallationId",
       ProjectionExpression: "OrgName, RepoName, Id, UserName",
       ExpressionAttributeValues: {
         ":installationId": numberAttributeFormat.write(installationId),
@@ -87,7 +86,10 @@ async function jobsRefresh({
         new UpdateItemCommand({
           ConditionExpression: "#status <> :completed",
           TableName: jobTableName,
-          Key: { Id: numberAttributeFormat.write(jobId) },
+          Key: {
+            Id: numberAttributeFormat.write(jobId),
+            InstallationId: numberAttributeFormat.write(installationId),
+          },
           UpdateExpression: "SET ExpiresAt = :expiresAt, #status = :status",
           ExpressionAttributeNames: { "#status": "Status" },
           ExpressionAttributeValues: {

@@ -1,3 +1,4 @@
+import { iamPolicyName } from "@redotech/cdk-util/iam";
 import { getName } from "@redotech/cdk-util/name";
 import {
   CfnInternetGateway,
@@ -9,67 +10,105 @@ import {
   CfnVPC,
   CfnVPCGatewayAttachment,
 } from "aws-cdk-lib/aws-ec2";
-import { CfnInstanceProfile, CfnRole } from "aws-cdk-lib/aws-iam";
-import { Aws, CfnOutput, CfnParameter, Fn, Stack } from "aws-cdk-lib/core";
+import {
+  CfnInstanceProfile,
+  CfnRole,
+  CfnRolePolicy,
+} from "aws-cdk-lib/aws-iam";
+import { CfnOutput, CfnParameter, Fn, Stack } from "aws-cdk-lib/core";
 import { Construct } from "constructs";
 
 export function clusterTemplate(stack: Stack) {
-  const roleArnParam = new CfnParameter(stack, "RoleArn", {
-    description: "ARN of app role",
+  const appRoleArnParam = new CfnParameter(stack, "AppRoleArn", {
+    description: "ARN of app IAM role",
   });
-  const roleArn = roleArnParam.valueAsString;
+  const appRoleArn = appRoleArnParam.valueAsString;
 
-  const provisionerFunctionArnParam = new CfnParameter(
-    stack,
-    "ProvisionerFunctionArn",
-    { description: "ARN of provisioner function" },
-  );
-  const provisionerFunctionArn = provisionerFunctionArnParam.valueAsString;
-
-  const { instanceProfile, securityGroup, subnet } = clusterStack(stack);
+  const { instanceProfile, instanceRole, securityGroup, subnet, role } =
+    clusterStack(stack, { appRoleArn });
 
   new CfnOutput(stack, "InstanceProfileName", {
     description: "Instance profile name",
-    exportName: `${Aws.STACK_NAME}:InstanceProfileName`,
     value: instanceProfile.ref,
   });
 
-  new CfnOutput(stack, "RoleArnOutput", {
-    description: "Role arn",
-    exportName: `${Aws.STACK_NAME}:RoleArn`,
-    key: "RoleArn",
-    value: roleArn,
+  new CfnOutput(stack, "InstanceRoleArn", {
+    description: "Instance role arn",
+    value: instanceRole.attrArn,
+  });
+
+  new CfnOutput(stack, "RoleArn", {
+    description: "ARN of control role",
+    value: role.attrArn,
   });
 
   new CfnOutput(stack, "SecurityGroupId", {
     description: "Security group ID",
-    exportName: `${Aws.STACK_NAME}:SecurityGroupId`,
     value: securityGroup.ref,
-  });
-
-  new CfnOutput(stack, "ProvisionerFunctionArnOutput", {
-    key: "ProvisionerFunctionArn",
-    exportName: `${Aws.STACK_NAME}:ProvisionerFunctionArn`,
-    description: "Lambda function ARN to provide provisioner URL",
-    value: provisionerFunctionArn,
   });
 
   new CfnOutput(stack, "SubnetId", {
     description: "Subnet ID",
-    exportName: `${Aws.STACK_NAME}:SubnetId`,
     value: subnet.ref,
   });
 }
 
-export function clusterStack(scope: Construct) {
+export function clusterStack(
+  scope: Construct,
+  { appRoleArn }: { appRoleArn: string },
+) {
   const { subnet, vpc } = networkStack(new Construct(scope, "Network"));
 
-  const { instanceProfile, securityGroup } = instanceStack(
-    new Construct(scope, "Instance"),
-    { vpc },
-  );
+  const {
+    instanceProfile,
+    role: instanceRole,
+    securityGroup,
+  } = instanceStack(new Construct(scope, "Instance"), { vpc });
 
-  return { instanceProfile, securityGroup, subnet };
+  const role = new CfnRole(scope, "Role", {
+    assumeRolePolicyDocument: {
+      Statement: [
+        {
+          Action: "sts:AssumeRole",
+          Effect: "Allow",
+          Principal: { AWS: appRoleArn },
+        },
+      ],
+      Version: "2012-10-17",
+    },
+    description: getName(scope).toString(),
+    tags: [{ key: "Name", value: getName(scope).toString() }],
+  });
+
+  new CfnRolePolicy(scope, "RolePolicy", {
+    policyDocument: {
+      Statement: [
+        {
+          // TODO: limit by resource tags
+          Action: [
+            "ec2:CreateTags",
+            "ec2:DescribeInstances",
+            "ec2:RunInstances",
+            "ec2:StartInstances",
+            "ec2:StopInstances",
+            "ec2:TerminateInstances",
+          ],
+          Effect: "Allow",
+          Resource: "*",
+        },
+        {
+          Action: "iam:PassRole",
+          Effect: "Allow",
+          Resource: instanceRole.attrArn,
+        },
+      ],
+      Version: "2012-10-17",
+    },
+    policyName: iamPolicyName(getName(scope)),
+    roleName: role.ref,
+  });
+
+  return { instanceProfile, instanceRole, role, securityGroup, subnet };
 }
 
 export function networkStack(scope: Construct) {
@@ -124,7 +163,7 @@ export function networkStack(scope: Construct) {
 }
 
 export function instanceStack(scope: Construct, { vpc }: { vpc: CfnVPC }) {
-  const role = new CfnRole(scope, "Role", {
+  const role = new CfnRole(scope, "InstanceRole", {
     assumeRolePolicyDocument: {
       Statement: [
         {
@@ -157,5 +196,5 @@ export function instanceStack(scope: Construct, { vpc }: { vpc: CfnVPC }) {
     vpcId: vpc.ref,
   });
 
-  return { instanceProfile, securityGroup };
+  return { instanceProfile, role, securityGroup };
 }

@@ -9,7 +9,6 @@ pkg_deb(
     data = ":tar",
     depends = [
         "curl",
-        "jq",
     ],
     description = "GitHub Actions Runner",
     maintainer = "Redo Tech",

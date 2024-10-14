@@ -2,6 +2,7 @@ load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
 load("@better_rules_javascript//commonjs:rules.bzl", "cjs_root")
 load("@better_rules_javascript//javascript:rules.bzl", "js_library")
 load("@better_rules_javascript//typescript:rules.bzl", "ts_library")
+load("//apt/rules:rules.bzl", "apt_packages_index")
 load("//file/rules:rules.bzl", "digest")
 load("//bazel/rules:rules.bzl", "build_setting_file")
 
@@ -11,7 +12,7 @@ DIGESTS = {
     "actions_runner_deb_digest": "//actions/runner:deb",
     "aws_cf_resource_function_digest": "//aws/cf-resource:function",
     "aws_cli_installer_deb_digest": "//aws/cli-installer:deb",
-    "aws_execute_api_digest": "//aws/execute-api:deb",
+    "aws_curl_deb_digest": "//aws/curl:deb",
     "aws_imds_client_deb_digest": "//aws/imds-client:deb",
     "aws_network_deb_digest": "//aws/network:deb",
     "fare_app_function_digest": "//fare/app:function",
@@ -22,18 +23,20 @@ DIGESTS = {
     "fare_infra_app_cf_digest": "//fare/infra:app_cf",
     "fare_infra_provisioner_cf_digest": "//fare/infra:provisioner_cf",
     "fare_provision_function_digest": "//fare/provision:function",
+    "packages_digest": ":packages",
 }
 
 filegroup(
     name = "data",
     srcs = [
+        ":packages",
         ":region_file",
         ":s3_bucket_file",
         ":s3_key_prefix_file",
         "//actions/runner:deb",
         "//aws/cf-resource:function",
         "//aws/cli-installer:deb",
-        "//aws/execute-api:deb",
+        "//aws/curl:deb",
         "//aws/imds-client:deb",
         "//aws/network:deb",
         "//fare/app:function",
@@ -63,6 +66,18 @@ ts_library(
         "@npm//@types/node:lib",
         "@npm//cdktf:lib",
         "@npm//constructs:lib",
+    ],
+)
+
+apt_packages_index(
+    name = "packages",
+    srcs = [
+        "//actions/runner:deb",
+        "//aws/cli-installer:deb",
+        "//aws/curl:deb",
+        "//aws/imds-client:deb",
+        "//aws/network:deb",
+        "//fare/create:deb",
     ],
 )
 

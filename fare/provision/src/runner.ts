@@ -14,9 +14,10 @@ export async function runnerRefresh({
   dynamodbClient,
   installationClient,
   instanceTableName,
-  instanceId: runnerName,
+  instanceId,
   repoName,
-  id: id,
+  id,
+  provisionerId,
 }: {
   activeAt: Temporal.Instant | undefined;
   dynamodbClient: DynamoDBClient;
@@ -25,6 +26,7 @@ export async function runnerRefresh({
   instanceId: string;
   repoName: string | undefined;
   id: number;
+  provisionerId: string;
 }) {
   const updatedAt = Temporal.Now.instant();
   let status: RunnerStatus;
@@ -58,7 +60,7 @@ export async function runnerRefresh({
   await dynamodbClient.send(
     new UpdateItemCommand({
       ConditionExpression:
-        "Id = :id" + (activeAt ? " AND ActiveAt <= :oldActiveAt" : ""),
+        "Runner.Id = :id" + (activeAt ? " AND ActiveAt <= :oldActiveAt" : ""),
       ExpressionAttributeValues: {
         ...(status === RunnerStatus.ACTIVE && {
           ":activeAt": instantAttributeFormat.write(updatedAt),
@@ -70,10 +72,13 @@ export async function runnerRefresh({
         ":status": stringAttributeFormat.write(status),
       },
       ExpressionAttributeNames: { "#status": "Status" },
-      Key: { Name: stringAttributeFormat.write(runnerName) },
+      Key: {
+        Id: stringAttributeFormat.write(instanceId),
+        ProvisionerId: stringAttributeFormat.write(provisionerId),
+      },
       TableName: instanceTableName,
       UpdateExpression:
-        "SET #status = :status" +
+        "SET Runner.#status = :status" +
         (status === RunnerStatus.ACTIVE ? ", ActiveAt = :activeAt" : ""),
     }),
   );

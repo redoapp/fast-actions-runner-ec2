@@ -7,11 +7,13 @@ package(default_visibility = ["//visibility:public"])
 pkg_deb(
     name = "deb",
     data = ":tar",
+    depends = ["iptables"],
     description = "AWS network utilities",
     maintainer = "Redo Tech",
     package = "aws-network",
     package_file_name = "aws-network.deb",
     postinst = "deb/postinst",
+    section = "contrib/net",
     version_file = "//tools/deb:version",
 )
 

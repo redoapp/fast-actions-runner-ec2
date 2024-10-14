@@ -1,23 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-deb_install() {
-  curl -LSs -o /tmp/"$1" https://${ArtifactS3Bucket}.s3.${ArtifactRegion}.amazonaws.com/${ArtifactS3KeyPrefix}"$1"
-  apt-get install -y /tmp/"$1"
-  rm /tmp/"$1"
-}
+echo 'deb [trusted=yes] https://${ArtifactS3Bucket}.s3.${ArtifactRegion}.amazonaws.com/${ArtifactS3KeyPrefix}apt /' > /etc/apt/sources.list.d/fare.list
 
 apt-get update
 
-deb_install aws-network.deb
+mkdir -p /etc/systemd/system-preset
+echo 'disable actions-runner.service' > /etc/systemd/system-preset/10-fare.preset
 
-deb_install imds-client.deb
-
-deb_install aws-execute-api.deb
-
-deb_install fare-create.deb
-
-deb_install actions-runner.deb
+apt-get install -y actions-runner aws-network imds-client awscurl fare-create
 
 setup_base64="${SetupBase64}"
 
@@ -27,3 +18,5 @@ if [ ! -z "$setup_base64" ]; then
   /tmp/setup
   rm /tmp/setup
 fi
+
+systemctl enable --now actions-runner

@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-systemctl enable fare-create.service
+systemctl preset fare-create.service

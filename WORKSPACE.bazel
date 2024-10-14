@@ -108,13 +108,13 @@ rules_terraform_deps()
 
 # Fast GitHub EC2 Runner
 
+load("//tools/aws:workspace.bzl", "aws_repositories")
+
+aws_repositories()
+
 load("//tools/file:workspace.bzl", "file_repositories")
 
 file_repositories()
-
-load("//tools/sigv4:workspace.bzl", "sigv4_repositories")
-
-sigv4_repositories()
 
 load("//tools/npm:workspace.bzl", "npm_repositories")
 

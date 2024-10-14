@@ -86,7 +86,6 @@ async function runnersRefresh({
         ":provisionerId": stringAttributeFormat.write(provisionerId),
       },
       FilterExpression: "attribute_exists(RunnerId)",
-      IndexName: "ProvisionerId",
       KeyConditionExpression: "ProvisionerId = :provisionerId",
       ProjectionExpression: "ActiveAt, Id, RunnerId",
       TableName: instanceTableName,
@@ -104,6 +103,7 @@ async function runnersRefresh({
         id: runnerId,
         instanceId: id,
         instanceTableName,
+        provisionerId,
         repoName,
       });
     }

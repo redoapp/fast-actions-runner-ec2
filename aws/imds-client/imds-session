@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-session_duration="${1:-}"
+session_duration="${1:-60}"
 
 exec curl -s -H "X-AWS-EC2-Metadata-Token-TTL-Seconds: $session_duration" --connect-timeout 1 -X PUT http://169.254.169.254/latest/api/token

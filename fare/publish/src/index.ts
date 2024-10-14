@@ -63,7 +63,7 @@ export function farePublishStack(
   scope: Construct,
   { bucket, keyPrefix }: { bucket: S3Bucket; keyPrefix: string },
 ) {
-  actionsArtifacts(new Construct(scope, "Actions"), { bucket, keyPrefix });
+  aptRepo(new Construct(scope, "Apt"), { bucket, keyPrefix });
   const { cfResourceFunction } = awsArtifacts(new Construct(scope, "Aws"), {
     bucket,
     keyPrefix,
@@ -89,21 +89,67 @@ export function farePublishStack(
   };
 }
 
-function actionsArtifacts(
+function aptRepo(
   scope: Construct,
   { bucket, keyPrefix }: { bucket: S3Bucket; keyPrefix: string },
 ) {
-  new S3Object(scope, "RunnerDeb", {
+  const deb = (name: string, path: string, digestPath: string) =>
+    new S3Object(scope, name, {
+      bucket: bucket.bucket,
+      contentType: "application/vnd.debian.binary-package",
+      key: `${keyPrefix}apt/debs/${path}`,
+      source: rlocation(scope, path),
+      sourceHash: digest(scope, digestPath),
+    });
+
+  deb(
+    "ActionsRunnerDeb",
+    "redotech_fast_actions_runner_ec2/actions/runner/actions-runner.deb",
+    "redotech_fast_actions_runner_ec2/fare/publish/actions_runner_deb_digest.txt",
+  );
+
+  deb(
+    "AwsCliInstallerDeb",
+    "redotech_fast_actions_runner_ec2/aws/cli-installer/awscli-installer.deb",
+    "redotech_fast_actions_runner_ec2/fare/publish/aws_cli_installer_deb_digest.txt",
+  );
+
+  deb(
+    "AwsCurlDeb",
+    "redotech_fast_actions_runner_ec2/aws/curl/awscurl.deb",
+    "redotech_fast_actions_runner_ec2/fare/publish/aws_curl_deb_digest.txt",
+  );
+
+  deb(
+    "AwsImdsClientDeb",
+    "redotech_fast_actions_runner_ec2/aws/imds-client/imds-client.deb",
+    "redotech_fast_actions_runner_ec2/fare/publish/aws_imds_client_deb_digest.txt",
+  );
+
+  deb(
+    "AwsNetworkDeb",
+    "redotech_fast_actions_runner_ec2/aws/network/aws-network.deb",
+    "redotech_fast_actions_runner_ec2/fare/publish/aws_network_deb_digest.txt",
+  );
+
+  deb(
+    "FareCreateDeb",
+    "redotech_fast_actions_runner_ec2/fare/create/fare-create.deb",
+    "redotech_fast_actions_runner_ec2/fare/publish/fare_create_deb_digest.txt",
+  );
+
+  new S3Object(scope, "PackagesIndex", {
     bucket: bucket.bucket,
-    contentType: "application/vnd.debian.binary-package",
-    key: `${keyPrefix}actions-runner.deb`,
+    contentEncoding: "gzip",
+    contentType: "text/plain",
+    key: `${keyPrefix}apt/Packages.gz`,
     source: rlocation(
       scope,
-      "redotech_fast_actions_runner_ec2/actions/runner/actions-runner.deb",
+      "redotech_fast_actions_runner_ec2/fare/publish/packages.gz",
     ),
     sourceHash: digest(
       scope,
-      "redotech_fast_actions_runner_ec2/fare/publish/actions_runner_deb_digest.txt",
+      "redotech_fast_actions_runner_ec2/fare/publish/packages_digest.txt",
     ),
   });
 }
@@ -126,62 +172,6 @@ function awsArtifacts(
       "redotech_fast_actions_runner_ec2/aws/cf-resource/function.zip",
     ),
     sourceHash: cfResourceFunctionDigest,
-  });
-
-  new S3Object(scope, "AwsExecuteApiDeb", {
-    bucket: bucket.bucket,
-    contentType: "application/vnd.debian.binary-package",
-    key: `${keyPrefix}aws-network.deb`,
-    source: rlocation(
-      scope,
-      "redotech_fast_actions_runner_ec2/aws/execute-api/aws-execute-api.deb",
-    ),
-    sourceHash: digest(
-      scope,
-      "redotech_fast_actions_runner_ec2/fare/publish/aws_execute_api_digest.txt",
-    ),
-  });
-
-  new S3Object(scope, "CliInstallerDeb", {
-    bucket: bucket.bucket,
-    contentType: "application/vnd.debian.binary-package",
-    key: `${keyPrefix}awscli-installer.deb`,
-    source: rlocation(
-      scope,
-      "redotech_fast_actions_runner_ec2/aws/cli-installer/awscli-installer.deb",
-    ),
-    sourceHash: digest(
-      scope,
-      "redotech_fast_actions_runner_ec2/fare/publish/aws_cli_installer_deb_digest.txt",
-    ),
-  });
-
-  new S3Object(scope, "ImdsClientDeb", {
-    bucket: bucket.bucket,
-    contentType: "application/vnd.debian.binary-package",
-    key: `${keyPrefix}imds-client.deb`,
-    source: rlocation(
-      scope,
-      "redotech_fast_actions_runner_ec2/aws/imds-client/imds-client.deb",
-    ),
-    sourceHash: digest(
-      scope,
-      "redotech_fast_actions_runner_ec2/fare/publish/aws_imds_client_deb_digest.txt",
-    ),
-  });
-
-  new S3Object(scope, "NetworkDeb", {
-    bucket: bucket.bucket,
-    contentType: "application/vnd.debian.binary-package",
-    key: `${keyPrefix}aws-network.deb`,
-    source: rlocation(
-      scope,
-      "redotech_fast_actions_runner_ec2/aws/network/aws-network.deb",
-    ),
-    sourceHash: digest(
-      scope,
-      "redotech_fast_actions_runner_ec2/fare/publish/aws_network_deb_digest.txt",
-    ),
   });
 
   return { cfResourceFunction };
@@ -235,20 +225,6 @@ function fareArtifacts(
       "redotech_fast_actions_runner_ec2/fare/cf-resource/function.zip",
     ),
     sourceHash: cfResourceFunctionDigest,
-  });
-
-  new S3Object(scope, "CreateDeb", {
-    bucket: bucket.bucket,
-    contentType: "application/vnd.debian.binary-package",
-    key: "fare-create.deb",
-    source: rlocation(
-      scope,
-      "redotech_fast_actions_runner_ec2/fare/create/fare-create.deb",
-    ),
-    sourceHash: digest(
-      scope,
-      "redotech_fast_actions_runner_ec2/fare/publish/fare_create_deb_digest.txt",
-    ),
   });
 
   new S3Object(scope, "ProvisionerTemplate", {

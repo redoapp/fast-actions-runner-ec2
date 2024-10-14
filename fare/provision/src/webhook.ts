@@ -163,13 +163,15 @@ async function processJobEvent({
       new UpdateItemCommand({
         ConditionExpression:
           status === JobStatus.COMPLETED
-            ? "#status !== :status"
+            ? "#status <> :status"
             : "attribute_not_exists(Id)",
-        Key: { Id: numberAttributeFormat.write(jobId) },
+        Key: {
+          Id: numberAttributeFormat.write(jobId),
+          InstallationId: numberAttributeFormat.write(installationId),
+        },
         UpdateExpression:
           "SET" +
-          " InstallationId = :installationId" +
-          ", RepoName = :repoName" +
+          " RepoName = :repoName" +
           ", #status = :status" +
           (status === JobStatus.COMPLETED ? ", ExpiresAt = :expiresAt" : "") +
           (orgName !== undefined ? ", OrgName = :owner" : ""),
@@ -181,7 +183,6 @@ async function processJobEvent({
               Temporal.Now.instant().add({ minutes: 1 }),
             ),
           }),
-          ":installationId": numberAttributeFormat.write(installationId),
           ...(orgName !== undefined && {
             ":orgName": stringAttributeFormat.write(orgName),
           }),
@@ -199,10 +200,10 @@ async function processJobEvent({
   }
 
   let provisionerId: string | undefined;
-  if (output.Attributes!.ProvisionerId) {
+  if (output.Attributes?.ProvisionerId) {
     provisionerId =
-      output.Attributes!.ProvisionerId &&
-      stringAttributeFormat.read(output.Attributes!.ProvisionerId);
+      output.Attributes.ProvisionerId &&
+      stringAttributeFormat.read(output.Attributes.ProvisionerId);
   } else {
     const provisioner = await findProvisioner({
       labelNames,
@@ -214,7 +215,10 @@ async function processJobEvent({
       await dynamodbClient.send(
         new UpdateItemCommand({
           ConditionExpression: "attribute_exists(Id)",
-          Key: { Id: numberAttributeFormat.write(jobId) },
+          Key: {
+            Id: numberAttributeFormat.write(jobId),
+            InstallationId: numberAttributeFormat.write(installationId),
+          },
           TableName: jobTableName,
           UpdateExpression: "SET ProvisionerId = :provisionerId",
           ExpressionAttributeValues: {
@@ -287,5 +291,6 @@ export async function refreshRunner({ instanceId }: { instanceId: string }) {
     instanceId: instanceId,
     repoName,
     id: runner.id,
+    provisionerId,
   });
 }

@@ -16,3 +16,4 @@ After=actions-runner-config.service
 After=network-online.target
 Description=GitHub Actions Runner
 Requires=actions-runner-config.service
+StartLimitIntervalSec=0

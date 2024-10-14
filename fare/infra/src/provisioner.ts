@@ -193,6 +193,7 @@ export function githubParams(scope: Construct) {
 
 export function runnerParams(scope: Construct) {
   const runnerGroupIdParam = new CfnParameter(scope, "RunnerGroupId", {
+    default: 1,
     description: "Runner group ID",
     type: "Number",
   });

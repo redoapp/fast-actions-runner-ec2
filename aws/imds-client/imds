@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-[ -z "${IMDS_SESSION-}" ] IMDS_SESSION="$(imds-session)"
+[ ! -z "${IMDS_SESSION-}" ] || IMDS_SESSION="$(imds-session)"
 
-exec curl -Ss -H "X-AWS-EC2-Metadata-Token: $metadata_token" http://169.254.169.254/latest/meta-data/"$1"
+exec curl -Ss -H "X-AWS-EC2-Metadata-Token: $IMDS_SESSION" http://169.254.169.254/latest/meta-data/"$1"

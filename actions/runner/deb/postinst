@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-systemctl enable --now actions-runner.service
+systemctl preset --now actions-runner.service

@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-systemctl enable --now metadata-secure.service
+systemctl preset --now metadata-secure.service

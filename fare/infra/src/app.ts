@@ -752,17 +752,23 @@ function runnerCreateStack(
           Action: "execute-api:Invoke",
           Effect: "Allow",
           Principal: { AWS: "*" },
-          Resource: "execute-api:/*/POST/${ec2:SourceInstanceARN}",
+          Resource: "execute-api:/*/POST/*/${ec2:SourceInstanceARN}",
         },
       ],
       Version: "2012-10-17",
     },
   });
 
-  const resource = new CfnResource(scope, "Resource", {
+  const provisionerResource = new CfnResource(scope, "ProvisionerResource", {
     parentId: api.attrRootResourceId,
-    pathPart: "{instanceArn}",
-    restApiId: api.attrRestApiId,
+    pathPart: "{provisionerId}",
+    restApiId: api.ref,
+  });
+
+  const resource = new CfnResource(scope, "Resource", {
+    parentId: provisionerResource.ref,
+    pathPart: "{instanceArn+}",
+    restApiId: api.ref,
   });
 
   const method = new CfnMethod(scope, "Method", {
@@ -780,7 +786,7 @@ function runnerCreateStack(
 
   const deployment = new CfnDeployment(scope, "Deployment", {
     restApiId: api.ref,
-    description: "2",
+    description: "3",
   });
   deployment.addDependency(method);
 
@@ -812,17 +818,15 @@ function dbStack(scope: Construct, { role }: { role: CfnRole }) {
     billingMode: "PAY_PER_REQUEST",
     globalSecondaryIndexes: [
       {
-        indexName: "InstallationId",
-        keySchema: [{ attributeName: "InstallationId", keyType: "HASH" }],
-        projection: { projectionType: "ALL" },
-      },
-      {
         indexName: "ProvisionerId",
         keySchema: [{ attributeName: "ProvisionerId", keyType: "HASH" }],
         projection: { projectionType: "ALL" },
       },
     ],
-    keySchema: [{ attributeName: "Id", keyType: "HASH" }],
+    keySchema: [
+      { attributeName: "InstallationId", keyType: "HASH" },
+      { attributeName: "Id", keyType: "RANGE" },
+    ],
     tags: [{ key: "Name", value: getName(scope).toString() }],
     timeToLiveSpecification: { enabled: true, attributeName: "Expiration" },
   });
@@ -851,13 +855,9 @@ function dbStack(scope: Construct, { role }: { role: CfnRole }) {
       { attributeName: "ProvisionerId", attributeType: "S" },
     ],
     billingMode: "PAY_PER_REQUEST",
-    keySchema: [{ attributeName: "Id", keyType: "HASH" }],
-    globalSecondaryIndexes: [
-      {
-        indexName: "ProvisionerId",
-        keySchema: [{ attributeName: "ProvisionerId", keyType: "HASH" }],
-        projection: { projectionType: "ALL" },
-      },
+    keySchema: [
+      { attributeName: "ProvisionerId", keyType: "HASH" },
+      { attributeName: "Id", keyType: "RANGE" },
     ],
     tags: [{ key: "Name", value: getName(scope).toString() }],
     timeToLiveSpecification: { enabled: true, attributeName: "Expiration" },

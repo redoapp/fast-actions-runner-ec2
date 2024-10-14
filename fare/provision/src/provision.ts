@@ -14,7 +14,6 @@ import {
   paginateQuery,
 } from "@aws-sdk/client-dynamodb";
 import {
-  CreateTagsCommand,
   EC2Client,
   InstanceStateName,
   RunInstancesCommand,
@@ -24,6 +23,7 @@ import {
   paginateDescribeInstances,
 } from "@aws-sdk/client-ec2";
 import { STSClient } from "@aws-sdk/client-sts";
+import { ARN } from "@aws-sdk/util-arn-parser";
 import { RequestError } from "@octokit/request-error";
 import { launchTemplateResourceRead } from "@redotech/aws-util/ec2";
 import {
@@ -54,6 +54,7 @@ import {
   instanceStatusAttributeFormat,
   runnerAttributeFormat,
 } from "./instance";
+import { JobStatus } from "./job";
 
 const githubAppId = envNumberRead("GITHUB_APP_ID");
 
@@ -115,7 +116,7 @@ function debouceProvisioned({
 
     if (provisionedAt) {
       if (Temporal.Instant.compare(effectiveAt, provisionedAt) < 0) {
-        console.error(
+        console.log(
           `Already provisioned ${provisionerId} at ${provisionedAt}, before ${effectiveAt}. Skipping.`,
         );
         return;
@@ -193,6 +194,7 @@ async function provision({ provisionerId }: { provisionerId: string }) {
 
   const create = () =>
     createInstance({
+      baseArn: launchTemplateArn,
       ec2Client,
       launchTemplateId,
       launchTemplateVersion,
@@ -213,6 +215,7 @@ async function provision({ provisionerId }: { provisionerId: string }) {
       ec2Client,
       installationClient,
       dynamodbClient,
+      provisionerId,
       repoName,
     });
 
@@ -222,6 +225,7 @@ async function provision({ provisionerId }: { provisionerId: string }) {
       ec2Client,
       installationClient,
       dynamodbClient,
+      provisionerId,
       repoName,
     });
 
@@ -243,11 +247,11 @@ async function provision({ provisionerId }: { provisionerId: string }) {
       ) < 0
     ) {
       console.log(
-        `No runner has been created by ${instance.id} after ${Math.round(instance.startedAt.until(Temporal.Now.instant()).total("seconds"))}s`,
+        `No runner has been created by ${provisionerId}/${instance.id} after ${Math.round(instance.startedAt.until(Temporal.Now.instant()).total("seconds"))}s`,
       );
-      // await terminate(instance);
+      await terminate(instance);
     } else if (instance.status === undefined) {
-      console.log(`Instance ${instance.id} is unrecognized`);
+      console.log(`Instance ${provisionerId}/${instance.id} is unrecognized`);
       if (
         [Ec2InstanceStatus.STOPPED, Ec2InstanceStatus.STOPPING].includes(
           instance.ec2Status,
@@ -261,13 +265,15 @@ async function provision({ provisionerId }: { provisionerId: string }) {
         instance.ec2Status,
       )
     ) {
-      console.log(`Instance ${instance.id} unexpectedly shut down`);
+      console.log(
+        `Instance ${provisionerId}/${instance.id} unexpectedly shut down`,
+      );
       await terminate(instance);
     } else if (
       instance.status === InstanceStatus.DISABLED &&
       instance.ec2Status === Ec2InstanceStatus.STARTED
     ) {
-      console.log(`Instance ${instance.id} has been disabled`);
+      console.log(`Instance ${provisionerId}/${instance.id} has been disabled`);
       await stop(instance);
     } else if (
       instance.runner &&
@@ -278,7 +284,7 @@ async function provision({ provisionerId }: { provisionerId: string }) {
       ) < 0
     ) {
       console.log(
-        `Runner on instance ${instance.id} has exceeded idle timeout`,
+        `Runner on instance ${provisionerId}/${instance.id} has exceeded idle timeout`,
       );
       await stop(instance);
     } else {
@@ -351,9 +357,12 @@ async function pendingJobsCount({
       IndexName: "ProvisionerId",
       TableName: jobTableName,
       KeyConditionExpression: "ProvisionerId = :provisionerId",
+      ExpressionAttributeNames: { "#status": "Status" },
       ExpressionAttributeValues: {
         ":provisionerId": stringAttributeFormat.write(provisionerId),
+        ":status": stringAttributeFormat.write(JobStatus.PENDING),
       },
+      FilterExpression: "#status = :status",
       Select: "COUNT",
     },
   )) {
@@ -363,11 +372,13 @@ async function pendingJobsCount({
 }
 
 async function createInstance({
+  baseArn,
   ec2Client,
   launchTemplateId,
   launchTemplateVersion,
   provisionerId,
 }: {
+  baseArn: ARN;
   launchTemplateId: string;
   launchTemplateVersion: string;
   ec2Client: EC2Client;
@@ -376,6 +387,7 @@ async function createInstance({
   console.log(
     `Creating ${provisionerId} instance from launch template ${launchTemplateId}:${launchTemplateVersion}`,
   );
+  const arnPrefix = `arn:${baseArn.partition}:ec2:${baseArn.region}:${baseArn.accountId}:instance/`;
   const output = await ec2Client.send(
     new RunInstancesCommand({
       LaunchTemplate: {
@@ -391,22 +403,16 @@ async function createInstance({
           Tags: [
             { Key: provisionerIdTag, Value: provisionerId },
             { Key: createRegionTag, Value: region },
+            {
+              Key: createUrlTag,
+              Value: `${runnerCreateUrl}${encodeURIComponent(provisionerId)}/${arnPrefix}`,
+            },
           ],
         },
       ],
     }),
   );
-
   const [instance] = output.Instances!;
-
-  const url = new URL(instance.InstanceId!, runnerCreateUrl);
-  url.searchParams.set("provisioner_id", provisionerId);
-  await ec2Client.send(
-    new CreateTagsCommand({
-      Resources: [instance.InstanceId!],
-      Tags: [{ Key: createUrlTag, Value: url.toString() }],
-    }),
-  );
 
   await dynamodbClient.send(
     new PutItemCommand({
@@ -459,8 +465,8 @@ async function stopRunner({
   repoName: string | undefined;
   installationClient: InstallationClient;
 }): Promise<boolean> {
-  console.log(`Deleting runner ${id}`);
   const owner = (installationClient.orgName ?? installationClient.userName)!;
+  console.log(`Deleting runner ${owner}/${id}`);
   try {
     if (repoName) {
       await installationClient.client.actions.deleteSelfHostedRunnerFromRepo({
@@ -486,7 +492,7 @@ async function stopRunner({
     }
     throw e;
   }
-  console.log(`Runner ${id} deleted`);
+  console.log(`Deleted runner ${owner}/${id}`);
   return true;
 }
 
@@ -495,20 +501,25 @@ async function disableInstance({
   installationClient,
   dynamodbClient,
   repoName,
+  provisionerId,
 }: {
   instance: Instance;
   installationClient: InstallationClient;
   dynamodbClient: DynamoDBClient;
   repoName: string;
+  provisionerId: string;
 }): Promise<boolean> {
   let runner: Runner | undefined;
   if (instance.status === InstanceStatus.DISABLED) {
     runner = instance.runner;
   } else {
-    console.log(`Disabling instance ${instance.id}`);
+    console.log(`Disabling instance ${provisionerId}/${instance.id}`);
     const output = await dynamodbClient.send(
       new UpdateItemCommand({
-        Key: { Id: stringAttributeFormat.write(instance.id) },
+        Key: {
+          Id: stringAttributeFormat.write(instance.id),
+          ProvisionerId: stringAttributeFormat.write(provisionerId),
+        },
         TableName: instanceTableName,
         UpdateExpression: "SET #status = :status",
         ExpressionAttributeNames: { "#status": "Status" },
@@ -518,7 +529,7 @@ async function disableInstance({
         ReturnValues: "ALL_NEW",
       }),
     );
-    console.log(`Disabled instance ${instance.id}`);
+    console.log(`Disabled instance ${provisionerId}/${instance.id}`);
     if (output.Attributes!.Runner) {
       runner = runnerAttributeFormat.read(output.Attributes!.Runner);
     }
@@ -535,32 +546,38 @@ async function stopInstance({
   installationClient,
   dynamodbClient,
   repoName,
+  provisionerId,
 }: {
   instance: Instance;
   ec2Client: EC2Client;
   installationClient: InstallationClient;
   dynamodbClient: DynamoDBClient;
   repoName: string;
+  provisionerId: string;
 }) {
   await disableInstance({
     instance,
     installationClient,
     dynamodbClient,
     repoName,
+    provisionerId,
   });
 
-  console.log(`Stopping instance ${instance.id}`);
+  console.log(`Stopping instance ${provisionerId}/${instance.id}`);
   await ec2Client.send(
     new StopInstancesCommand({ InstanceIds: [instance.id] }),
   );
   await dynamodbClient.send(
     new UpdateItemCommand({
-      Key: { Id: stringAttributeFormat.write(instance.id) },
+      Key: {
+        Id: stringAttributeFormat.write(instance.id),
+        ProvisionerId: stringAttributeFormat.write(provisionerId),
+      },
       TableName: instanceTableName,
       UpdateExpression: "REMOVE Runner",
     }),
   );
-  console.log(`Stopped instance ${instance.id}`);
+  console.log(`Stopped instance ${provisionerId}/${instance.id}`);
 }
 
 async function terminateInstance({
@@ -569,12 +586,14 @@ async function terminateInstance({
   installationClient,
   dynamodbClient,
   repoName,
+  provisionerId,
 }: {
   instance: Instance;
   ec2Client: EC2Client;
   installationClient: InstallationClient;
   dynamodbClient: DynamoDBClient;
   repoName: string;
+  provisionerId: string;
 }) {
   if (
     !(await disableInstance({
@@ -582,22 +601,26 @@ async function terminateInstance({
       installationClient,
       dynamodbClient,
       repoName,
+      provisionerId,
     }))
   ) {
     return;
   }
 
-  console.log(`Terminating instance ${instance.id}`);
+  console.log(`Terminating instance ${provisionerId}/${instance.id}`);
   await ec2Client.send(
     new TerminateInstancesCommand({ InstanceIds: [instance.id] }),
   );
   await dynamodbClient.send(
     new DeleteItemCommand({
-      Key: { Id: stringAttributeFormat.write(instance.id) },
+      Key: {
+        Id: stringAttributeFormat.write(instance.id),
+        ProvisionerId: stringAttributeFormat.write(provisionerId),
+      },
       TableName: instanceTableName,
     }),
   );
-  console.log(`Terminated instance ${instance.id}`);
+  console.log(`Terminated instance ${provisionerId}/${instance.id}`);
 }
 
 interface Instance {
@@ -635,7 +658,6 @@ async function* getInstances({
       ExpressionAttributeValues: {
         ":provisionerId": stringAttributeFormat.write(provisionerId),
       },
-      IndexName: "ProvisionerId",
       KeyConditionExpression: "ProvisionerId = :provisionerId",
       ProjectionExpression: "Id, Runner, #status",
       TableName: instanceTableName,
@@ -713,7 +735,10 @@ async function* getInstances({
     await dynamodbClient.send(
       new DeleteItemCommand({
         TableName: instanceTableName,
-        Key: { Id: stringAttributeFormat.write(id) },
+        Key: {
+          Id: stringAttributeFormat.write(id),
+          ProvisionerId: stringAttributeFormat.write(provisionerId),
+        },
       }),
     );
     console.log(`Cleaned up record for instance ${id}`);

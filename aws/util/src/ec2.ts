@@ -17,3 +17,7 @@ export function instanceResourceRead(resource: string): {
   }
   return { instanceId: resource.slice(prefix.length) };
 }
+
+export function instanceResourceWrite({ instanceId }: { instanceId: string }) {
+  return `instance/${instanceId}`;
+}

@@ -1,12 +1,12 @@
 import "./polyfill";
 
 import {
+  ConditionalCheckFailedException,
   DynamoDBClient,
   GetItemCommand,
-  PutItemCommand,
+  UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
-import { DescribeInstancesCommand, EC2Client } from "@aws-sdk/client-ec2";
-import { parse } from "@aws-sdk/util-arn-parser";
+import { ARN, parse } from "@aws-sdk/util-arn-parser";
 import { RestEndpointMethodTypes } from "@octokit/rest";
 import { instanceResourceRead } from "@redotech/aws-util/ec2";
 import {
@@ -14,11 +14,14 @@ import {
   stringAttributeFormat,
   stringSetAttributeFormat,
 } from "@redotech/dynamodb/attribute";
-import { arnAttributeFormat } from "@redotech/dynamodb/aws";
 import { envNumberRead, envStringRead } from "@redotech/lambda/env";
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { appGithubClient, provisionerInstallationClient } from "./github";
-import { InstanceStatus } from "./instance";
+import {
+  InstanceStatus,
+  RunnerStatus,
+  runnerAttributeFormat,
+} from "./instance";
 
 const githubAppId = envNumberRead("GITHUB_APP_ID");
 
@@ -33,24 +36,44 @@ const dynamodbClient = new DynamoDBClient();
 const githubClient = appGithubClient(githubAppId, githubPrivateKey);
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
-  const instanceArn = parse(event.pathParameters!.instanceArn!);
+  const provisionerId = event.pathParameters!.provisionerId!;
 
-  const provisionerId = event.queryStringParameters!.provisioner_id;
-  if (!provisionerId) {
+  let instanceArn: ARN;
+  try {
+    instanceArn = parse(event.pathParameters!.instanceArn!);
+  } catch (e) {
+    console.error(String(e));
     return {
-      statusCode: 400,
-      body: "Missing provisioner_id",
+      body: "Invalid instance ARN",
       headers: { "Content-Type": "text/plain" },
+      statusCode: 400,
     };
   }
-
   const { instanceId } = instanceResourceRead(instanceArn.resource);
 
-  await authorize({
-    dynamodbClient,
-    provisionerId,
-    instanceId,
-  });
+  const output = await dynamodbClient.send(
+    new GetItemCommand({
+      Key: {
+        Id: stringAttributeFormat.write(instanceId),
+        ProvisionerId: stringAttributeFormat.write(provisionerId),
+      },
+      TableName: instanceTableName,
+      ProjectionExpression: "ProvisionerId",
+    }),
+  );
+  const item = output.Item;
+  if (!item) {
+    console.log(`No instance ${instanceId}`);
+    return { statusCode: 404, body: `No instance ${instanceId}` };
+  }
+
+  if (provisionerId !== stringAttributeFormat.read(item.ProvisionerId)) {
+    console.log(`Does not have ${provisionerId}`);
+    return {
+      statusCode: 404,
+      body: `Does not have provisioner ${provisionerId}`,
+    };
+  }
 
   let config: string;
   try {
@@ -60,6 +83,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     }));
   } catch (e) {
     if (e instanceof InstanceDisabledError) {
+      console.log(`Instance ${instanceId} is disabled`);
       return { statusCode: 409 };
     }
     throw e;
@@ -67,47 +91,6 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
   return { body: config };
 };
-
-async function authorize({
-  dynamodbClient,
-  provisionerId,
-  instanceId,
-}: {
-  dynamodbClient: DynamoDBClient;
-  provisionerId: string;
-  instanceId: string;
-}): Promise<void> {
-  const output = await dynamodbClient.send(
-    new GetItemCommand({
-      Key: { Id: stringAttributeFormat.write(provisionerId) },
-      TableName: provisionerTableName,
-      ProjectionExpression: "LaunchTemplateArn, Id",
-    }),
-  );
-  const item = output.Item;
-  if (!item) {
-    throw new Error("No provisioner found");
-  }
-
-  const launchTemplateArn = arnAttributeFormat.read(item.LaunchTemplateArn);
-
-  const ec2Client = new EC2Client({ region: launchTemplateArn.region });
-  const describeOutput = await ec2Client.send(
-    new DescribeInstancesCommand({ InstanceIds: [instanceId] }),
-  );
-  const instance = describeOutput.Reservations?.[0].Instances?.[0];
-  if (!instance) {
-    throw new Error(`No instance ${instanceId}`);
-  }
-  if (
-    instance.Tags!.find((tag) => tag.Key === "FaeRunner:ProvisionerId")
-      ?.Value !== provisionerId
-  ) {
-    throw new Error(
-      `Instance ${instanceId} does not have tag FaeRunner:ProvisionerId=${provisionerId}`,
-    );
-  }
-}
 
 async function createRunner({
   instanceId,
@@ -164,35 +147,44 @@ async function createRunner({
       });
   }
 
-  const putOutput = await dynamodbClient.send(
-    new PutItemCommand({
-      ConditionExpression: "#status <> :disabled",
-      ExpressionAttributeValues: {
-        ":disabled": stringAttributeFormat.write(InstanceStatus.DISABLED),
-      },
-      ExpressionAttributeNames: { "#status": "Status" },
-      Item: {
-        Id: numberAttributeFormat.write(response.data.runner.id),
-        Name: stringAttributeFormat.write(instanceId),
-        ProvisionerId: stringAttributeFormat.write(provisionerId),
-      },
-      TableName: instanceTableName,
-    }),
-  );
-  if (!putOutput.Attributes) {
-    if (repoName !== undefined) {
-      await installationClient.client.actions.deleteSelfHostedRunnerFromRepo({
-        owner: orgName ?? userName,
-        repo: repoName,
-        runner_id: response.data.runner.id,
-      });
-    } else {
-      await installationClient.client.actions.deleteSelfHostedRunnerFromOrg({
-        org: orgName,
-        runner_id: response.data.runner.id,
-      });
+  try {
+    await dynamodbClient.send(
+      new UpdateItemCommand({
+        ConditionExpression: "#status <> :disabled",
+        ExpressionAttributeValues: {
+          ":disabled": stringAttributeFormat.write(InstanceStatus.DISABLED),
+          ":runner": runnerAttributeFormat.write({
+            activeAt: Temporal.Now.instant(),
+            id: response.data.runner.id,
+            status: RunnerStatus.IDLE,
+          }),
+        },
+        ExpressionAttributeNames: { "#status": "Status" },
+        Key: {
+          Id: stringAttributeFormat.write(instanceId),
+          ProvisionerId: stringAttributeFormat.write(provisionerId),
+        },
+        UpdateExpression: "SET Runner = :runner",
+        TableName: instanceTableName,
+      }),
+    );
+  } catch (e) {
+    if (e instanceof ConditionalCheckFailedException) {
+      if (repoName !== undefined) {
+        await installationClient.client.actions.deleteSelfHostedRunnerFromRepo({
+          owner: orgName ?? userName,
+          repo: repoName,
+          runner_id: response.data.runner.id,
+        });
+      } else {
+        await installationClient.client.actions.deleteSelfHostedRunnerFromOrg({
+          org: orgName,
+          runner_id: response.data.runner.id,
+        });
+      }
+      throw new InstanceDisabledError(instanceId);
     }
-    throw new InstanceDisabledError(instanceId);
+    throw e;
   }
 
   return { config: response.data.encoded_jit_config };
