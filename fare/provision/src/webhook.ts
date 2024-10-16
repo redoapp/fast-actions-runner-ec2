@@ -26,7 +26,7 @@ import {
   provisionerCandidates,
   provisionerMatches,
 } from "./provisioner";
-import { runnerRefresh as commonRefreshRunner } from "./runner";
+import { runnerRefresh } from "./runner";
 
 const githubAppId = envNumberRead("GITHUB_APP_ID");
 
@@ -50,6 +50,7 @@ const sqsClient = new SQSClient();
 
 export const handler: APIGatewayProxyHandlerV2 = (
   event,
+  context,
 ): Promise<APIGatewayProxyResultV2> =>
   reportError(() =>
     githubWebhook(
@@ -68,11 +69,11 @@ export const handler: APIGatewayProxyHandlerV2 = (
         const jobId = event.workflow_job.id;
         const runnerName = event.workflow_job.runner_name ?? undefined;
 
+        let provisionerId: string | undefined;
         if (event.action === "completed") {
-          await processJobComplete({
+          provisionerId = await processJobComplete({
             installationId,
             jobId,
-            runnerName,
           });
         } else {
           const labels = event.workflow_job.labels;
@@ -82,16 +83,41 @@ export const handler: APIGatewayProxyHandlerV2 = (
             event.repository.owner.type === "User"
               ? event.repository.owner.login
               : undefined;
-
-          await processJobPending({
+          provisionerId = await processJobPending({
             labels,
             installationId,
             jobId,
             orgName,
             repoName,
-            runnerName,
             userName,
           });
+        }
+
+        if (provisionerId !== undefined) {
+          await sqsClient.send(
+            new SendMessageCommand({
+              MessageBody: "_",
+              MessageDeduplicationId: context.awsRequestId,
+              MessageGroupId: provisionerId,
+              QueueUrl: provisionQueueUrl,
+            }),
+          );
+          if (runnerName) {
+            const installationClient = await provisionerInstallationClient({
+              dynamodbClient,
+              provisionerTableName,
+              githubClient,
+              provisionerId,
+            });
+
+            await runnerRefresh({
+              dynamodbClient,
+              installationClient,
+              instanceId: runnerName,
+              instanceTableName,
+              provisionerId,
+            });
+          }
         }
 
         return { statusCode: 204 };
@@ -105,7 +131,6 @@ async function processJobPending({
   labels: labelNames,
   orgName,
   repoName,
-  runnerName,
   userName,
 }: {
   installationId: number;
@@ -113,7 +138,6 @@ async function processJobPending({
   orgName: string | undefined;
   labels: string[];
   repoName: string;
-  runnerName: string | undefined;
   userName: string | undefined;
 }) {
   console.log(`Processing pending job ${installationId}/${jobId}`);
@@ -141,11 +165,11 @@ async function processJobPending({
     throw e;
   }
 
-  let provisionerId: string | undefined;
   if (output.Attributes?.ProvisionerId) {
-    provisionerId =
+    return (
       output.Attributes.ProvisionerId &&
-      stringAttributeFormat.read(output.Attributes.ProvisionerId);
+      stringAttributeFormat.read(output.Attributes.ProvisionerId)
+    );
   } else {
     const owner = (orgName ?? userName)!;
     const job: JobAspect = { labelNames, repoName };
@@ -155,7 +179,6 @@ async function processJobPending({
       provisionerTableName,
     })) {
       if (provisionerMatches(provisioner, job)) {
-        provisionerId = provisioner.id;
         console.log(
           `Found provisioner ${provisioner.id} for ${owner}/${repoName} ${labelNames}`,
         );
@@ -163,7 +186,7 @@ async function processJobPending({
           new UpdateItemCommand({
             ConditionExpression: "attribute_exists(Id)",
             ExpressionAttributeValues: {
-              ":provisionerId": stringAttributeFormat.write(provisionerId),
+              ":provisionerId": stringAttributeFormat.write(provisioner.id),
             },
             Key: {
               Id: numberAttributeFormat.write(jobId),
@@ -173,35 +196,19 @@ async function processJobPending({
             UpdateExpression: "SET ProvisionerId = :provisionerId",
           }),
         );
-        break;
+        return provisioner.id;
       }
     }
     console.log(`No provisioner found for ${owner}/${repoName} ${labelNames}`);
-  }
-
-  if (provisionerId !== undefined) {
-    await sqsClient.send(
-      new SendMessageCommand({
-        MessageBody: "_",
-        MessageDeduplicationId: `${provisionerId}/${process.hrtime.bigint().toString(16)}`,
-        MessageGroupId: provisionerId,
-        QueueUrl: provisionQueueUrl,
-      }),
-    );
-    if (runnerName !== undefined) {
-      await refreshRunner({ instanceId: runnerName, provisionerId });
-    }
   }
 }
 
 async function processJobComplete({
   installationId,
   jobId,
-  runnerName,
 }: {
   installationId: number;
   jobId: number;
-  runnerName: string | undefined;
 }) {
   console.log(`Processing completed job ${installationId}/${jobId}`);
   const output = await dynamodbClient.send(
@@ -219,44 +226,8 @@ async function processJobComplete({
     return;
   }
 
-  const provisionerId =
+  return (
     output.Attributes.ProvisionerId &&
-    stringAttributeFormat.read(output.Attributes.ProvisionerId);
-  await sqsClient.send(
-    new SendMessageCommand({
-      MessageBody: "_",
-      MessageDeduplicationId: `${provisionerId}/${process.hrtime.bigint().toString(16)}`,
-      MessageGroupId: provisionerId,
-      QueueUrl: provisionQueueUrl,
-    }),
+    stringAttributeFormat.read(output.Attributes.ProvisionerId)
   );
-  if (runnerName !== undefined) {
-    await refreshRunner({ instanceId: runnerName, provisionerId });
-  }
-}
-
-/**
- * Refresh the status of the runner.
- */
-async function refreshRunner({
-  instanceId,
-  provisionerId,
-}: {
-  instanceId: string;
-  provisionerId: string;
-}) {
-  const installationClient = await provisionerInstallationClient({
-    dynamodbClient,
-    provisionerTableName,
-    githubClient,
-    provisionerId,
-  });
-
-  await commonRefreshRunner({
-    dynamodbClient,
-    installationClient,
-    instanceId,
-    instanceTableName,
-    provisionerId,
-  });
 }

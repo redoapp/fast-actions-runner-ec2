@@ -67,13 +67,13 @@ const provisionerTableName = envStringRead("PROVISIONER_TABLE_NAME");
 
 const runnerCreateUrl = envUrlRead("RUNNER_CREATE_URL");
 
+const region = envStringRead("AWS_REGION");
+
 const dynamodbClient = new DynamoDBClient();
 
 const stsClient = new STSClient();
 
 const githubClient = appGithubClient(githubAppId, githubPrivateKey);
-
-const region = envStringRead("AWS_REGION");
 
 export const handler: SQSHandler = async (event) => {
   if (event.Records.length !== 1) {
@@ -144,6 +144,8 @@ function debouceProvisioned({
 }
 
 async function provision({ provisionerId }: { provisionerId: string }) {
+  console.log(`Provisioning ${provisionerId}`);
+
   const provisionerOutput = await dynamodbClient.send(
     new GetItemCommand({
       Key: { Id: stringAttributeFormat.write(provisionerId) },
@@ -156,7 +158,10 @@ async function provision({ provisionerId }: { provisionerId: string }) {
   if (!provisionerItem) {
     throw new Error(`No provisioner ${provisionerId}`);
   }
-  const countMax = numberAttributeFormat.read(provisionerItem.CountMax);
+  let countMax = numberAttributeFormat.read(provisionerItem.CountMax);
+  if (countMax < 0) {
+    countMax = Infinity;
+  }
   const idleTimeout = durationAttributeFormat.read(provisionerItem.IdleTimeout);
   const launchTemplateArn = arnAttributeFormat.read(
     provisionerItem.LaunchTemplateArn,
@@ -236,8 +241,10 @@ async function provision({ provisionerId }: { provisionerId: string }) {
       instance.launchTemplateId !== launchTemplateId ||
       instance.launchTemplateVersion !== launchTemplateVersion
     ) {
-      console.log(`Instance ${instance.id} is out of date`);
-      await terminate(instance);
+      console.log(`Instance ${provisionerId}/${instance.id} is out of date`);
+      if (await terminate(instance)) {
+        continue;
+      }
     } else if (
       instance.status !== InstanceStatus.DISABLED &&
       !instance.runner &&
@@ -250,15 +257,13 @@ async function provision({ provisionerId }: { provisionerId: string }) {
       console.log(
         `No runner has been created by ${provisionerId}/${instance.id} after ${Math.round(instance.startedAt.until(Temporal.Now.instant()).total("seconds"))}s`,
       );
-      await terminate(instance);
+      if (await terminate(instance)) {
+        continue;
+      }
     } else if (instance.status === undefined) {
       console.log(`Instance ${provisionerId}/${instance.id} is unrecognized`);
-      if (
-        [Ec2InstanceStatus.STOPPED, Ec2InstanceStatus.STOPPING].includes(
-          instance.ec2Status,
-        )
-      ) {
-        await terminate(instance);
+      if (await terminate(instance)) {
+        continue;
       }
     } else if (
       instance.status === InstanceStatus.ENABLED &&
@@ -269,13 +274,19 @@ async function provision({ provisionerId }: { provisionerId: string }) {
       console.log(
         `Instance ${provisionerId}/${instance.id} unexpectedly shut down`,
       );
-      await terminate(instance);
+      if (await terminate(instance)) {
+        continue;
+      }
     } else if (
       instance.status === InstanceStatus.DISABLED &&
       instance.ec2Status === Ec2InstanceStatus.STARTED
     ) {
+      // TODO: is this right?
       console.log(`Instance ${provisionerId}/${instance.id} has been disabled`);
-      await stop(instance);
+      if (await stop(instance)) {
+        instance.ec2Status = Ec2InstanceStatus.STOPPING;
+        instance.status = InstanceStatus.DISABLED;
+      }
     } else if (
       instance.runner &&
       instance.runner.status === RunnerStatus.IDLE &&
@@ -287,39 +298,67 @@ async function provision({ provisionerId }: { provisionerId: string }) {
       console.log(
         `Runner on instance ${provisionerId}/${instance.id} has exceeded idle timeout`,
       );
-      await stop(instance);
-    } else {
-      instances.push(instance);
+      if (await stop(instance)) {
+        instance.ec2Status = Ec2InstanceStatus.STOPPING;
+        instance.status = InstanceStatus.DISABLED;
+      }
     }
+    instances.push(instance);
   }
-
-  console.log(`Total instance count is ${instances.length}`);
-
   // scale down within the maximum
   const priority = (instance: Instance) =>
     +(instance.status === InstanceStatus.ENABLED) + +!!instance.runner;
   instances.sort((a, b) => priority(a) - priority(b));
-  const excess = instances.length - (countMax < 0 ? Infinity : countMax);
+  const excess = instances.length - countMax;
   if (0 < excess) {
-    console.log(`Instance count is ${excess} in excess of the maximum`);
-    for (const instance of instances.splice(0, excess)) {
+    console.log(
+      `Instance count for ${provisionerId} is ${excess} in excess of the maximum`,
+    );
+    while (countMax < instances.length) {
+      const instance = instances.pop()!;
+      instances.unshift(instance);
       await terminate(instance);
     }
   }
 
+  console.log(
+    `Total instance count for ${provisionerId} is ${instances.length}`,
+  );
+
+  const startingCount = instances.filter(
+    (instance) => instance.ec2Status === Ec2InstanceStatus.STARTING,
+  ).length;
+  const startedCount = instances.filter(
+    (instance) => instance.ec2Status === Ec2InstanceStatus.STARTED,
+  ).length;
+  const stoppingCount = instances.filter(
+    (instance) => instance.ec2Status === Ec2InstanceStatus.STOPPING,
+  ).length;
+  const stoppedCount = instances.filter(
+    (instance) => instance.ec2Status === Ec2InstanceStatus.STOPPED,
+  ).length;
+  console.log(
+    `EC2 statuses for ${provisionerId}: ${startingCount} starting, ${startedCount} started, ${stoppingCount} stopping, ${stoppedCount} stopped`,
+  );
+
+  const enabledCount = instances.filter(
+    (instance) => instance.status === InstanceStatus.ENABLED,
+  ).length;
+  const disabledCount = instances.filter(
+    (instance) => instance.status === InstanceStatus.DISABLED,
+  ).length;
+  console.log(
+    `Instance statuses for ${provisionerId}: ${enabledCount} enabled, ${disabledCount} disabled`,
+  );
+
   const enabledInstances = instances.filter(
     (instance) => instance.status === InstanceStatus.ENABLED,
   );
-  console.log(`Enabled instance count is ${enabledInstances.length}`);
 
   // query jobs
-  let jobCount = await pendingJobsCount({
-    provisionerId,
-  });
-  console.log(`Pending job count is ${jobCount}`);
-  if (countMax) {
-    jobCount = Math.min(jobCount, countMax);
-  }
+  let jobCount = await pendingJobsCount({ provisionerId });
+  console.log(`Pending job count for ${provisionerId} is ${jobCount}`);
+
   jobCount -= enabledInstances.length;
   if (jobCount <= 0) {
     return;
@@ -332,8 +371,12 @@ async function provision({ provisionerId }: { provisionerId: string }) {
   console.log(`Starting ${startInstances.length} instances`);
   for (const instance of startInstances) {
     await start(instance);
-    --jobCount;
   }
+
+  jobCount = Math.min(
+    jobCount - startInstances.length,
+    countMax - instances.length,
+  );
 
   if (jobCount <= 0) {
     return;
@@ -562,7 +605,7 @@ async function stopInstance({
       provisionerId,
     }))
   ) {
-    return;
+    return false;
   }
 
   console.log(`Stopping instance ${provisionerId}/${instance.id}`);
@@ -580,6 +623,8 @@ async function stopInstance({
     }),
   );
   console.log(`Stopped instance ${provisionerId}/${instance.id}`);
+
+  return true;
 }
 
 async function terminateInstance({
@@ -606,7 +651,7 @@ async function terminateInstance({
       provisionerId,
     }))
   ) {
-    return;
+    return false;
   }
 
   console.log(`Terminating instance ${provisionerId}/${instance.id}`);
@@ -623,6 +668,8 @@ async function terminateInstance({
     }),
   );
   console.log(`Terminated instance ${provisionerId}/${instance.id}`);
+
+  return true;
 }
 
 interface Instance {
