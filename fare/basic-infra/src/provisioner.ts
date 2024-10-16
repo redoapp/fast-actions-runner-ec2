@@ -31,7 +31,7 @@ export function provisionerTemplate(stack: Stack) {
     artifactS3KeyPrefix,
     paramGroup: artifactParamGroup,
     paramLabels: artifactParamLabels,
-  } = artifactParams(stack, { includeRegion: true });
+  } = artifactParams(stack);
 
   const {
     orgName,

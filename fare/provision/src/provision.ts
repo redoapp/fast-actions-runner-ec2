@@ -54,7 +54,6 @@ import {
   instanceStatusAttributeFormat,
   runnerAttributeFormat,
 } from "./instance";
-import { JobStatus } from "./job";
 
 const githubAppId = envNumberRead("GITHUB_APP_ID");
 
@@ -311,7 +310,7 @@ async function provision({ provisionerId }: { provisionerId: string }) {
   const enabledInstances = instances.filter(
     (instance) => instance.status === InstanceStatus.ENABLED,
   );
-  console.log(`Enabled instance count is ${instances.length}`);
+  console.log(`Enabled instance count is ${enabledInstances.length}`);
 
   // query jobs
   let jobCount = await pendingJobsCount({
@@ -359,12 +358,9 @@ async function pendingJobsCount({
       IndexName: "ProvisionerId",
       TableName: jobTableName,
       KeyConditionExpression: "ProvisionerId = :provisionerId",
-      ExpressionAttributeNames: { "#status": "Status" },
       ExpressionAttributeValues: {
         ":provisionerId": stringAttributeFormat.write(provisionerId),
-        ":status": stringAttributeFormat.write(JobStatus.PENDING),
       },
-      FilterExpression: "#status = :status",
       Select: "COUNT",
     },
   )) {

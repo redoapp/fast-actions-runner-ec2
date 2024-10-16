@@ -18,20 +18,13 @@ const artifactS3KeyPrefix = readFileSync(
   "utf-8",
 );
 
-export function artifactParams<Region extends boolean>(
-  scope: Construct,
-  { includeRegion }: { includeRegion: Region },
-) {
-  const artifactRegionParam = includeRegion
-    ? new CfnParameter(scope, "ArtifactRegion", {
-        description: "Artifact Region",
-        default: artifactRegion,
-        minLength: 1,
-      })
-    : undefined;
-  const artifactRegion_ = <Region extends true ? string : undefined>(
-    artifactRegionParam?.valueAsString
-  );
+export function artifactParams(scope: Construct) {
+  const artifactRegionParam = new CfnParameter(scope, "ArtifactRegion", {
+    description: "Artifact Region",
+    default: artifactRegion,
+    minLength: 1,
+  });
+  const artifactRegion_ = artifactRegionParam.valueAsString;
 
   const artifactS3BucketParam = new CfnParameter(scope, "ArtifactS3Bucket", {
     description: "Artifact S3 Bucket",

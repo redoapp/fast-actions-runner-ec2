@@ -30,6 +30,7 @@ export function fareTestStack(
     dependsOn: [cfResourceFunction],
     onFailure: "DO_NOTHING",
     parameters: {
+      ArtifactRegion: "us-east-1",
       ArtifactS3Bucket: bucket.bucket,
       ArtifactS3KeyPrefix: keyPrefix,
     },
@@ -53,6 +54,7 @@ export function fareTestStack(
     onFailure: "DO_NOTHING",
     parameters: {
       Ami: "ami-0a0e5d9c7acc336f1",
+      ArtifactRegion: "us-east-1",
       ArtifactS3Bucket: bucket.bucket,
       ArtifactS3KeyPrefix: keyPrefix,
       Id: "main",

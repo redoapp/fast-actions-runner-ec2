@@ -3,6 +3,8 @@
  * Start installation sync for all installations.
  */
 
+import "./polyfill";
+
 import {
   InvocationType,
   InvokeCommand,
@@ -23,7 +25,7 @@ const installationSyncName = envStringRead("INSTALLATION_SYNC_NAME");
 
 const lambdaClient = new LambdaClient();
 
-export const handler: ScheduledHandler = async (event) => {
+export const handler: ScheduledHandler = async () => {
   const installations = await githubClient.paginate(
     "GET /app/installations",
     { per_page: 100 },
@@ -31,6 +33,7 @@ export const handler: ScheduledHandler = async (event) => {
       response.data.map((installation) => ({ id: installation.id })),
   );
   for (const installation of installations) {
+    console.log(`Starting syncing installation ${installation.id}`);
     const event: InstallationSyncEvent = { installationId: installation.id };
     await lambdaClient.send(
       new InvokeCommand({

@@ -23,9 +23,7 @@ import { Construct } from "constructs";
 import { digestKey } from "./common";
 
 export function appTemplate(stack: Stack) {
-  const { artifactS3Bucket, artifactS3KeyPrefix } = artifactParams(stack, {
-    includeRegion: false,
-  });
+  const { artifactS3Bucket, artifactS3KeyPrefix } = artifactParams(stack);
 
   const { provisionerFunction, role, setupUrlFunction } = appStack(stack, {
     artifactS3Bucket,
@@ -91,6 +89,16 @@ export function appStack(
     { role },
   );
 
+  installationSyncStack(new Construct(scope, "InstallationSync"), {
+    artifactS3Bucket,
+    artifactS3KeyPrefix,
+    githubAppIdName,
+    githubPrivateKeyName,
+    jobTable,
+    provisionerTable,
+    role,
+  });
+
   const { api: runnerCreateApi } = runnerCreateStack(
     new Construct(scope, "RunnerCreate"),
     {
@@ -119,6 +127,11 @@ export function appStack(
     },
   );
 
+  const { function: provisionerFunction } = provisionerStack(
+    new Construct(scope, "Provisioner"),
+    { artifactS3Bucket, artifactS3KeyPrefix, provisionerTable },
+  );
+
   provisionerSyncStack(new Construct(scope, "ProvisionerSync"), {
     artifactS3Bucket,
     artifactS3KeyPrefix,
@@ -129,11 +142,6 @@ export function appStack(
     provisionQueue,
     role,
   });
-
-  const { function: provisionerFunction } = provisionerStack(
-    new Construct(scope, "Provisioner"),
-    { artifactS3Bucket, artifactS3KeyPrefix, provisionerTable },
-  );
 
   const { url: webhookUrl } = webhookStack(new Construct(scope, "Webhook"), {
     artifactS3Bucket,
@@ -165,75 +173,78 @@ export function appStack(
   return { provisionerFunction, role, setupUrlFunction };
 }
 
-function provisionerStack(
-  scope: Construct,
-  {
-    artifactS3Bucket,
-    artifactS3KeyPrefix,
-    provisionerTable,
-  }: {
-    artifactS3KeyPrefix: string;
-    artifactS3Bucket: string;
-    provisionerTable: CfnTable;
-  },
-) {
-  const fareCfResourceFunctionDigest = digestKey(
-    "redotech_fast_actions_runner_ec2/fare/infra/fare_cf_resource_function_digest.digest",
-  );
-
-  const role = new CfnRole(scope, "Role", {
-    assumeRolePolicyDocument: {
-      Statement: [
-        {
-          Action: "sts:AssumeRole",
-          Effect: "Allow",
-          Principal: { Service: "lambda.amazonaws.com" },
-        },
-      ],
-      Version: "2012-10-17",
-    },
-    managedPolicyArns: [
-      "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+function dbStack(scope: Construct, { role }: { role: CfnRole }) {
+  const jobTable = new CfnTable(scope, "JobTable", {
+    attributeDefinitions: [
+      { attributeName: "Id", attributeType: "N" },
+      { attributeName: "InstallationId", attributeType: "N" },
+      { attributeName: "ProvisionerId", attributeType: "S" },
+    ],
+    billingMode: "PAY_PER_REQUEST",
+    globalSecondaryIndexes: [
+      {
+        indexName: "ProvisionerId",
+        keySchema: [{ attributeName: "ProvisionerId", keyType: "HASH" }],
+        projection: { projectionType: "ALL" },
+      },
+    ],
+    keySchema: [
+      { attributeName: "InstallationId", keyType: "HASH" },
+      { attributeName: "Id", keyType: "RANGE" },
     ],
     tags: [{ key: "Name", value: getName(scope).toString() }],
   });
 
-  const function_ = new CfnFunction(scope, "Function", {
-    code: {
-      s3Bucket: artifactS3Bucket,
-      s3Key: `${artifactS3KeyPrefix}fare-cf-resource-${fareCfResourceFunctionDigest}.zip`,
-    },
-    environment: {
-      variables: {
-        PROVISIONER_TABLE_NAME: provisionerTable.ref,
-        NODE_OPTIONS: "--enable-source-maps",
+  const provisionerTable = new CfnTable(scope, "ProvisionerTable", {
+    attributeDefinitions: [
+      { attributeName: "Id", attributeType: "S" },
+      { attributeName: "Owner", attributeType: "S" },
+    ],
+    billingMode: "PAY_PER_REQUEST",
+    globalSecondaryIndexes: [
+      {
+        indexName: "Owner",
+        keySchema: [{ attributeName: "Owner", keyType: "HASH" }],
+        projection: { projectionType: "ALL" },
       },
-    },
-    handler:
-      "redotech_fast_actions_runner_ec2/fare/cf-resource/lib/provisioner.handler",
-    memorySize: 256,
-    role: role.attrArn,
-    runtime: "nodejs20.x",
+    ],
+    keySchema: [{ attributeName: "Id", keyType: "HASH" }],
     tags: [{ key: "Name", value: getName(scope).toString() }],
-    timeout: Temporal.Duration.from({ seconds: 10 }).total("seconds"),
   });
 
-  new CfnRolePolicy(scope, "Policy", {
+  const instanceTable = new CfnTable(scope, "InstanceTable", {
+    attributeDefinitions: [
+      { attributeName: "Id", attributeType: "S" },
+      { attributeName: "ProvisionerId", attributeType: "S" },
+    ],
+    billingMode: "PAY_PER_REQUEST",
+    keySchema: [
+      { attributeName: "ProvisionerId", keyType: "HASH" },
+      { attributeName: "Id", keyType: "RANGE" },
+    ],
+    tags: [{ key: "Name", value: getName(scope).toString() }],
+  });
+
+  new CfnRolePolicy(scope, "JobTablePolicy", {
+    policyName: iamPolicyName(getName(scope)),
+    roleName: role.ref,
     policyDocument: {
       Statement: [
         {
-          Action: "dynamodb:*Item",
+          Action: ["dynamodb:*Item", "dynamodb:Query", "dynamodb:Scan"],
           Effect: "Allow",
-          Resource: provisionerTable.attrArn,
+          Resource: [
+            jobTable.attrArn,
+            provisionerTable.attrArn,
+            instanceTable.attrArn,
+          ],
         },
       ],
       Version: "2012-10-17",
     },
-    policyName: iamPolicyName(getName(scope)),
-    roleName: role.ref,
   });
 
-  return { function: function_ };
+  return { jobTable, provisionerTable, instanceTable };
 }
 
 function githubAppStack(
@@ -298,7 +309,7 @@ function githubAppStack(
         GITHUB_PRIVATE_KEY_NAME: githubPrivateKeyName,
         LAMBDAINIT_HANDLER:
           "redotech_fast_actions_runner_ec2/fare/app/lib/callback.handler",
-        NODE_OPTIONS: "--enable-source-maps",
+        NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=50",
         SECRET_SSM: secretName,
         WEBHOOK_SECRET_NAME: webhookSecretName,
       },
@@ -334,7 +345,7 @@ function githubAppStack(
       variables: {
         APP_NAME: Aws.STACK_NAME,
         CALLBACK_URL: callbackUrl.attrFunctionUrl,
-        NODE_OPTIONS: "--enable-source-maps",
+        NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=50",
         WEBHOOK_URL: webhookUrl.attrFunctionUrl,
       },
     },
@@ -382,7 +393,7 @@ function githubAppStack(
         LAMBDAINIT_HANDLER:
           "redotech_fast_actions_runner_ec2/fare/app/lib/url.handler",
         MANIFEST_URL: manifestUrl.attrFunctionUrl,
-        NODE_OPTIONS: "--enable-source-maps",
+        NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=50",
         SECRET_SSM: secretName,
       },
     },
@@ -398,31 +409,111 @@ function githubAppStack(
   return { setupUrlFunction: urlFunction };
 }
 
-function secretStack(
+function provisionerStack(
   scope: Construct,
   {
     artifactS3Bucket,
     artifactS3KeyPrefix,
-    role,
-    secretName,
+    provisionerTable,
   }: {
     artifactS3KeyPrefix: string;
     artifactS3Bucket: string;
-    role: CfnRole;
-    secretName: string;
+    provisionerTable: CfnTable;
   },
 ) {
-  const cfResourceFunctionDigest = digestKey(
-    "redotech_fast_actions_runner_ec2/fare/infra/aws_cf_resource_function_digest.digest",
+  const fareCfResourceFunctionDigest = digestKey(
+    "redotech_fast_actions_runner_ec2/fare/infra/fare_cf_resource_function_digest.digest",
+  );
+
+  const role = new CfnRole(scope, "Role", {
+    assumeRolePolicyDocument: {
+      Statement: [
+        {
+          Action: "sts:AssumeRole",
+          Effect: "Allow",
+          Principal: { Service: "lambda.amazonaws.com" },
+        },
+      ],
+      Version: "2012-10-17",
+    },
+    managedPolicyArns: [
+      "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+    ],
+    tags: [{ key: "Name", value: getName(scope).toString() }],
+  });
+
+  const function_ = new CfnFunction(scope, "Function", {
+    code: {
+      s3Bucket: artifactS3Bucket,
+      s3Key: `${artifactS3KeyPrefix}fare-cf-resource-${fareCfResourceFunctionDigest}.zip`,
+    },
+    environment: {
+      variables: {
+        PROVISIONER_TABLE_NAME: provisionerTable.ref,
+        NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=50",
+      },
+    },
+    handler:
+      "redotech_fast_actions_runner_ec2/fare/cf-resource/lib/provisioner.handler",
+    memorySize: 256,
+    role: role.attrArn,
+    runtime: "nodejs20.x",
+    tags: [{ key: "Name", value: getName(scope).toString() }],
+    timeout: Temporal.Duration.from({ seconds: 10 }).total("seconds"),
+  });
+
+  new CfnRolePolicy(scope, "Policy", {
+    policyDocument: {
+      Statement: [
+        {
+          Action: "dynamodb:*Item",
+          Effect: "Allow",
+          Resource: provisionerTable.attrArn,
+        },
+      ],
+      Version: "2012-10-17",
+    },
+    policyName: iamPolicyName(getName(scope)),
+    roleName: role.ref,
+  });
+
+  return { function: function_ };
+}
+
+function installationSyncStack(
+  scope: Construct,
+  {
+    artifactS3Bucket,
+    artifactS3KeyPrefix,
+    githubAppIdName,
+    githubPrivateKeyName,
+    jobTable,
+    provisionerTable,
+    role,
+  }: {
+    artifactS3Bucket: string;
+    artifactS3KeyPrefix: string;
+    githubAppIdName: string;
+    githubPrivateKeyName: string;
+    jobTable: CfnTable;
+    provisionerTable: CfnTable;
+    role: CfnRole;
+  },
+) {
+  const functionDigest = digestKey(
+    "redotech_fast_actions_runner_ec2/fare/infra/fare_provision_function_digest.digest",
   );
 
   const policy = new CfnRolePolicy(scope, "Policy", {
     policyDocument: {
       Statement: [
         {
-          Action: ["ssm:DeleteParameter", "ssm:PutParameter"],
+          Action: "ssm:GetParameter*",
           Effect: "Allow",
-          Resource: `arn:aws:ssm:${Aws.REGION}:${Aws.ACCOUNT_ID}:parameter${secretName}`,
+          Resource: [
+            `arn:${Aws.PARTITION}:ssm:${Aws.REGION}:${Aws.ACCOUNT_ID}:parameter${githubAppIdName}`,
+            `arn:${Aws.PARTITION}:ssm:${Aws.REGION}:${Aws.ACCOUNT_ID}:parameter${githubPrivateKeyName}`,
+          ],
         },
       ],
       Version: "2012-10-17",
@@ -434,27 +525,86 @@ function secretStack(
   const function_ = new CfnFunction(scope, "Function", {
     code: {
       s3Bucket: artifactS3Bucket,
-      s3Key: `${artifactS3KeyPrefix}cf-resource-${cfResourceFunctionDigest}.zip`,
+      s3Key: `${artifactS3KeyPrefix}fare-provision-${functionDigest}.zip`,
     },
     environment: {
       variables: {
-        NODE_OPTIONS: "--enable-source-maps",
+        GITHUB_APP_ID_SSM: githubAppIdName,
+        GITHUB_PRIVATE_KEY_SSM: githubPrivateKeyName,
+        LAMBDAINIT_HANDLER:
+          "redotech_fast_actions_runner_ec2/fare/provision/lib/installation-sync.handler",
+        JOB_TABLE_NAME: jobTable.ref,
+        NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=50",
+        PROVISIONER_TABLE_NAME: provisionerTable.ref,
       },
     },
-    handler:
-      "redotech_fast_actions_runner_ec2/aws/cf-resource/lib/secret-lambda.handler",
+    handler: "redotech_fast_actions_runner_ec2/aws/function/lib/init.handler",
     memorySize: 256,
     role: role.attrArn,
     runtime: "nodejs20.x",
     tags: [{ key: "Name", value: getName(scope).toString() }],
-    timeout: 10,
+    timeout: Temporal.Duration.from({ seconds: 60 }).total("seconds"),
   });
   function_.addDependency(policy);
 
-  new CustomResource(scope, "Parameter", {
-    resourceType: "Custom::Secret",
-    serviceToken: function_.attrArn,
-    properties: { Name: secretName, Size: 32 },
+  const allPolicy = new CfnRolePolicy(scope, "AllPolicy", {
+    policyDocument: {
+      Statement: [
+        {
+          Action: "ssm:GetParameter*",
+          Effect: "Allow",
+          Resource: [
+            `arn:${Aws.PARTITION}:ssm:${Aws.REGION}:${Aws.ACCOUNT_ID}:parameter${githubAppIdName}`,
+            `arn:${Aws.PARTITION}:ssm:${Aws.REGION}:${Aws.ACCOUNT_ID}:parameter${githubPrivateKeyName}`,
+          ],
+        },
+        {
+          Action: "lambda:InvokeFunction",
+          Effect: "Allow",
+          Resource: function_.attrArn,
+        },
+      ],
+      Version: "2012-10-17",
+    },
+    policyName: iamPolicyName(getName(scope).child("All")),
+    roleName: role.ref,
+  });
+
+  const allFunction = new CfnFunction(scope, "AllFunction", {
+    code: {
+      s3Bucket: artifactS3Bucket,
+      s3Key: `${artifactS3KeyPrefix}fare-provision-${functionDigest}.zip`,
+    },
+    environment: {
+      variables: {
+        GITHUB_APP_ID_SSM: githubAppIdName,
+        GITHUB_PRIVATE_KEY_SSM: githubPrivateKeyName,
+        LAMBDAINIT_HANDLER:
+          "redotech_fast_actions_runner_ec2/fare/provision/lib/installation-sync-all.handler",
+        NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=50",
+        INSTALLATION_SYNC_NAME: function_.ref,
+      },
+    },
+    handler: "redotech_fast_actions_runner_ec2/aws/function/lib/init.handler",
+    memorySize: 256,
+    role: role.attrArn,
+    runtime: "nodejs20.x",
+    tags: [{ key: "Name", value: getName(scope).child("All").toString() }],
+    timeout: Temporal.Duration.from({ seconds: 60 }).total("seconds"),
+  });
+  allFunction.addDependency(allPolicy);
+
+  const rule = new CfnRule(scope, "Rule", {
+    scheduleExpression: "rate(2 minutes)",
+    state: "ENABLED",
+    targets: [{ id: "InstallationSyncAll", arn: allFunction.attrArn }],
+  });
+
+  new CfnPermission(scope, "RulePermission", {
+    action: "lambda:InvokeFunction",
+    functionName: allFunction.ref,
+    principal: "events.amazonaws.com",
+    sourceArn: rule.attrArn,
   });
 }
 
@@ -533,7 +683,7 @@ function provisionStack(
         JOB_TABLE_NAME: jobTable.ref,
         LAMBDAINIT_HANDLER:
           "redotech_fast_actions_runner_ec2/fare/provision/lib/provision.handler",
-        NODE_OPTIONS: "--enable-source-maps",
+        NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=50",
         PROVISIONER_TABLE_NAME: provisionerTable.ref,
         RUNNER_CREATE_URL: `https://${runnerCreateApi.attrRestApiId}.execute-api.${Aws.REGION}.${Aws.URL_SUFFIX}/main/`,
       },
@@ -582,7 +732,7 @@ function provisionerSyncStack(
     "redotech_fast_actions_runner_ec2/fare/infra/fare_provision_function_digest.digest",
   );
 
-  const policy = new CfnRolePolicy(scope, "ProvisionerSyncPolicy", {
+  const policy = new CfnRolePolicy(scope, "Policy", {
     policyDocument: {
       Statement: [
         {
@@ -601,7 +751,7 @@ function provisionerSyncStack(
       ],
       Version: "2012-10-17",
     },
-    policyName: iamPolicyName(getName(scope).child("ProvisionerSync")),
+    policyName: iamPolicyName(getName(scope)),
     roleName: role.ref,
   });
 
@@ -617,7 +767,7 @@ function provisionerSyncStack(
         LAMBDAINIT_HANDLER:
           "redotech_fast_actions_runner_ec2/fare/provision/lib/provisioner-sync.handler",
         INSTANCE_TABLE_NAME: instanceTable.ref,
-        NODE_OPTIONS: "--enable-source-maps",
+        NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=50",
         PROVISION_QUEUE_URL: provisionQueue.attrQueueUrl,
         PROVISIONER_TABLE_NAME: provisionerTable.ref,
       },
@@ -626,12 +776,7 @@ function provisionerSyncStack(
     memorySize: 256,
     role: role.attrArn,
     runtime: "nodejs20.x",
-    tags: [
-      {
-        key: "Name",
-        value: getName(scope).toString(),
-      },
-    ],
+    tags: [{ key: "Name", value: getName(scope).toString() }],
     timeout: Temporal.Duration.from({ seconds: 60 }).total("seconds"),
   });
   function_.addDependency(policy);
@@ -658,7 +803,7 @@ function provisionerSyncStack(
     },
     environment: {
       variables: {
-        NODE_OPTIONS: "--enable-source-maps",
+        NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=50",
         PROVISIONER_SYNC_NAME: function_.ref,
         PROVISIONER_TABLE_NAME: provisionerTable.ref,
       },
@@ -668,12 +813,7 @@ function provisionerSyncStack(
     memorySize: 256,
     role: role.attrArn,
     runtime: "nodejs20.x",
-    tags: [
-      {
-        key: "Name",
-        value: getName(scope).child("ProvisionerSyncAll").toString(),
-      },
-    ],
+    tags: [{ key: "Name", value: getName(scope).child("All").toString() }],
     timeout: Temporal.Duration.from({ seconds: 15 }).total("seconds"),
   });
   allFunction.addDependency(allPolicy);
@@ -728,7 +868,7 @@ function runnerCreateStack(
         GITHUB_PRIVATE_KEY_SSM: githubPrivateKeyName,
         LAMBDAINIT_HANDLER:
           "redotech_fast_actions_runner_ec2/fare/provision/lib/runner-create.handler",
-        NODE_OPTIONS: "--enable-source-maps",
+        NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=50",
         PROVISION_TABLE_NAME: provisionerTable.ref,
         INSTANCE_TABLE_NAME: instanceTable.ref,
       },
@@ -808,81 +948,64 @@ function runnerCreateStack(
   return { api };
 }
 
-function dbStack(scope: Construct, { role }: { role: CfnRole }) {
-  const jobTable = new CfnTable(scope, "JobTable", {
-    attributeDefinitions: [
-      { attributeName: "Id", attributeType: "N" },
-      { attributeName: "InstallationId", attributeType: "N" },
-      { attributeName: "ProvisionerId", attributeType: "S" },
-    ],
-    billingMode: "PAY_PER_REQUEST",
-    globalSecondaryIndexes: [
-      {
-        indexName: "ProvisionerId",
-        keySchema: [{ attributeName: "ProvisionerId", keyType: "HASH" }],
-        projection: { projectionType: "ALL" },
-      },
-    ],
-    keySchema: [
-      { attributeName: "InstallationId", keyType: "HASH" },
-      { attributeName: "Id", keyType: "RANGE" },
-    ],
-    tags: [{ key: "Name", value: getName(scope).toString() }],
-    timeToLiveSpecification: { enabled: true, attributeName: "Expiration" },
-  });
+function secretStack(
+  scope: Construct,
+  {
+    artifactS3Bucket,
+    artifactS3KeyPrefix,
+    role,
+    secretName,
+  }: {
+    artifactS3KeyPrefix: string;
+    artifactS3Bucket: string;
+    role: CfnRole;
+    secretName: string;
+  },
+) {
+  const cfResourceFunctionDigest = digestKey(
+    "redotech_fast_actions_runner_ec2/fare/infra/aws_cf_resource_function_digest.digest",
+  );
 
-  const provisionerTable = new CfnTable(scope, "ProvisionerTable", {
-    attributeDefinitions: [
-      { attributeName: "Id", attributeType: "S" },
-      { attributeName: "Owner", attributeType: "S" },
-    ],
-    billingMode: "PAY_PER_REQUEST",
-    globalSecondaryIndexes: [
-      {
-        indexName: "Owner",
-        keySchema: [{ attributeName: "Owner", keyType: "HASH" }],
-        projection: { projectionType: "ALL" },
-      },
-    ],
-    keySchema: [{ attributeName: "Id", keyType: "HASH" }],
-    tags: [{ key: "Name", value: getName(scope).toString() }],
-    timeToLiveSpecification: { enabled: true, attributeName: "Expiration" },
-  });
-
-  const instanceTable = new CfnTable(scope, "InstanceTable", {
-    attributeDefinitions: [
-      { attributeName: "Id", attributeType: "S" },
-      { attributeName: "ProvisionerId", attributeType: "S" },
-    ],
-    billingMode: "PAY_PER_REQUEST",
-    keySchema: [
-      { attributeName: "ProvisionerId", keyType: "HASH" },
-      { attributeName: "Id", keyType: "RANGE" },
-    ],
-    tags: [{ key: "Name", value: getName(scope).toString() }],
-    timeToLiveSpecification: { enabled: true, attributeName: "Expiration" },
-  });
-
-  new CfnRolePolicy(scope, "JobTablePolicy", {
-    policyName: iamPolicyName(getName(scope)),
-    roleName: role.ref,
+  const policy = new CfnRolePolicy(scope, "Policy", {
     policyDocument: {
       Statement: [
         {
-          Action: ["dynamodb:*Item", "dynamodb:Query", "dynamodb:Scan"],
+          Action: ["ssm:DeleteParameter", "ssm:PutParameter"],
           Effect: "Allow",
-          Resource: [
-            jobTable.attrArn,
-            provisionerTable.attrArn,
-            instanceTable.attrArn,
-          ],
+          Resource: `arn:aws:ssm:${Aws.REGION}:${Aws.ACCOUNT_ID}:parameter${secretName}`,
         },
       ],
       Version: "2012-10-17",
     },
+    policyName: iamPolicyName(getName(scope)),
+    roleName: role.ref,
   });
 
-  return { jobTable, provisionerTable, instanceTable };
+  const function_ = new CfnFunction(scope, "Function", {
+    code: {
+      s3Bucket: artifactS3Bucket,
+      s3Key: `${artifactS3KeyPrefix}cf-resource-${cfResourceFunctionDigest}.zip`,
+    },
+    environment: {
+      variables: {
+        NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=50",
+      },
+    },
+    handler:
+      "redotech_fast_actions_runner_ec2/aws/cf-resource/lib/secret-lambda.handler",
+    memorySize: 256,
+    role: role.attrArn,
+    runtime: "nodejs20.x",
+    tags: [{ key: "Name", value: getName(scope).toString() }],
+    timeout: 10,
+  });
+  function_.addDependency(policy);
+
+  new CustomResource(scope, "Parameter", {
+    resourceType: "Custom::Secret",
+    serviceToken: function_.attrArn,
+    properties: { Name: secretName, Size: 32 },
+  });
 }
 
 function webhookStack(
@@ -964,7 +1087,7 @@ function webhookStack(
         JOB_TABLE_NAME: jobTable.ref,
         LAMBDAINIT_HANDLER:
           "redotech_fast_actions_runner_ec2/fare/provision/lib/webhook.handler",
-        NODE_OPTIONS: "--enable-source-maps",
+        NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=50",
         PROVISION_QUEUE_URL: provisionQueue.ref,
         PROVISIONER_TABLE_NAME: provisionerTable.ref,
         WEBHOOK_SECRET_SSM: webhookSecretName,
