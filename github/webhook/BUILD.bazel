@@ -1,41 +1,8 @@
-load("@aspect_bazel_lib//lib:copy_file.bzl", "copy_file")
-load("@aspect_bazel_lib//lib:directory_path.bzl", "directory_path")
-load("@aspect_bazel_lib//lib:jq.bzl", "jq")
 load("@better_rules_javascript//commonjs:rules.bzl", "cjs_root")
 load("@better_rules_javascript//javascript:rules.bzl", "js_library")
 load("@better_rules_javascript//typescript:rules.bzl", "ts_import", "ts_library")
 
 package(default_visibility = ["//visibility:public"])
-
-genrule(
-    name = "event_validate",
-    srcs = [
-        ":event_schema",
-        "ajv/keywords.js",
-    ],
-    outs = ["lib/event-validate.js"],
-    cmd = "$(execpath //tools/ajv:cli) compile -c ajv-formats -c ./$(location ajv/keywords.js) -s $(location :event_schema) -o $@ --code-lines true",
-    tools = ["//tools/ajv:cli"],
-)
-
-directory_path(
-    name = "event_schema_github",
-    directory = "@npm//@octokit/webhooks-schemas:lib",
-    path = "schema.json",
-)
-
-copy_file(
-    name = "event_schema_src",
-    src = ":event_schema_github",
-    out = "event-src.schema.json",
-)
-
-jq(
-    name = "event_schema",
-    srcs = [":event_schema_src"],
-    out = "event.schema.json",
-    filter_file = "schema.jq",
-)
 
 ts_library(
     name = "lib",
@@ -48,21 +15,8 @@ ts_library(
     root = ":root",
     strip_prefix = "src",
     deps = [
-        ":ajv",
         "@npm//@octokit/webhooks-methods:lib",
         "@npm//@octokit/webhooks-types:lib",
-    ],
-)
-
-ts_import(
-    name = "ajv",
-    compile_deps = ["@npm//ajv:lib"],
-    declarations = glob(["src/**/*.d.ts"]),
-    js = [":event_validate"],
-    root = ":root",
-    deps = [
-        "@npm//@octokit/webhooks-types:lib",
-        "@npm//ajv-formats:lib",
     ],
 )
 

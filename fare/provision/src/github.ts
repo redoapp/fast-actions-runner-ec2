@@ -102,6 +102,7 @@ const expirationMargin = Temporal.Duration.from({ minutes: 1 });
 export interface InstallationClient {
   client: Octokit;
   orgName: string | undefined;
+  repoName: string | undefined;
   userName: string | undefined;
 }
 
@@ -116,13 +117,13 @@ export async function provisionerInstallationClient({
   provisionerTableName: string;
   provisionerId: string;
 }): Promise<InstallationClient> {
-  const { token, orgName, userName } = await providerAccess({
+  const { token, orgName, repoName, userName } = await providerAccess({
     dynamodbClient,
     provisionerTableName,
     githubClient,
     provisionerId,
   });
-  return { client: new Octokit({ auth: token }), orgName, userName };
+  return { client: new Octokit({ auth: token }), orgName, repoName, userName };
 }
 
 interface AccessToken {
@@ -161,6 +162,7 @@ async function providerAccess({
   provisionerId: string;
 }): Promise<{
   orgName: string | undefined;
+  repoName: string | undefined;
   token: string;
   userName: string | undefined;
 }> {
@@ -168,7 +170,7 @@ async function providerAccess({
     new GetItemCommand({
       Key: { Id: stringAttributeFormat.write(provisionerId) },
       TableName: provisionerTableName,
-      ProjectionExpression: "AccessToken, OrgName, UserName",
+      ProjectionExpression: "AccessToken, OrgName, RepoName, UserName",
     }),
   );
   const item = output.Item;
@@ -176,8 +178,9 @@ async function providerAccess({
     throw new Error(`No provisioner ${provisionerId}`);
   }
 
-  const userName = item.UserName && stringAttributeFormat.read(item.UserName);
   const orgName = item.OrgName && stringAttributeFormat.read(item.OrgName);
+  const repoName = item.RepoName && stringAttributeFormat.read(item.RepoName);
+  const userName = item.UserName && stringAttributeFormat.read(item.UserName);
   let accessToken = item.AccessToken && accessTokenRead(item.AccessToken);
 
   if (
@@ -222,5 +225,5 @@ async function providerAccess({
     );
   }
 
-  return { orgName, userName, token: accessToken.token };
+  return { orgName, repoName, userName, token: accessToken.token };
 }

@@ -6504,44 +6504,6 @@ PACKAGES = {
         "name": "aggregate-error",
         "url": "https://registry.npmjs.org/aggregate-error/-/aggregate-error-3.1.0.tgz",
     },
-    "ajv-cli@5.0.0-e45c17ec": {
-        "deps": [
-            {
-                "id": "ajv@8.16.0",
-            },
-            {
-                "id": "fast-json-patch@2.2.1",
-            },
-            {
-                "id": "glob@7.2.3",
-            },
-            {
-                "id": "js-yaml@3.14.1",
-            },
-            {
-                "id": "json-schema-migrate@2.0.0",
-            },
-            {
-                "id": "json5@2.2.3",
-            },
-            {
-                "id": "minimist@1.2.8",
-            },
-        ],
-        "integrity": "sha512-LY4m6dUv44HTyhV+u2z5uX4EhPYTM38Iv1jdgDJJJCyOOuqB8KtZEGjPZ2T+sh5ZIJrXUfgErYx/j3gLd3+PlQ==",
-        "name": "ajv-cli",
-        "url": "https://registry.npmjs.org/ajv-cli/-/ajv-cli-5.0.0.tgz",
-    },
-    "ajv-formats@3.0.1-e45c17ec": {
-        "deps": [
-            {
-                "id": "ajv@8.16.0",
-            },
-        ],
-        "integrity": "sha512-8iUql50EUR+uUcdRQ3HDqa6EVyo3docL8g5WJ3FNcWmu62IbkGUue/pEyLBW8VGKKucTPgqeks4fIU1DA4yowQ==",
-        "name": "ajv-formats",
-        "url": "https://registry.npmjs.org/ajv-formats/-/ajv-formats-3.0.1.tgz",
-    },
     "ajv@6.12.6": {
         "deps": [
             {
@@ -8039,11 +8001,6 @@ PACKAGES = {
         "name": "external-editor",
         "url": "https://registry.npmjs.org/external-editor/-/external-editor-3.1.0.tgz",
     },
-    "fast-deep-equal@2.0.1": {
-        "integrity": "sha512-bCK/2Z4zLidyB4ReuIsvALH6w31YfAQDmXMqMx6FyfHqvBxtjC0eRumeSu4Bs3XtXwpyIywtSTrVT99BxY1f9w==",
-        "name": "fast-deep-equal",
-        "url": "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-2.0.1.tgz",
-    },
     "fast-deep-equal@3.1.3": {
         "integrity": "sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==",
         "name": "fast-deep-equal",
@@ -8075,16 +8032,6 @@ PACKAGES = {
         "integrity": "sha512-oX2ruAFQwf/Orj8m737Y5adxDQO0LAB7/S5MnxCdTNDd4p6BsyIVsv9JQsATbTSq8KHRpLwIHbVlUNatxd+1Ow==",
         "name": "fast-glob",
         "url": "https://registry.npmjs.org/fast-glob/-/fast-glob-3.3.2.tgz",
-    },
-    "fast-json-patch@2.2.1": {
-        "deps": [
-            {
-                "id": "fast-deep-equal@2.0.1",
-            },
-        ],
-        "integrity": "sha512-4j5uBaTnsYAV5ebkidvxiLUYOwjQ+JSFljeqfTxCrH9bDmlCQaOJFS84oDJ2rAXZq2yskmk3ORfoP9DCwqFNig==",
-        "name": "fast-json-patch",
-        "url": "https://registry.npmjs.org/fast-json-patch/-/fast-json-patch-2.2.1.tgz",
     },
     "fast-json-stable-stringify@2.1.0": {
         "integrity": "sha512-lhd/wF+Lk98HZoTCtlVraHtfh5XYijIjalXck7saUtuanSDyLMxnHhSXEDJqHxD7msR8D0uCmqlkwjCV8xvwHw==",
@@ -8929,16 +8876,6 @@ PACKAGES = {
         "name": "json-buffer",
         "url": "https://registry.npmjs.org/json-buffer/-/json-buffer-3.0.1.tgz",
     },
-    "json-schema-migrate@2.0.0": {
-        "deps": [
-            {
-                "id": "ajv@8.16.0",
-            },
-        ],
-        "integrity": "sha512-r38SVTtojDRp4eD6WsCqiE0eNDt4v1WalBXb9cyZYw9ai5cGtBwzRNWjHzJl38w6TxFkXAIA7h+fyX3tnrAFhQ==",
-        "name": "json-schema-migrate",
-        "url": "https://registry.npmjs.org/json-schema-migrate/-/json-schema-migrate-2.0.0.tgz",
-    },
     "json-schema-traverse@0.4.1": {
         "integrity": "sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg==",
         "name": "json-schema-traverse",
@@ -8972,11 +8909,6 @@ PACKAGES = {
         "integrity": "sha512-SU/971Kt5qVQfJpyDveVhQ/vya+5hvrjClFOcr8c0Fq5aODJjMwutrOfCU+eCnVD5gpx1Q3fEqkyom77zH1iIg==",
         "name": "json-stable-stringify",
         "url": "https://registry.npmjs.org/json-stable-stringify/-/json-stable-stringify-1.1.1.tgz",
-    },
-    "json5@2.2.3": {
-        "integrity": "sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==",
-        "name": "json5",
-        "url": "https://registry.npmjs.org/json5/-/json5-2.2.3.tgz",
     },
     "jsonfile@6.1.0": {
         "deps": [
@@ -9344,11 +9276,6 @@ PACKAGES = {
         "integrity": "sha512-KqWh+VchfxcMNRAJjj2tnsSJdNbHsVgnkBhTNrW7AjVo6OvLtxw8zfT9oLw1JSohlFzJ8jCoTgaoXvJ+kHt6fw==",
         "name": "minimatch",
         "url": "https://registry.npmjs.org/minimatch/-/minimatch-9.0.4.tgz",
-    },
-    "minimist@1.2.8": {
-        "integrity": "sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==",
-        "name": "minimist",
-        "url": "https://registry.npmjs.org/minimist/-/minimist-1.2.8.tgz",
     },
     "minipass-collect@2.0.1": {
         "deps": [
@@ -10917,18 +10844,6 @@ ROOTS = [
     {
         "id": "@typescript-eslint/parser@7.13.1-e45c17ec",
         "name": "@typescript-eslint/parser",
-    },
-    {
-        "id": "ajv-cli@5.0.0-e45c17ec",
-        "name": "ajv-cli",
-    },
-    {
-        "id": "ajv-formats@3.0.1-e45c17ec",
-        "name": "ajv-formats",
-    },
-    {
-        "id": "ajv@8.16.0",
-        "name": "ajv",
     },
     {
         "id": "argparse@2.0.1",

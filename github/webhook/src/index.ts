@@ -1,6 +1,5 @@
 import { verify } from "@octokit/webhooks-methods";
 import { WebhookEvent } from "@octokit/webhooks-types";
-import * as eventValidate from "./event-validate";
 
 export const GithubSignatureHeader = "X-Hub-Signature-256";
 
@@ -26,13 +25,8 @@ export async function githubWebhookRead(
   } catch (e) {
     throw new GithubWebhookBodyMalformedError(String(e));
   }
-  if (!eventValidate(event)) {
-    throw new GithubWebhookBodyMalformedError(
-      eventValidate.errors![0].message || "",
-    );
-  }
 
-  return event;
+  return event as WebhookEvent;
 }
 
 export interface GithubWebhookRequest {

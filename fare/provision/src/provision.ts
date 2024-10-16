@@ -168,7 +168,9 @@ async function provision({ provisionerId }: { provisionerId: string }) {
   const launchTimeout = durationAttributeFormat.read(
     provisionerItem.LaunchTimeout,
   );
-  const repoName = stringAttributeFormat.read(provisionerItem.RepoName);
+  const repoName =
+    provisionerItem.RepoName &&
+    stringAttributeFormat.read(provisionerItem.RepoName);
 
   const credentials = awsCredentialsProvider({
     dynamodbClient,
@@ -555,13 +557,17 @@ async function stopInstance({
   repoName: string;
   provisionerId: string;
 }) {
-  await disableInstance({
-    instance,
-    installationClient,
-    dynamodbClient,
-    repoName,
-    provisionerId,
-  });
+  if (
+    !(await disableInstance({
+      instance,
+      installationClient,
+      dynamodbClient,
+      repoName,
+      provisionerId,
+    }))
+  ) {
+    return;
+  }
 
   console.log(`Stopping instance ${provisionerId}/${instance.id}`);
   await ec2Client.send(

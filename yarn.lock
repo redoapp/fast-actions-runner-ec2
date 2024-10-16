@@ -2171,9 +2171,6 @@ __metadata:
     "@types/react-dom": ^18
     "@typescript-eslint/eslint-plugin": ^7
     "@typescript-eslint/parser": " ^7"
-    ajv: ^8
-    ajv-cli: ^5
-    ajv-formats: ^3
     argparse: ^2
     aws-cdk: ^2.147
     aws-cdk-lib: ^2.147
@@ -3636,42 +3633,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv-cli@npm:^5":
-  version: 5.0.0
-  resolution: "ajv-cli@npm:5.0.0"
-  dependencies:
-    ajv: ^8.0.0
-    fast-json-patch: ^2.0.0
-    glob: ^7.1.0
-    js-yaml: ^3.14.0
-    json-schema-migrate: ^2.0.0
-    json5: ^2.1.3
-    minimist: ^1.2.0
-  peerDependencies:
-    ts-node: ">=9.0.0"
-  peerDependenciesMeta:
-    ts-node:
-      optional: true
-  bin:
-    ajv: dist/index.js
-  checksum: e8ba29f618c653abba3a08d8784f8c882b5ac560dab587540af4d53d8230acb93af07c37165a0461294adb4015ba8ceb09916017a66754c782f950f9679ae94a
-  languageName: node
-  linkType: hard
-
-"ajv-formats@npm:^3":
-  version: 3.0.1
-  resolution: "ajv-formats@npm:3.0.1"
-  dependencies:
-    ajv: ^8.0.0
-  peerDependencies:
-    ajv: ^8.0.0
-  peerDependenciesMeta:
-    ajv:
-      optional: true
-  checksum: f4e1fe232d67fcafc02eafe373a7a9962351e0439dd0736647ca75c93c3da23b430b6502c255ab4315410ae330d4f3013ac9fe226c40b2524ca93a58e786d086
-  languageName: node
-  linkType: hard
-
 "ajv@npm:^6.12.4":
   version: 6.12.6
   resolution: "ajv@npm:6.12.6"
@@ -3684,7 +3645,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv@npm:^8, ajv@npm:^8.0.0, ajv@npm:^8.0.1":
+"ajv@npm:^8.0.1":
   version: 8.16.0
   resolution: "ajv@npm:8.16.0"
   dependencies:
@@ -4709,13 +4670,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-deep-equal@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "fast-deep-equal@npm:2.0.1"
-  checksum: b701835a87985e0ec4925bdf1f0c1e7eb56309b5d12d534d5b4b69d95a54d65bb16861c081781ead55f73f12d6c60ba668713391ee7fbf6b0567026f579b7b0b
-  languageName: node
-  linkType: hard
-
 "fast-deep-equal@npm:^3.1.1, fast-deep-equal@npm:^3.1.3":
   version: 3.1.3
   resolution: "fast-deep-equal@npm:3.1.3"
@@ -4740,15 +4694,6 @@ __metadata:
     merge2: ^1.3.0
     micromatch: ^4.0.4
   checksum: 900e4979f4dbc3313840078419245621259f349950411ca2fa445a2f9a1a6d98c3b5e7e0660c5ccd563aa61abe133a21765c6c0dec8e57da1ba71d8000b05ec1
-  languageName: node
-  linkType: hard
-
-"fast-json-patch@npm:^2.0.0":
-  version: 2.2.1
-  resolution: "fast-json-patch@npm:2.2.1"
-  dependencies:
-    fast-deep-equal: ^2.0.1
-  checksum: 955aebb3f873d1fb0452a5d8c34865ce4c3c6cdafeb7d3ad98d43b467de9a5a0d304132f8595fd2b373f8f4d200605947e865286b180f3a55e8377a634893164
   languageName: node
   linkType: hard
 
@@ -4982,7 +4927,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^7.1.0, glob@npm:^7.1.3":
+"glob@npm:^7.1.3":
   version: 7.2.3
   resolution: "glob@npm:7.2.3"
   dependencies:
@@ -5411,7 +5356,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-yaml@npm:^3.10.0, js-yaml@npm:^3.14.0":
+"js-yaml@npm:^3.10.0":
   version: 3.14.1
   resolution: "js-yaml@npm:3.14.1"
   dependencies:
@@ -5488,15 +5433,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"json-schema-migrate@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "json-schema-migrate@npm:2.0.0"
-  dependencies:
-    ajv: ^8.0.0
-  checksum: 21537305f3a5102695cfeeab997d565516297b240ee560bf7fe5c01ea4d56b65e0fbc4e9a4f9a32819e2cb1874daf43b06eb580e623d0aade0cf50d03ae40418
-  languageName: node
-  linkType: hard
-
 "json-schema-traverse@npm:^0.4.1":
   version: 0.4.1
   resolution: "json-schema-traverse@npm:0.4.1"
@@ -5527,15 +5463,6 @@ __metadata:
     jsonify: ^0.0.1
     object-keys: ^1.1.1
   checksum: e1ba06600fd278767eeff53f28e408e29c867e79abf564e7aadc3ce8f31f667258f8db278ef28831e45884dd687388fa1910f46e599fc19fb94c9afbbe3a4de8
-  languageName: node
-  linkType: hard
-
-"json5@npm:^2.1.3":
-  version: 2.2.3
-  resolution: "json5@npm:2.2.3"
-  bin:
-    json5: lib/cli.js
-  checksum: 2a7436a93393830bce797d4626275152e37e877b265e94ca69c99e3d20c2b9dab021279146a39cdb700e71b2dd32a4cebd1514cd57cee102b1af906ce5040349
   languageName: node
   linkType: hard
 
@@ -5856,13 +5783,6 @@ __metadata:
   dependencies:
     brace-expansion: ^2.0.1
   checksum: cf717f597ec3eed7dabc33153482a2e8d49f4fd3c26e58fd9c71a94c5029a0838728841b93f46bf1263b65a8010e2ee800d0dc9b004ab8ba8b6d1ec07cc115b5
-  languageName: node
-  linkType: hard
-
-"minimist@npm:^1.2.0":
-  version: 1.2.8
-  resolution: "minimist@npm:1.2.8"
-  checksum: 75a6d645fb122dad29c06a7597bddea977258957ed88d7a6df59b5cd3fe4a527e253e9bbf2e783e4b73657f9098b96a5fe96ab8a113655d4109108577ecf85b0
   languageName: node
   linkType: hard
 

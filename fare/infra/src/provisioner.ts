@@ -162,6 +162,7 @@ export function githubParams(scope: Construct) {
 
   const repoNameParam = new CfnParameter(scope, "RepoName", {
     allowedPattern: githubNamePattern,
+    default: "",
     description: "GitHub repository name",
     maxLength: githubNameLengthMax,
   });

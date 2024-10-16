@@ -5,17 +5,9 @@
 
 import "./polyfill";
 
-import {
-  DynamoDBClient,
-  GetItemCommand,
-  paginateQuery,
-} from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, paginateQuery } from "@aws-sdk/client-dynamodb";
 import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
-import {
-  instantAttributeFormat,
-  numberAttributeFormat,
-  stringAttributeFormat,
-} from "@redotech/dynamodb/attribute";
+import { stringAttributeFormat } from "@redotech/dynamodb/attribute";
 import { envNumberRead, envStringRead } from "@redotech/lambda/env";
 import { Handler } from "aws-lambda";
 import {
@@ -65,46 +57,26 @@ async function runnersRefresh({
   installationClient: InstallationClient;
   provisionerId: string;
 }) {
-  const output = await dynamodbClient.send(
-    new GetItemCommand({
-      TableName: provisionerTableName,
-      Key: { Id: stringAttributeFormat.write(provisionerId) },
-      ProjectionExpression: "RepoName",
-    }),
-  );
-  const item = output.Item;
-  if (!item) {
-    throw new Error(`Provisioner ${provisionerId} not found`);
-  }
-
-  const repoName = item.UserName && stringAttributeFormat.read(item.RepoName);
-
   for await (const output of paginateQuery(
     { client: dynamodbClient },
     {
       ExpressionAttributeValues: {
         ":provisionerId": stringAttributeFormat.write(provisionerId),
       },
-      FilterExpression: "attribute_exists(RunnerId)",
+      FilterExpression: "attribute_exists(Runner)",
       KeyConditionExpression: "ProvisionerId = :provisionerId",
-      ProjectionExpression: "ActiveAt, Id, RunnerId",
+      ProjectionExpression: "Id",
       TableName: instanceTableName,
     },
   )) {
     for (const item of output.Items!) {
-      const activeAt = instantAttributeFormat.read(item.ActiveAt);
       const id = stringAttributeFormat.read(item.Id);
-      const runnerId = numberAttributeFormat.read(item.RunnerId);
-
       await runnerRefresh({
-        activeAt,
         dynamodbClient,
         installationClient,
-        id: runnerId,
         instanceId: id,
         instanceTableName,
         provisionerId,
-        repoName,
       });
     }
   }

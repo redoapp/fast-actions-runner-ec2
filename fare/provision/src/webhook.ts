@@ -3,7 +3,6 @@ import "./polyfill";
 import {
   ConditionalCheckFailedException,
   DynamoDBClient,
-  GetItemCommand,
   UpdateItemCommand,
   UpdateItemCommandOutput,
   paginateQuery,
@@ -24,7 +23,6 @@ import {
   githubWebhook,
   provisionerInstallationClient,
 } from "./github";
-import { runnerAttributeFormat } from "./instance";
 import { JobStatus } from "./job";
 import { labelsMatch } from "./provisioner";
 import { runnerRefresh as commonRefreshRunner } from "./runner";
@@ -70,7 +68,7 @@ export const handler: APIGatewayProxyHandlerV2 = (
         const jobId = event.workflow_job.id;
         const orgName = event.organization?.login;
         const repoName = event.repository.name;
-        const runnerName = event.workflow_job.runner_name;
+        const runnerName = event.workflow_job.runner_name ?? undefined;
         const userName =
           event.repository.owner.type === "User"
             ? event.repository.owner.login
@@ -80,20 +78,16 @@ export const handler: APIGatewayProxyHandlerV2 = (
             ? JobStatus.COMPLETED
             : JobStatus.PENDING;
 
-        await Promise.all([
-          runnerName
-            ? refreshRunner({ instanceId: runnerName })
-            : Promise.resolve(),
-          processJobEvent({
-            labels,
-            installationId,
-            jobId,
-            orgName,
-            repoName,
-            status,
-            userName,
-          }),
-        ]);
+        await processJobEvent({
+          labels,
+          installationId,
+          jobId,
+          orgName,
+          repoName,
+          runnerName,
+          status,
+          userName,
+        });
 
         return { statusCode: 204 };
       },
@@ -146,6 +140,7 @@ async function processJobEvent({
   labels: labelNames,
   orgName,
   repoName,
+  runnerName,
   userName,
 }: {
   status: JobStatus;
@@ -154,6 +149,7 @@ async function processJobEvent({
   orgName: string | undefined;
   labels: string[];
   repoName: string;
+  runnerName: string | undefined;
   userName: string | undefined;
 }) {
   console.log(`Processing job ${jobId} ${status}`);
@@ -174,7 +170,7 @@ async function processJobEvent({
           " RepoName = :repoName" +
           ", #status = :status" +
           (status === JobStatus.COMPLETED ? ", ExpiresAt = :expiresAt" : "") +
-          (orgName !== undefined ? ", OrgName = :owner" : ""),
+          (orgName !== undefined ? ", OrgName = :orgName" : ""),
         TableName: jobTableName,
         ExpressionAttributeNames: { "#status": "Status" },
         ExpressionAttributeValues: {
@@ -238,44 +234,22 @@ async function processJobEvent({
         QueueUrl: provisionQueueUrl,
       }),
     );
+    if (runnerName !== undefined) {
+      await refreshRunner({ instanceId: runnerName, provisionerId });
+    }
   }
 }
 
 /**
  * Refresh the status of the runner.
  */
-export async function refreshRunner({ instanceId }: { instanceId: string }) {
-  const instanceOutput = await dynamodbClient.send(
-    new GetItemCommand({
-      Key: { Id: stringAttributeFormat.write(instanceId) },
-      TableName: instanceTableName,
-      ProjectionExpression: "ActiveAt, Runner, ProvisionerId",
-    }),
-  );
-  const instanceItem = instanceOutput.Item;
-  if (!instanceItem || !instanceItem.Runner) {
-    return;
-  }
-  const provisionerId = stringAttributeFormat.read(instanceItem.ProvisionerId);
-
-  const provisionerOutput = await dynamodbClient.send(
-    new GetItemCommand({
-      Key: { Id: stringAttributeFormat.write(provisionerId) },
-      TableName: instanceTableName,
-      ProjectionExpression: "RepoName",
-    }),
-  );
-  const provisionerItem = provisionerOutput.Item;
-  if (!provisionerItem) {
-    return;
-  }
-
-  const repoName =
-    provisionerItem.RepoName &&
-    stringAttributeFormat.read(instanceItem.RepoName);
-
-  const runner = runnerAttributeFormat.read(instanceItem.Runner);
-
+async function refreshRunner({
+  instanceId,
+  provisionerId,
+}: {
+  instanceId: string;
+  provisionerId: string;
+}) {
   const installationClient = await provisionerInstallationClient({
     dynamodbClient,
     provisionerTableName,
@@ -284,13 +258,10 @@ export async function refreshRunner({ instanceId }: { instanceId: string }) {
   });
 
   await commonRefreshRunner({
-    activeAt: runner.activeAt,
     dynamodbClient,
     installationClient,
+    instanceId,
     instanceTableName,
-    instanceId: instanceId,
-    repoName,
-    id: runner.id,
     provisionerId,
   });
 }

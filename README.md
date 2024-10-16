@@ -36,7 +36,8 @@ From Step 1, take the name of the created Lambda function. If you want to create
 a personal app, omit the payload.
 
 ```sh
-aws lambda invoke --function-name Example  --payload'{"organization":"example-org"}'
+aws --cli-binary-format raw-in-base64-out lambda invoke --function-name Example --payload'{"organization":"example-org"}' /dev/stdout \
+  | jq -rs '.[0].url'
 ```
 
 This produces a URL. Open the URL in your browser. You will be prompted to

@@ -275,7 +275,7 @@ export function instanceStack(
     launchTemplateData: {
       blockDeviceMappings: [
         {
-          deviceName: "/dev/xvda",
+          deviceName: "/dev/sda1",
           ebs: { volumeSize: volumeSizeGib, volumeType: "gp3" },
         },
       ],

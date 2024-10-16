@@ -1,14 +1,14 @@
-package(default_visibility =  ["//visibility:public"])
+package(default_visibility = ["//visibility:public"])
 
 genrule(
     name = "version",
+    srcs = ["//bazel/rules:build_embed_label"],
+    outs = ["version.txt"],
     cmd = """
-        if [ -s $(location //bazel/rules:build_embed_label)]; then
+        if [ -s $(location //bazel/rules:build_embed_label) ]; then
             cp $(location //bazel/rules:build_embed_label) $@
         else
             printf 0 > $@
         fi
     """.strip(),
-    srcs = ["//bazel/rules:build_embed_label"],
-    outs = ["version.txt"],
 )

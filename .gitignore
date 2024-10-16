@@ -7,6 +7,5 @@ user.bazelrc
 
 /bazel-*
 /data
-/user
 
 !.vscode/extensions.json
