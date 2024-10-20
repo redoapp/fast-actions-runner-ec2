@@ -1,6 +1,7 @@
 import { artifactParams } from "@redotech/cdk-util/artifact";
 import { iamPolicyName } from "@redotech/cdk-util/iam";
 import { getName } from "@redotech/cdk-util/name";
+import { githubNameLengthMax, githubNamePattern } from "@redotech/github-util";
 import {
   CfnDeployment,
   CfnMethod,
@@ -18,16 +19,32 @@ import {
   CfnUrl,
 } from "aws-cdk-lib/aws-lambda";
 import { CfnQueue } from "aws-cdk-lib/aws-sqs";
-import { Aws, CfnOutput, CustomResource, Stack } from "aws-cdk-lib/core";
+import {
+  Aws,
+  CfnOutput,
+  CfnParameter,
+  CustomResource,
+  Stack,
+} from "aws-cdk-lib/core";
 import { Construct } from "constructs";
 import { digestKey } from "./common";
 
 export function appTemplate(stack: Stack) {
   const { artifactS3Bucket, artifactS3KeyPrefix } = artifactParams(stack);
 
+  const orgNameParam = new CfnParameter(stack, "OrgName", {
+    allowedPattern: githubNamePattern,
+    default: "",
+    description:
+      "GitHub organization name, if app will owned by an organization",
+    maxLength: githubNameLengthMax,
+  });
+  const orgName = orgNameParam.valueAsString;
+
   const { provisionerFunction, role, setupUrlFunction } = appStack(stack, {
     artifactS3Bucket,
     artifactS3KeyPrefix,
+    orgName,
   });
 
   new CfnOutput(stack, "ProvisionerFunctionArn", {
@@ -53,7 +70,8 @@ export function appStack(
   {
     artifactS3KeyPrefix,
     artifactS3Bucket,
-  }: { artifactS3KeyPrefix: string; artifactS3Bucket: string },
+    orgName,
+  }: { artifactS3KeyPrefix: string; artifactS3Bucket: string; orgName: string },
 ) {
   const secretName = `/${Aws.STACK_NAME}/Secret`;
   const githubAppIdName = `/${Aws.STACK_NAME}/GithubAppId`;
@@ -163,6 +181,7 @@ export function appStack(
       artifactS3KeyPrefix,
       githubAppIdName,
       githubPrivateKeyName,
+      orgName,
       role,
       secretName,
       webhookSecretName,
@@ -254,6 +273,7 @@ function githubAppStack(
     artifactS3Bucket,
     githubAppIdName,
     githubPrivateKeyName,
+    orgName,
     role,
     secretName,
     webhookSecretName,
@@ -263,6 +283,7 @@ function githubAppStack(
     artifactS3Bucket: string;
     githubAppIdName: string;
     githubPrivateKeyName: string;
+    orgName: string;
     role: CfnRole;
     secretName: string;
     webhookSecretName: string;
@@ -345,6 +366,7 @@ function githubAppStack(
       variables: {
         APP_NAME: Aws.STACK_NAME,
         CALLBACK_URL: callbackUrl.attrFunctionUrl,
+        GITHUB_ORG: orgName,
         NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=50",
         WEBHOOK_URL: webhookUrl.attrFunctionUrl,
       },

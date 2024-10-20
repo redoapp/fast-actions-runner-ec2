@@ -6,20 +6,13 @@ const manifestUrl = envStringRead("MANIFEST_URL");
 
 const secret = envStringRead("SECRET");
 
-export interface AppUrlEvent {
-  organization?: string;
-}
-
 export interface AppUrlResult {
   url: string;
 }
 
-export const handler: Handler<AppUrlEvent, AppUrlResult> = async (event) => {
+export const handler: Handler<unknown, AppUrlResult> = async () => {
   const token = sign({}, secret, { expiresIn: "1h" });
   const url = new URL(manifestUrl);
-  if (event.organization !== undefined) {
-    url.searchParams.set("org", event.organization);
-  }
   url.searchParams.set("token", token);
   return { url: url.toString() };
 };

@@ -1,6 +1,8 @@
 load("//aws/cfn-rules:rules.bzl", "cfn_mermaid")
 load("//shell/rules:rules.bzl", "sh_binary")
 
+package(default_visibility = ["//visibility:public"])
+
 cfn_mermaid(
     name = "app",
     src = "//fare/infra:app_cf",

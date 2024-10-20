@@ -4,13 +4,13 @@ load("@better_rules_javascript//javascript:rules.bzl", "js_library")
 package(default_visibility = ["//visibility:public"])
 
 alias(
-    name = "bazelrc",
-    actual = "//tools/bazel:bazelrc",
+    name = "doc_gen",
+    actual = "//doc:gen",
 )
 
 alias(
-    name = "doc_gen",
-    actual = "//doc:gen",
+    name = "fare_publish",
+    actual = "//redotech/publish:fare_publish",
 )
 
 alias(
@@ -29,11 +29,6 @@ alias(
 )
 
 alias(
-    name = "nodejs_roots",
-    actual = "//tools/nodejs:roots",
-)
-
-alias(
     name = "npm_resolve",
     actual = "//tools/npm:resolve",
 )
@@ -41,16 +36,6 @@ alias(
 alias(
     name = "refresh",
     actual = "//tools/bazel:refresh",
-)
-
-alias(
-    name = "tslint",
-    actual = "//tools/lint:tslint",
-)
-
-test_suite(
-    name = "external_test",
-    tests = ["//tools/test:external_test"],
 )
 
 cjs_root(
@@ -62,11 +47,6 @@ js_library(
     name = "eslint_config",
     srcs = [".eslintrc.js"],
     root = ":root",
-)
-
-alias(
-    name = "runner_publish",
-    actual = "//tools/publish:runner_publish",
 )
 
 js_library(

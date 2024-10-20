@@ -11,8 +11,10 @@
 		rootNetworkSubnet[NetworkSubnet<br/>EC2::Subnet]-->rootNetworkVpc[NetworkVpc<br/>EC2::VPC]
 		rootNetworkSubnetRouteTable[NetworkSubnetRouteTable<br/>EC2::SubnetRouteTableAssociation]-->rootNetworkRouteTable[NetworkRouteTable<br/>EC2::RouteTable]
 		rootNetworkSubnetRouteTable[NetworkSubnetRouteTable<br/>EC2::SubnetRouteTableAssociation]-->rootNetworkSubnet[NetworkSubnet<br/>EC2::Subnet]
-		rootInstanceInstanceProfile[InstanceInstanceProfile<br/>IAM::InstanceProfile]-->rootInstanceRole[InstanceRole<br/>IAM::Role]
+		rootInstanceInstanceProfile[InstanceInstanceProfile<br/>IAM::InstanceProfile]-->rootInstanceInstanceRole[InstanceInstanceRole<br/>IAM::Role]
 		rootInstanceSecurityGroup[InstanceSecurityGroup<br/>EC2::SecurityGroup]-->rootNetworkVpc[NetworkVpc<br/>EC2::VPC]
+		rootRolePolicy[RolePolicy<br/>IAM::RolePolicy]-->rootRole[Role<br/>IAM::Role]
+		rootRolePolicy[RolePolicy<br/>IAM::RolePolicy]-->rootInstanceInstanceRole[InstanceInstanceRole<br/>IAM::Role]
 
   	end
 

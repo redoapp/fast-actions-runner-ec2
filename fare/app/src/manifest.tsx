@@ -6,10 +6,11 @@ const appName = envStringRead("APP_NAME");
 
 const callbackUrl = envStringRead("CALLBACK_URL");
 
+const orgName = envStringRead("GITHUB_ORG");
+
 const webhookUrl = envStringRead("WEBHOOK_URL");
 
 export const handler: LambdaFunctionURLHandler = async (event) => {
-  const orgName = event.queryStringParameters!.org;
   const token = event.queryStringParameters!.token;
   if (!token) {
     return {

@@ -2,49 +2,75 @@
 
 An EC2-based self-hosted runner for GitHub Actions.
 
-Emphasizes, ease-of-use, flexibility, and performance.
+FARE starts/stops pooled EC2 instances, for quick startup and warm caches.
 
 ## Description
 
-This self-hosted runner is cheaper and faster than using hosted GitHub Actions
-runners.
+This self-hosted runner is cheaper than hosted GitHub Actions runners, and
+faster than alternatives.
 
 ### Cheaper
 
-At time of writing, GitHub's standard Linux runner for private repos is
-$0.48/hour. EC2 provides the same specs (m5.large) for $0.10/hour. This discount
-scales for larger instances as well.
+At time of writing, GitHub's standard Linux runner is $0.48/hour for private
+repos, whereas EC2 m5.large is $0.10/hour. This discount scales to larger
+instance sizes as well.
+
+Note that FARE workers incur EBS storage costs, which are $0.08/GB/month. (E.g.
+10 workers with 64GB disks are $51/month for storage.)
 
 ### Faster
 
-Caches can be very helpful for builds performance, but download and uploading
-caches over the network is slow.
+Caches can be very helpful for build performance, but downloading and uploading
+distributed caches is slow. And GitHub Actions limits total cache size to
+10GB/repository.
 
 Instead, FARE maintains a pool of EC2 intances, and starts or stops them as
 necessary.
 
+And instances may be used for multiple runs without restart, amortizing boot
+overhead and leveraging OS file caching.
+
 ## Usage
 
-### 1. Create Cloudformation stack from the App template.
+### 1. Create controller.
 
 Create a stack from
-`https://redotech-fast-actions-ec2-runner-artifact.s3.us-east-1.amazonaws.com/<version>/fare-app.template.yaml`
+`https://redotech-fare-artifact.s3.us-east-1.amazonaws.com/<version>/fare-app.template.yaml`
+
+If other AWS accounts will be using the controller, grant
+`lambda:InvokeFunction` on the ProvisionerFunctionArn to those accounts.
 
 ### 2. Create a GitHub app.
 
-From Step 1, take the name of the created Lambda function. If you want to create
-a personal app, omit the payload.
+From Step 1, read the SetupUrlFunctionArn output and invoke that Lambda
+function.
 
 ```sh
-aws --cli-binary-format raw-in-base64-out lambda invoke --function-name Example --payload'{"organization":"example-org"}' /dev/stdout \
-  | jq -rs '.[0].url'
+aws lambda invoke --function-name FunctionArn /dev/stdout | jq -rs '.[0].url'
 ```
 
-This produces a URL. Open the URL in your browser. You will be prompted to
-create a GitHub app. Accept.
+Open the URL in your browser. You will be prompted to create a GitHub app.
+Accept.
 
-### 3. Create Cloudformation stacks from the Provisioner template.
+### 3. Install the GitHub app.
 
-There are multiple ways of doing this.
+Install the GitHub app to the necessary organizations or repositories.
 
-### 4. Install the GitHub app.
+### 4. Configure the provisioner(s).
+
+You will need at least one label that will match job labels defined by GitHub
+actions. Organizations may create a runner group for to control access to the
+runners.
+
+#### Provisioner
+
+Create an EC2 launch template. Then use the Cloudformation template
+`https://redotech-fare-artifact.s3.us-east-1.amazonaws.com/<version>/fare-provisioner.template.yaml`.
+
+#### Preset
+
+Or use a preset that creates an EC2 launch template for you:
+`https://redotech-fare-artifact.s3.us-east-1.amazonaws.com/<version>/fare-basic-provisioner.template.yaml`.
+
+You might also consider using a preset for creating the VPC, subnet, etc.:
+`https://redotech-fare-artifact.s3.us-east-1.amazonaws.com/<version>/fare-basic-cluster.template.yaml`.
