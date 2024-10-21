@@ -321,21 +321,24 @@ async function provision({ provisionerId }: { provisionerId: string }) {
   );
   const runnerStatusCounts = countBy(
     instances,
-    (instance) => instance.ec2Status,
+    (instance) => instance.runner?.status,
   );
   console.log(
     `Runner statuses for ${provisionerId}: ${runnerStatusCounts[RunnerStatus.ACTIVE] ?? 0} active, ${runnerStatusCounts[RunnerStatus.IDLE] ?? 0} idle`,
   );
 
   // stop idle runners
-  let idleCandidates = instances.filter((instance) => instance.runner);
-  let idleMax = idleCandidates.length - countMin;
+  let idleMax =
+    instances.filter((instance) => instance.runner).length - countMin;
+  let idleCandidates = instances.filter(
+    (instance) => instance.runner?.status === RunnerStatus.IDLE,
+  );
   idleCandidates = sortBy(
     idleCandidates,
     (instance) => instance.runner!.activeAt.epochNanoseconds,
   );
   for (const instance of idleCandidates) {
-    if (!idleMax) {
+    if (idleMax <= 0) {
       break;
     }
     const idleExcess = instance
