@@ -65,43 +65,44 @@ export const handler: APIGatewayProxyHandlerV2 = (
           throw new GithubWebhookBodyMalformedError("workflow_job missing");
         }
 
+        const action = event.action;
         const installationId = event.installation!.id;
         const jobId = event.workflow_job.id;
         const runnerName = event.workflow_job.runner_name ?? undefined;
+        console.log(
+          `Processing event ${action} for job ${installationId}/${jobId}`,
+        );
 
         let provisionerId: string | undefined;
-        if (event.action === "completed") {
-          provisionerId = await processJobComplete({
-            installationId,
-            jobId,
-          });
-        } else {
-          const labels = event.workflow_job.labels;
-          const orgName = event.organization?.login;
-          const repoName = event.repository.name;
-          const userName =
-            event.repository.owner.type === "User"
-              ? event.repository.owner.login
-              : undefined;
-          provisionerId = await processJobPending({
-            labels,
-            installationId,
-            jobId,
-            orgName,
-            repoName,
-            userName,
-          });
+        switch (action) {
+          case "completed":
+            provisionerId = await processJobComplete({
+              installationId,
+              jobId,
+            });
+            break;
+          case "in_progress":
+          case "queued": {
+            const labels = event.workflow_job.labels;
+            const orgName = event.organization?.login;
+            const repoName = event.repository.name;
+            const userName =
+              event.repository.owner.type === "User"
+                ? event.repository.owner.login
+                : undefined;
+            provisionerId = await processJobPending({
+              labels,
+              installationId,
+              jobId,
+              orgName,
+              repoName,
+              userName,
+            });
+            break;
+          }
         }
 
         if (provisionerId !== undefined) {
-          await sqsClient.send(
-            new SendMessageCommand({
-              MessageBody: "_",
-              MessageDeduplicationId: context.awsRequestId,
-              MessageGroupId: provisionerId,
-              QueueUrl: provisionQueueUrl,
-            }),
-          );
           if (runnerName) {
             const installationClient = await provisionerInstallationClient({
               dynamodbClient,
@@ -118,6 +119,14 @@ export const handler: APIGatewayProxyHandlerV2 = (
               provisionerId,
             });
           }
+          await sqsClient.send(
+            new SendMessageCommand({
+              MessageBody: "_",
+              MessageDeduplicationId: context.awsRequestId,
+              MessageGroupId: provisionerId,
+              QueueUrl: provisionQueueUrl,
+            }),
+          );
         }
 
         return { statusCode: 204 };

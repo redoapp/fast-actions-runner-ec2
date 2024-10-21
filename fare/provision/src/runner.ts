@@ -27,6 +27,7 @@ export async function runnerRefresh({
   instanceId: string;
   provisionerId: string;
 }) {
+  console.log(`Refreshing ${provisionerId}/${instanceId} runner status`);
   const instanceOutput = await dynamodbClient.send(
     new GetItemCommand({
       Key: {
@@ -38,6 +39,9 @@ export async function runnerRefresh({
     }),
   );
   if (!instanceOutput.Item || !instanceOutput.Item!.Runner) {
+    console.log(
+      `Instance ${provisionerId}/${instanceId} does not have a runner`,
+    );
     return;
   }
 
@@ -64,8 +68,12 @@ export async function runnerRefresh({
         });
     }
     status = response.data.busy ? RunnerStatus.ACTIVE : RunnerStatus.IDLE;
+    console.log(`Instance ${provisionerId}/${instanceId} runner is ${status}`);
   } catch (e) {
     if (e instanceof RequestError && e.status === 404) {
+      console.log(
+        `Instance ${provisionerId}/${runner.id} does not have a GitHub runner`,
+      );
       status = RunnerStatus.IDLE;
     } else {
       throw e;
