@@ -35,7 +35,7 @@ import {
 import { arnAttributeFormat } from "@redotech/dynamodb/aws";
 import { envNumberRead, envStringRead, envUrlRead } from "@redotech/lambda/env";
 import { SQSHandler } from "aws-lambda";
-import { sortBy } from "lodash";
+import { countBy, sortBy } from "lodash";
 import { Temporal } from "temporal-polyfill";
 import {
   awsCredentialsProvider,
@@ -222,6 +222,14 @@ async function provision({ provisionerId }: { provisionerId: string }) {
     stopInstance({
       instance,
       ec2Client,
+      dynamodbClient,
+      provisionerId,
+    });
+
+  const stopGracefully = (instance: Instance) =>
+    stopInstanceGracefully({
+      instance,
+      ec2Client,
       installationClient,
       dynamodbClient,
       provisionerId,
@@ -232,44 +240,45 @@ async function provision({ provisionerId }: { provisionerId: string }) {
     terminateInstance({
       instance,
       ec2Client,
+      dynamodbClient,
+      provisionerId,
+    });
+
+  const terminateGracefully = (instance: Instance) =>
+    terminateInstanceGracefully({
+      instance,
+      ec2Client,
       installationClient,
       dynamodbClient,
       provisionerId,
       repoName,
     });
 
-  const instances: Instance[] = [];
+  let instances: Instance[] = [];
   for await (const instance of getInstances({ ec2Client, provisionerId })) {
-    if (
+    if (instance.status === undefined) {
+      console.log(`Instance ${provisionerId}/${instance.id} is unrecognized`);
+      await terminate(instance);
+      continue;
+    } else if (
       instance.launchTemplateId !== launchTemplateId ||
       instance.launchTemplateVersion !== launchTemplateVersion
     ) {
-      console.log(`Instance ${provisionerId}/${instance.id} is out of date`);
-      if (await terminate(instance)) {
-        continue;
-      }
-    } else if (
-      instance.status !== InstanceStatus.DISABLED &&
-      !instance.runner &&
-      instance.startedAt &&
-      Temporal.Instant.compare(
-        instance.startedAt.add(launchTimeout),
-        Temporal.Now.instant(),
-      ) < 0
-    ) {
       console.log(
-        `No runner has been created by ${provisionerId}/${instance.id} after ${Math.round(instance.startedAt.until(Temporal.Now.instant()).total("seconds"))}s`,
+        `Instance ${provisionerId}/${instance.id} is out of date with ${launchTemplateId}/${launchTemplateVersion}`,
       );
-      if (await terminate(instance)) {
+      if (await terminateGracefully(instance)) {
         continue;
       }
-    } else if (instance.status === undefined) {
-      console.log(`Instance ${provisionerId}/${instance.id} is unrecognized`);
-      if (await terminate(instance)) {
-        continue;
+    } else if (instance.status === InstanceStatus.DISABLED) {
+      if (instance.ec2Status === Ec2InstanceStatus.STARTED) {
+        console.log(
+          `Instance ${provisionerId}/${instance.id} has been disabled`,
+        );
+        await stop(instance);
+        instance.ec2Status = Ec2InstanceStatus.STOPPING;
       }
     } else if (
-      instance.status === InstanceStatus.ENABLED &&
       [Ec2InstanceStatus.STOPPED, Ec2InstanceStatus.STOPPING].includes(
         instance.ec2Status,
       )
@@ -277,96 +286,110 @@ async function provision({ provisionerId }: { provisionerId: string }) {
       console.log(
         `Instance ${provisionerId}/${instance.id} unexpectedly shut down`,
       );
-      if (await terminate(instance)) {
+      if (await terminateGracefully(instance)) {
         continue;
       }
-    } else if (
-      instance.status === InstanceStatus.DISABLED &&
-      instance.ec2Status === Ec2InstanceStatus.STARTED
-    ) {
-      // TODO: is this right?
-      console.log(`Instance ${provisionerId}/${instance.id} has been disabled`);
-      if (await stop(instance)) {
-        instance.ec2Status = Ec2InstanceStatus.STOPPING;
-        instance.status = InstanceStatus.DISABLED;
-      }
-    } else if (
-      instance.runner &&
-      instance.runner.status === RunnerStatus.IDLE &&
-      Temporal.Instant.compare(
-        instance.runner.activeAt!.add(idleTimeout),
-        Temporal.Now.instant(),
-      ) < 0
-    ) {
-      console.log(
-        `Runner on instance ${provisionerId}/${instance.id} has exceeded idle timeout`,
-      );
-      if (await stop(instance)) {
-        instance.ec2Status = Ec2InstanceStatus.STOPPING;
-        instance.status = InstanceStatus.DISABLED;
+    } else if (!instance.runner) {
+      const launchExcess = Temporal.Now.instant()
+        .until(instance.startedAt)
+        .subtract(launchTimeout);
+      if (
+        Temporal.Duration.compare(new Temporal.Duration(), launchExcess) < 0
+      ) {
+        console.log(
+          `Instance ${provisionerId}/${instance.id} exceeded launch timeout ${durationDisplay(launchTimeout)} by ${durationDisplay(launchExcess)}`,
+        );
+        if (await terminateGracefully(instance)) {
+          continue;
+        }
       }
     }
     instances.push(instance);
   }
-  // scale down within the maximum
-  const priority = (instance: Instance) =>
-    +(instance.status === InstanceStatus.ENABLED) + +!!instance.runner;
-  instances.sort((a, b) => priority(a) - priority(b));
-  const excess = instances.length - countMax;
-  if (0 < excess) {
-    console.log(
-      `Instance count for ${provisionerId} is ${excess} in excess of the maximum`,
-    );
-    while (countMax < instances.length) {
-      const instance = instances.pop()!;
-      instances.unshift(instance);
-      await terminate(instance);
-    }
-  }
 
+  // count instances
   console.log(
     `Total instance count for ${provisionerId} is ${instances.length}`,
   );
-
-  const startingCount = instances.filter(
-    (instance) => instance.ec2Status === Ec2InstanceStatus.STARTING,
-  ).length;
-  const startedCount = instances.filter(
-    (instance) => instance.ec2Status === Ec2InstanceStatus.STARTED,
-  ).length;
-  const stoppingCount = instances.filter(
-    (instance) => instance.ec2Status === Ec2InstanceStatus.STOPPING,
-  ).length;
-  const stoppedCount = instances.filter(
-    (instance) => instance.ec2Status === Ec2InstanceStatus.STOPPED,
-  ).length;
+  const statusCounts = countBy(instances, (instance) => instance.status);
   console.log(
-    `EC2 statuses for ${provisionerId}: ${startingCount} starting, ${startedCount} started, ${stoppingCount} stopping, ${stoppedCount} stopped`,
+    `Instance statuses for ${provisionerId}: ${statusCounts[InstanceStatus.ENABLED]} enabled, ${InstanceStatus.DISABLED} disabled`,
   );
-
-  const enabledCount = instances.filter(
-    (instance) => instance.status === InstanceStatus.ENABLED,
-  ).length;
-  const disabledCount = instances.filter(
-    (instance) => instance.status === InstanceStatus.DISABLED,
-  ).length;
+  const ec2StatusCounts = countBy(instances, (instance) => instance.ec2Status);
   console.log(
-    `Instance statuses for ${provisionerId}: ${enabledCount} enabled, ${disabledCount} disabled`,
+    `EC2 statuses for ${provisionerId}: ${ec2StatusCounts[Ec2InstanceStatus.STARTING]} starting, ${ec2StatusCounts[Ec2InstanceStatus.STARTED]} started, ${ec2StatusCounts[Ec2InstanceStatus.STOPPING]} stopping, ${ec2StatusCounts[Ec2InstanceStatus.STOPPED]} stopped`,
+  );
+  const runnerStatusCounts = countBy(
+    instances,
+    (instance) => instance.ec2Status,
+  );
+  console.log(
+    `Runner statuses for ${provisionerId}: ${runnerStatusCounts[RunnerStatus.ACTIVE]} active, ${runnerStatusCounts[RunnerStatus.IDLE]} idle`,
   );
 
-  const enabledInstances = instances.filter(
-    (instance) => instance.status === InstanceStatus.ENABLED,
+  // stop idle runners
+  let idleCandidates = instances.filter((instance) => instance.runner);
+  let idleMax = idleCandidates.length - countMin;
+  idleCandidates = sortBy(
+    instances,
+    (instance) => instance.runner!.activeAt.epochNanoseconds,
   );
+  for (const instance of idleCandidates) {
+    if (!idleMax) {
+      break;
+    }
+    const idleExcess = instance
+      .runner!.activeAt.until(Temporal.Now.instant())
+      .subtract(idleTimeout);
+    if (Temporal.Duration.compare(idleExcess, new Temporal.Duration()) <= 0) {
+      break;
+    }
+    console.log(
+      `Runner on instance ${provisionerId}/${instance.id} exceeded idle timeout ${durationDisplay(idleTimeout)} by ${durationDisplay(idleExcess)}`,
+    );
+    if (await stopGracefully(instance)) {
+      instance.ec2Status = Ec2InstanceStatus.STOPPING;
+      instance.status = InstanceStatus.DISABLED;
+      idleMax--;
+    }
+  }
+
+  // scale down within the maximum
+  instances = sortBy(
+    instances,
+    (instance) => instance.status === InstanceStatus.ENABLED,
+    (instance) => !!instance.runner,
+    (instance) =>
+      instance.runner
+        ? instance.runner.activeAt.epochNanoseconds
+        : instance.startedAt.epochNanoseconds,
+  );
+  const excessCount = instances.length - countMax;
+  if (0 < excessCount) {
+    console.log(
+      `Instance count for ${provisionerId} exceeds the maximum ${countMax} by ${excessCount}`,
+    );
+    for (let i = 0; i < instances.length && countMax < instances.length; ) {
+      if (await terminateGracefully(instances[i])) {
+        instances.splice(i, 1);
+      } else {
+        i++;
+      }
+    }
+  }
 
   // query jobs
   const jobCount = await pendingJobsCount({ provisionerId });
   console.log(`Pending job count for ${provisionerId} is ${jobCount}`);
 
-  let instancesPlanned = Math.ceil(jobCount * scaleFactor);
-  instancesPlanned = Math.max(instancesPlanned, countMin);
+  let instanceTargetCount = Math.ceil(jobCount * scaleFactor);
+  instanceTargetCount = Math.max(instanceTargetCount, countMin);
 
-  instancesPlanned -= enabledInstances.length;
-  if (instancesPlanned <= 0) {
+  let instancePlannedCount =
+    instanceTargetCount -
+    instances.filter((instance) => instance.status === InstanceStatus.ENABLED)
+      .length;
+  if (instancePlannedCount <= 0) {
     return;
   }
 
@@ -378,24 +401,24 @@ async function provision({ provisionerId }: { provisionerId: string }) {
     startInstances,
     (instance) => -instance.startedAt.epochNanoseconds,
   );
-  startInstances = startInstances.slice(0, instancesPlanned);
+  startInstances = startInstances.slice(0, instancePlannedCount);
   console.log(`Starting ${startInstances.length} instances`);
   for (const instance of startInstances) {
     await start(instance);
   }
 
   // limit total instances to maximum
-  instancesPlanned = Math.min(
-    instancesPlanned - startInstances.length,
+  instancePlannedCount = Math.min(
+    instancePlannedCount - startInstances.length,
     countMax - instances.length,
   );
-  if (instancesPlanned <= 0) {
+  if (instancePlannedCount <= 0) {
     return;
   }
 
   // create instances
-  console.log(`Creating ${instancesPlanned} instances`);
-  while (instancesPlanned--) {
+  console.log(`Creating ${instancePlannedCount} instances`);
+  while (instancePlannedCount--) {
     await create();
   }
 }
@@ -595,30 +618,14 @@ async function disableInstance({
 async function stopInstance({
   instance,
   ec2Client,
-  installationClient,
   dynamodbClient,
-  repoName,
   provisionerId,
 }: {
   instance: Instance;
   ec2Client: EC2Client;
-  installationClient: InstallationClient;
   dynamodbClient: DynamoDBClient;
-  repoName: string;
   provisionerId: string;
 }) {
-  if (
-    !(await disableInstance({
-      instance,
-      installationClient,
-      dynamodbClient,
-      repoName,
-      provisionerId,
-    }))
-  ) {
-    return false;
-  }
-
   console.log(`Stopping instance ${provisionerId}/${instance.id}`);
   await ec2Client.send(
     new StopInstancesCommand({ InstanceIds: [instance.id] }),
@@ -634,11 +641,9 @@ async function stopInstance({
     }),
   );
   console.log(`Stopped instance ${provisionerId}/${instance.id}`);
-
-  return true;
 }
 
-async function terminateInstance({
+async function stopInstanceGracefully({
   instance,
   ec2Client,
   installationClient,
@@ -665,6 +670,27 @@ async function terminateInstance({
     return false;
   }
 
+  await stopInstance({
+    instance,
+    ec2Client,
+    dynamodbClient,
+    provisionerId,
+  });
+
+  return true;
+}
+
+async function terminateInstance({
+  instance,
+  ec2Client,
+  dynamodbClient,
+  provisionerId,
+}: {
+  instance: Instance;
+  ec2Client: EC2Client;
+  dynamodbClient: DynamoDBClient;
+  provisionerId: string;
+}) {
   console.log(`Terminating instance ${provisionerId}/${instance.id}`);
   await ec2Client.send(
     new TerminateInstancesCommand({ InstanceIds: [instance.id] }),
@@ -679,6 +705,41 @@ async function terminateInstance({
     }),
   );
   console.log(`Terminated instance ${provisionerId}/${instance.id}`);
+}
+
+async function terminateInstanceGracefully({
+  instance,
+  ec2Client,
+  installationClient,
+  dynamodbClient,
+  repoName,
+  provisionerId,
+}: {
+  instance: Instance;
+  ec2Client: EC2Client;
+  installationClient: InstallationClient;
+  dynamodbClient: DynamoDBClient;
+  repoName: string;
+  provisionerId: string;
+}) {
+  if (
+    !(await disableInstance({
+      instance,
+      installationClient,
+      dynamodbClient,
+      repoName,
+      provisionerId,
+    }))
+  ) {
+    return false;
+  }
+
+  await terminateInstance({
+    instance,
+    ec2Client,
+    dynamodbClient,
+    provisionerId,
+  });
 
   return true;
 }
@@ -803,4 +864,8 @@ async function* getInstances({
     );
     console.log(`Cleaned up record for instance ${id}`);
   }
+}
+
+function durationDisplay(duration: Temporal.Duration) {
+  return `${duration.total("seconds").toFixed(0)}s`;
 }

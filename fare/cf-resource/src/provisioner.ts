@@ -43,6 +43,11 @@ async function doUpdate(event: CloudFormationCustomResourceEvent) {
       case "Update": {
         const countMax = resourceProperties.CountMax;
         const countMin = resourceProperties.CountMin;
+        if (countMax !== -1 && countMax < countMin) {
+          throw new Error(
+            `CountMax ${countMax} is less than CountMin ${countMin}`,
+          );
+        }
         const scaleFactor = resourceProperties.ScaleFactor;
         const idleTimeout = Temporal.Duration.from(
           resourceProperties.IdleTimeout,
