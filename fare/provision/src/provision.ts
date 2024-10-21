@@ -313,25 +313,25 @@ async function provision({ provisionerId }: { provisionerId: string }) {
   );
   const statusCounts = countBy(instances, (instance) => instance.status);
   console.log(
-    `Instance statuses for ${provisionerId}: ${statusCounts[InstanceStatus.ENABLED]} enabled, ${InstanceStatus.DISABLED} disabled`,
+    `Instance statuses for ${provisionerId}: ${statusCounts[InstanceStatus.ENABLED] ?? 0} enabled, ${statusCounts[InstanceStatus.DISABLED] ?? 0} disabled`,
   );
   const ec2StatusCounts = countBy(instances, (instance) => instance.ec2Status);
   console.log(
-    `EC2 statuses for ${provisionerId}: ${ec2StatusCounts[Ec2InstanceStatus.STARTING]} starting, ${ec2StatusCounts[Ec2InstanceStatus.STARTED]} started, ${ec2StatusCounts[Ec2InstanceStatus.STOPPING]} stopping, ${ec2StatusCounts[Ec2InstanceStatus.STOPPED]} stopped`,
+    `EC2 statuses for ${provisionerId}: ${ec2StatusCounts[Ec2InstanceStatus.STARTING] ?? 0} starting, ${ec2StatusCounts[Ec2InstanceStatus.STARTED] ?? 0} started, ${ec2StatusCounts[Ec2InstanceStatus.STOPPING] ?? 0} stopping, ${ec2StatusCounts[Ec2InstanceStatus.STOPPED] ?? 0} stopped`,
   );
   const runnerStatusCounts = countBy(
     instances,
     (instance) => instance.ec2Status,
   );
   console.log(
-    `Runner statuses for ${provisionerId}: ${runnerStatusCounts[RunnerStatus.ACTIVE]} active, ${runnerStatusCounts[RunnerStatus.IDLE]} idle`,
+    `Runner statuses for ${provisionerId}: ${runnerStatusCounts[RunnerStatus.ACTIVE] ?? 0} active, ${runnerStatusCounts[RunnerStatus.IDLE] ?? 0} idle`,
   );
 
   // stop idle runners
   let idleCandidates = instances.filter((instance) => instance.runner);
   let idleMax = idleCandidates.length - countMin;
   idleCandidates = sortBy(
-    instances,
+    idleCandidates,
     (instance) => instance.runner!.activeAt.epochNanoseconds,
   );
   for (const instance of idleCandidates) {
