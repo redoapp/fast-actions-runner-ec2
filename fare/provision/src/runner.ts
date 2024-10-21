@@ -83,7 +83,7 @@ export async function runnerRefresh({
   try {
     await dynamodbClient.send(
       new UpdateItemCommand({
-        ConditionExpression: "Runner.Id = :id AND ActiveAt <= :oldActiveAt",
+        ConditionExpression: "Runner.Id = :id AND Runner.ActiveAt <= :oldActiveAt",
         ExpressionAttributeValues: {
           ...(status === RunnerStatus.ACTIVE && {
             ":activeAt": instantAttributeFormat.write(updatedAt),
@@ -100,7 +100,7 @@ export async function runnerRefresh({
         TableName: instanceTableName,
         UpdateExpression:
           "SET Runner.#status = :status" +
-          (status === RunnerStatus.ACTIVE ? ", ActiveAt = :activeAt" : ""),
+          (status === RunnerStatus.ACTIVE ? ", Runner.ActiveAt = :activeAt" : ""),
       }),
     );
   } catch (e) {

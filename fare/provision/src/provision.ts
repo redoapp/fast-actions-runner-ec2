@@ -290,8 +290,8 @@ async function provision({ provisionerId }: { provisionerId: string }) {
         continue;
       }
     } else if (!instance.runner) {
-      const launchExcess = Temporal.Now.instant()
-        .until(instance.startedAt)
+      const launchExcess = instance.startedAt
+        .until(Temporal.Now.instant())
         .subtract(launchTimeout);
       if (
         Temporal.Duration.compare(new Temporal.Duration(), launchExcess) < 0
