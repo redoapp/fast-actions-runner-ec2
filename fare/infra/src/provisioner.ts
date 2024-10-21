@@ -54,6 +54,8 @@ export function provisionerTemplate(stack: Stack) {
     idleTimeout,
     launchTimeout,
     runnerCountMax,
+    runnerCountMin,
+    runnerScaleFactor,
     paramGroup: scalingParamGroup,
     paramLabels: scalingParamLabels,
   } = scalingParams(stack);
@@ -94,6 +96,8 @@ export function provisionerTemplate(stack: Stack) {
     runnerGroupId,
     runnerLabels,
     runnerCountMax,
+    runnerCountMin,
+    runnerScaleFactor,
   });
 }
 
@@ -237,27 +241,51 @@ export function scalingParams(scope: Construct) {
   const idleTimeout = idleTimeoutParam.valueAsString;
 
   const runnerCountMaxParam = new CfnParameter(scope, "RunnerCountMax", {
-    type: "Number",
-    description: "Maximum number of runners, or -1 for unlimited",
     default: -1,
+    description: "Maximum number of runners, or -1 for unlimited",
     minValue: -1,
+    type: "Number",
   });
   const runnerCountMax = runnerCountMaxParam.valueAsNumber;
+
+  const runnerCountMinParam = new CfnParameter(scope, "RunnerCountMin", {
+    default: 0,
+    description: "Maximum number of runners",
+    minValue: 0,
+    type: "Number",
+  });
+  const runnerCountMin = runnerCountMinParam.valueAsNumber;
+
+  const runnerScaleFactorParam = new CfnParameter(scope, "RunnerScaleFactor", {
+    description: "Number of runners, relative to number of pending jobs",
+    default: 1,
+    minValue: 0,
+    type: "Number",
+  });
+  const runnerScaleFactor = runnerScaleFactorParam.valueAsNumber;
 
   const paramLabels = {
     [idleTimeoutParam.logicalId]: { default: "Idle timeout" },
     [runnerCountMaxParam.logicalId]: { default: "Maximum runners" },
+    [runnerCountMinParam.logicalId]: { default: "Minimum runners" },
+    [runnerScaleFactorParam.logicalId]: { default: "Scale factor" },
   };
 
   const paramGroup = {
     Label: { default: "Scaling" },
-    Parameters: [runnerCountMaxParam.logicalId, idleTimeoutParam.logicalId],
+    Parameters: [
+      runnerCountMinParam.logicalId,
+      runnerCountMaxParam.logicalId,
+      idleTimeoutParam.logicalId,
+    ],
   };
 
   return {
     idleTimeout,
     launchTimeout,
     runnerCountMax,
+    runnerCountMin,
+    runnerScaleFactor,
     paramLabels,
     paramGroup,
   };
@@ -276,6 +304,8 @@ export function provisionerStack(
     repoName,
     roleArn,
     runnerCountMax,
+    runnerCountMin,
+    runnerScaleFactor,
     runnerGroupId,
     runnerLabels,
     userName,
@@ -291,6 +321,8 @@ export function provisionerStack(
     repoName: string;
     roleArn: string;
     runnerCountMax: number;
+    runnerCountMin: number;
+    runnerScaleFactor: number;
     runnerGroupId: number;
     runnerLabels: string[];
   },
@@ -309,6 +341,7 @@ export function provisionerStack(
     serviceToken: provisionerFunctionArn,
     properties: {
       CountMax: runnerCountMax,
+      CountMin: runnerCountMin,
       Id: id,
       IdleTimeout: idleTimeout,
       Labels: runnerLabels,
@@ -319,6 +352,7 @@ export function provisionerStack(
       RepoName: Fn.conditionIf(repoNameEmpty.logicalId, Aws.NO_VALUE, repoName),
       RoleArn: roleArn,
       RunnerGroupId: runnerGroupId,
+      ScaleFactor: runnerScaleFactor,
       UserName: Fn.conditionIf(userNameEmpty.logicalId, Aws.NO_VALUE, userName),
     },
   });

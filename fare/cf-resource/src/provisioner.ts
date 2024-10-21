@@ -42,6 +42,8 @@ async function doUpdate(event: CloudFormationCustomResourceEvent) {
       case "Create":
       case "Update": {
         const countMax = resourceProperties.CountMax;
+        const countMin = resourceProperties.CountMin;
+        const scaleFactor = resourceProperties.ScaleFactor;
         const idleTimeout = Temporal.Duration.from(
           resourceProperties.IdleTimeout,
         );
@@ -67,6 +69,7 @@ async function doUpdate(event: CloudFormationCustomResourceEvent) {
             UpdateExpression:
               "SET" +
               " CountMax = :countMax" +
+              ", CountMin = :countMin" +
               ", IdleTimeout = :idleTimeout" +
               ", Labels = :labels" +
               ", LaunchTemplateArn = :launchTemplateArn" +
@@ -74,6 +77,7 @@ async function doUpdate(event: CloudFormationCustomResourceEvent) {
               ", LaunchTimeout = :launchTimeout" +
               ", RoleArn = :roleArn" +
               ", RunnerGroupId = :runnerGroupId" +
+              ", ScaleFactor = :scaleFactor" +
               ", #owner = :owner" +
               (orgName !== undefined ? ", OrgName = :orgName" : "") +
               (userName !== undefined ? ", UserName = :userName" : "") +
@@ -86,6 +90,7 @@ async function doUpdate(event: CloudFormationCustomResourceEvent) {
             ExpressionAttributeNames: { "#owner": "Owner" },
             ExpressionAttributeValues: {
               ":countMax": numberAttributeFormat.write(countMax),
+              ":countMin": numberAttributeFormat.write(countMin),
               ":idleTimeout": durationAttributeFormat.write(idleTimeout),
               ":labels": stringSetAttributeFormat.write(labels),
               ":launchTemplateArn": arnAttributeFormat.write(launchTemplateArn),
@@ -95,6 +100,7 @@ async function doUpdate(event: CloudFormationCustomResourceEvent) {
               ":launchTimeout": durationAttributeFormat.write(launchTimeout),
               ":runnerGroupId": numberAttributeFormat.write(runnerGroupId),
               ":owner": stringAttributeFormat.write((orgName ?? userName)!),
+              ":scaleFactor": numberAttributeFormat.write(scaleFactor),
               ":roleArn": arnAttributeFormat.write(roleArn),
               ...(orgName !== undefined && {
                 ":orgName": stringAttributeFormat.write(orgName),

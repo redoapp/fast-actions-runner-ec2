@@ -41,7 +41,9 @@ ts_library(
         "@npm//@octokit/webhooks-types:lib",
         "@npm//@smithy/types:lib",
         "@npm//@types/aws-lambda:lib",
+        "@npm//@types/lodash:lib",
         "@npm//@types/node:lib",
+        "@npm//lodash:lib",
         "@npm//temporal-polyfill:lib",
     ],
 )

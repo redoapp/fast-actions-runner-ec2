@@ -52,6 +52,8 @@ export function provisionerTemplate(stack: Stack) {
     idleTimeout,
     launchTimeout,
     runnerCountMax,
+    runnerCountMin,
+    runnerScaleFactor,
     paramGroup: scalingParamGroup,
     paramLabels: scalingParamLabels,
   } = scalingParams(stack);
@@ -146,6 +148,8 @@ export function provisionerTemplate(stack: Stack) {
     keyPair,
     provisionerFunctionArn,
     runnerCountMax,
+    runnerCountMin,
+    runnerScaleFactor,
     runnerGroupId,
     runnerLabels,
     securityGroupId,
@@ -174,6 +178,8 @@ export function provisionerStack(
     repoName,
     roleArn,
     runnerCountMax,
+    runnerCountMin,
+    runnerScaleFactor,
     runnerGroupId,
     runnerLabels,
     securityGroupId,
@@ -197,8 +203,10 @@ export function provisionerStack(
     repoName: string;
     roleArn: string;
     runnerCountMax: number;
+    runnerCountMin: number;
     runnerGroupId: number;
     runnerLabels: string[];
+    runnerScaleFactor: number;
     securityGroupId: string;
     setupScriptB64: string;
     subnetId: string;
@@ -228,6 +236,8 @@ export function provisionerStack(
     launchTimeout,
     launchTemplateArn: `arn:aws:ec2:${Aws.REGION}:${Aws.ACCOUNT_ID}:launch-template/${launchTemplate.ref}`,
     runnerCountMax,
+    runnerCountMin,
+    runnerScaleFactor,
     launchTemplateVersion: launchTemplate.attrLatestVersionNumber,
     runnerGroupId,
     runnerLabels,

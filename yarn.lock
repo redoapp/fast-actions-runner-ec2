@@ -2166,6 +2166,7 @@ __metadata:
     "@types/argparse": ^2
     "@types/aws-lambda": ^8
     "@types/jsonwebtoken": ^9
+    "@types/lodash": ^4
     "@types/node": ^20
     "@types/react": ^18
     "@types/react-dom": ^18
@@ -2179,6 +2180,7 @@ __metadata:
     core-js: ^3
     eslint: ^8
     jsonwebtoken: ^9
+    lodash: ^4
     prettier: ~3.3
     prettier-plugin-organize-imports: ^3.2.0
     prettier-plugin-sort-json: ^3
@@ -3366,6 +3368,13 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: a568e7cb1c703bcb015eff8bf5996e276e748d2b39ddc47edf5ddccd1378f5792179c43302a1c803e47a54b0220f9ecaae445ec444d28bf81b88856f899e85b9
+  languageName: node
+  linkType: hard
+
+"@types/lodash@npm:^4":
+  version: 4.17.12
+  resolution: "@types/lodash@npm:4.17.12"
+  checksum: 7b564e4114f09ce5ae31a2e9493592baf20bb498507f3705c5d91cf838c2298b4f6a06f2d6c8dc608fcac63e210a2b7b13388c7a5e220e15688f813521030127
   languageName: node
   linkType: hard
 
@@ -5632,7 +5641,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:^4.17.15, lodash@npm:^4.17.21, lodash@npm:^4.7.0":
+"lodash@npm:^4, lodash@npm:^4.17.15, lodash@npm:^4.17.21, lodash@npm:^4.7.0":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: eb835a2e51d381e561e508ce932ea50a8e5a68f4ebdd771ea240d3048244a8d13658acbd502cd4829768c56f2e16bdd4340b9ea141297d472517b83868e677f7

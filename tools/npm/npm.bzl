@@ -6151,6 +6151,11 @@ PACKAGES = {
         "name": "@types/jsonwebtoken",
         "url": "https://registry.npmjs.org/@types/jsonwebtoken/-/jsonwebtoken-9.0.6.tgz",
     },
+    "@types/lodash@4.17.12": {
+        "integrity": "sha512-sviUmCE8AYdaF/KIHLDJBQgeYzPBI0vf/17NaYehBJfYD1j6/L95Slh07NlyK2iNyBNaEkb3En2jRt+a8y3xZQ==",
+        "name": "@types/lodash",
+        "url": "https://registry.npmjs.org/@types/lodash/-/lodash-4.17.12.tgz",
+    },
     "@types/node@20.14.10": {
         "deps": [
             {
@@ -10826,6 +10831,10 @@ ROOTS = [
         "name": "@types/jsonwebtoken",
     },
     {
+        "id": "@types/lodash@4.17.12",
+        "name": "@types/lodash",
+    },
+    {
         "id": "@types/node@20.14.8",
         "name": "@types/node",
     },
@@ -10876,6 +10885,10 @@ ROOTS = [
     {
         "id": "jsonwebtoken@9.0.2",
         "name": "jsonwebtoken",
+    },
+    {
+        "id": "lodash@4.17.21",
+        "name": "lodash",
     },
     {
         "id": "prettier-plugin-organize-imports@3.2.4-e45c17ec",

@@ -35,6 +35,7 @@ import {
 import { arnAttributeFormat } from "@redotech/dynamodb/aws";
 import { envNumberRead, envStringRead, envUrlRead } from "@redotech/lambda/env";
 import { SQSHandler } from "aws-lambda";
+import { sortBy } from "lodash";
 import { Temporal } from "temporal-polyfill";
 import {
   awsCredentialsProvider,
@@ -151,7 +152,7 @@ async function provision({ provisionerId }: { provisionerId: string }) {
       Key: { Id: stringAttributeFormat.write(provisionerId) },
       TableName: provisionerTableName,
       ProjectionExpression:
-        "CountMax, IdleTimeout, RepoName, LaunchTemplateArn, LaunchTemplateVersion, LaunchTimeout",
+        "CountMax, CountMin, IdleTimeout, RepoName, LaunchTemplateArn, LaunchTemplateVersion, LaunchTimeout, ScaleFactor",
     }),
   );
   const provisionerItem = provisionerOutput.Item;
@@ -162,6 +163,7 @@ async function provision({ provisionerId }: { provisionerId: string }) {
   if (countMax < 0) {
     countMax = Infinity;
   }
+  const countMin = numberAttributeFormat.read(provisionerItem.CountMin);
   const idleTimeout = durationAttributeFormat.read(provisionerItem.IdleTimeout);
   const launchTemplateArn = arnAttributeFormat.read(
     provisionerItem.LaunchTemplateArn,
@@ -175,6 +177,7 @@ async function provision({ provisionerId }: { provisionerId: string }) {
   const repoName =
     provisionerItem.RepoName &&
     stringAttributeFormat.read(provisionerItem.RepoName);
+  const scaleFactor = numberAttributeFormat.read(provisionerItem.ScaleFactor);
 
   const credentials = awsCredentialsProvider({
     dynamodbClient,
@@ -356,35 +359,43 @@ async function provision({ provisionerId }: { provisionerId: string }) {
   );
 
   // query jobs
-  let jobCount = await pendingJobsCount({ provisionerId });
+  const jobCount = await pendingJobsCount({ provisionerId });
   console.log(`Pending job count for ${provisionerId} is ${jobCount}`);
 
-  jobCount -= enabledInstances.length;
-  if (jobCount <= 0) {
+  let instancesPlanned = Math.ceil(jobCount * scaleFactor);
+  instancesPlanned = Math.max(instancesPlanned, countMin);
+
+  instancesPlanned -= enabledInstances.length;
+  if (instancesPlanned <= 0) {
     return;
   }
 
-  // start instances
-  const startInstances = instances
-    .filter((instance) => instance.ec2Status === Ec2InstanceStatus.STOPPED)
-    .slice(0, jobCount);
+  // start stopped instances, most recent first
+  let startInstances = instances.filter(
+    (instance) => instance.ec2Status === Ec2InstanceStatus.STOPPED,
+  );
+  startInstances = sortBy(
+    startInstances,
+    (instance) => -instance.startedAt.epochNanoseconds,
+  );
+  startInstances = startInstances.slice(0, instancesPlanned);
   console.log(`Starting ${startInstances.length} instances`);
   for (const instance of startInstances) {
     await start(instance);
   }
 
-  jobCount = Math.min(
-    jobCount - startInstances.length,
+  // limit total instances to maximum
+  instancesPlanned = Math.min(
+    instancesPlanned - startInstances.length,
     countMax - instances.length,
   );
-
-  if (jobCount <= 0) {
+  if (instancesPlanned <= 0) {
     return;
   }
 
   // create instances
-  console.log(`Creating ${jobCount} instances`);
-  while (jobCount--) {
+  console.log(`Creating ${instancesPlanned} instances`);
+  while (instancesPlanned--) {
     await create();
   }
 }
@@ -674,7 +685,7 @@ async function terminateInstance({
 
 interface Instance {
   id: string;
-  startedAt: Temporal.Instant | undefined;
+  startedAt: Temporal.Instant;
   status: InstanceStatus | undefined;
   ec2Status: Ec2InstanceStatus;
   runner: Runner | undefined;
@@ -771,7 +782,7 @@ async function* getInstances({
           status: record?.status,
           runner: record?.runner,
           id: instance.InstanceId!,
-          startedAt: instance.LaunchTime?.toTemporalInstant(),
+          startedAt: instance.LaunchTime!.toTemporalInstant(),
           launchTemplateId: launchTemplateId || "",
           launchTemplateVersion: launchTemplateVersion || "",
         };
