@@ -55,6 +55,7 @@ import {
   instanceStatusAttributeFormat,
   runnerAttributeFormat,
 } from "./instance";
+import { runnerRefresh } from "./runner";
 
 const githubAppId = envNumberRead("GITHUB_APP_ID");
 
@@ -222,14 +223,6 @@ async function provision({ provisionerId }: { provisionerId: string }) {
     stopInstance({
       instance,
       ec2Client,
-      dynamodbClient,
-      provisionerId,
-    });
-
-  const stopGracefully = (instance: Instance) =>
-    stopInstanceGracefully({
-      instance,
-      ec2Client,
       installationClient,
       dynamodbClient,
       provisionerId,
@@ -238,14 +231,6 @@ async function provision({ provisionerId }: { provisionerId: string }) {
 
   const terminate = (instance: Instance) =>
     terminateInstance({
-      instance,
-      ec2Client,
-      dynamodbClient,
-      provisionerId,
-    });
-
-  const terminateGracefully = (instance: Instance) =>
-    terminateInstanceGracefully({
       instance,
       ec2Client,
       installationClient,
@@ -267,11 +252,14 @@ async function provision({ provisionerId }: { provisionerId: string }) {
       console.log(
         `Instance ${provisionerId}/${instance.id} is out of date with ${launchTemplateId}/${launchTemplateVersion}`,
       );
-      if (await terminateGracefully(instance)) {
+      if (await terminate(instance)) {
         continue;
       }
     } else if (instance.status === InstanceStatus.DISABLED) {
-      if (instance.ec2Status === Ec2InstanceStatus.STARTED) {
+      if (
+        instance.ec2Status === Ec2InstanceStatus.STARTED &&
+        !instance.runner
+      ) {
         console.log(
           `Instance ${provisionerId}/${instance.id} has been disabled`,
         );
@@ -286,20 +274,16 @@ async function provision({ provisionerId }: { provisionerId: string }) {
       console.log(
         `Instance ${provisionerId}/${instance.id} unexpectedly shut down`,
       );
-      if (await terminateGracefully(instance)) {
+      if (await terminate(instance)) {
         continue;
       }
     } else if (!instance.runner) {
-      const launchExcess = instance.startedAt
-        .until(Temporal.Now.instant())
-        .subtract(launchTimeout);
-      if (
-        Temporal.Duration.compare(new Temporal.Duration(), launchExcess) < 0
-      ) {
+      const launchDuration = instance.startedAt.until(Temporal.Now.instant());
+      if (Temporal.Duration.compare(launchTimeout, launchDuration) < 0) {
         console.log(
-          `Instance ${provisionerId}/${instance.id} exceeded launch timeout ${durationDisplay(launchTimeout)} by ${durationDisplay(launchExcess)}`,
+          `Instance ${provisionerId}/${instance.id} is been launching for ${durationDisplay(launchDuration)}, exceeding the timeout ${durationDisplay(launchTimeout)}`,
         );
-        if (await terminateGracefully(instance)) {
+        if (await terminate(instance)) {
           continue;
         }
       }
@@ -341,17 +325,27 @@ async function provision({ provisionerId }: { provisionerId: string }) {
     if (idleMax <= 0) {
       break;
     }
-    const idleExcess = instance
-      .runner!.activeAt.until(Temporal.Now.instant())
-      .subtract(idleTimeout);
-    if (Temporal.Duration.compare(idleExcess, new Temporal.Duration()) <= 0) {
+    const idle = instance.runner!.activeAt.until(Temporal.Now.instant());
+    if (Temporal.Duration.compare(idle, idleTimeout) <= 0) {
       break;
     }
+    if (
+      (await runnerRefresh({
+        dynamodbClient,
+        installationClient,
+        instanceId: instance.id,
+        instanceTableName,
+        provisionerId,
+      })) !== RunnerStatus.IDLE
+    ) {
+      continue;
+    }
     console.log(
-      `Runner on instance ${provisionerId}/${instance.id} exceeded idle timeout ${durationDisplay(idleTimeout)} by ${durationDisplay(idleExcess)}`,
+      `Runner on instance ${provisionerId}/${instance.id} has been idle ${durationDisplay(idle)}, exceeding the timeout ${durationDisplay(idleTimeout)}`,
     );
-    if (await stopGracefully(instance)) {
+    if (await stop(instance)) {
       instance.ec2Status = Ec2InstanceStatus.STOPPING;
+      instance.runner = undefined;
       instance.status = InstanceStatus.DISABLED;
       idleMax--;
     }
@@ -373,7 +367,7 @@ async function provision({ provisionerId }: { provisionerId: string }) {
       `Instance count for ${provisionerId} exceeds the maximum ${countMax} by ${excessCount}`,
     );
     for (let i = 0; i < instances.length && countMax < instances.length; ) {
-      if (await terminateGracefully(instances[i])) {
+      if (await terminate(instances[i])) {
         instances.splice(i, 1);
       } else {
         i++;
@@ -390,8 +384,10 @@ async function provision({ provisionerId }: { provisionerId: string }) {
 
   let instancePlannedCount =
     instanceTargetCount -
-    instances.filter((instance) => instance.status === InstanceStatus.ENABLED)
-      .length;
+    instances.filter(
+      (instance) =>
+        instance.status === InstanceStatus.ENABLED || instance.runner,
+    ).length;
   if (instancePlannedCount <= 0) {
     return;
   }
@@ -621,14 +617,30 @@ async function disableInstance({
 async function stopInstance({
   instance,
   ec2Client,
+  installationClient,
   dynamodbClient,
+  repoName,
   provisionerId,
 }: {
   instance: Instance;
   ec2Client: EC2Client;
+  installationClient: InstallationClient;
   dynamodbClient: DynamoDBClient;
+  repoName: string;
   provisionerId: string;
 }) {
+  if (
+    !(await disableInstance({
+      instance,
+      installationClient,
+      dynamodbClient,
+      repoName,
+      provisionerId,
+    }))
+  ) {
+    return false;
+  }
+
   console.log(`Stopping instance ${provisionerId}/${instance.id}`);
   await ec2Client.send(
     new StopInstancesCommand({ InstanceIds: [instance.id] }),
@@ -644,9 +656,11 @@ async function stopInstance({
     }),
   );
   console.log(`Stopped instance ${provisionerId}/${instance.id}`);
+
+  return true;
 }
 
-async function stopInstanceGracefully({
+async function terminateInstance({
   instance,
   ec2Client,
   installationClient,
@@ -673,27 +687,6 @@ async function stopInstanceGracefully({
     return false;
   }
 
-  await stopInstance({
-    instance,
-    ec2Client,
-    dynamodbClient,
-    provisionerId,
-  });
-
-  return true;
-}
-
-async function terminateInstance({
-  instance,
-  ec2Client,
-  dynamodbClient,
-  provisionerId,
-}: {
-  instance: Instance;
-  ec2Client: EC2Client;
-  dynamodbClient: DynamoDBClient;
-  provisionerId: string;
-}) {
   console.log(`Terminating instance ${provisionerId}/${instance.id}`);
   await ec2Client.send(
     new TerminateInstancesCommand({ InstanceIds: [instance.id] }),
@@ -708,41 +701,6 @@ async function terminateInstance({
     }),
   );
   console.log(`Terminated instance ${provisionerId}/${instance.id}`);
-}
-
-async function terminateInstanceGracefully({
-  instance,
-  ec2Client,
-  installationClient,
-  dynamodbClient,
-  repoName,
-  provisionerId,
-}: {
-  instance: Instance;
-  ec2Client: EC2Client;
-  installationClient: InstallationClient;
-  dynamodbClient: DynamoDBClient;
-  repoName: string;
-  provisionerId: string;
-}) {
-  if (
-    !(await disableInstance({
-      instance,
-      installationClient,
-      dynamodbClient,
-      repoName,
-      provisionerId,
-    }))
-  ) {
-    return false;
-  }
-
-  await terminateInstance({
-    instance,
-    ec2Client,
-    dynamodbClient,
-    provisionerId,
-  });
 
   return true;
 }
