@@ -26,7 +26,7 @@ export async function runnerRefresh({
   instanceTableName: string;
   instanceId: string;
   provisionerId: string;
-}) {
+}): Promise<RunnerStatus> {
   console.log(`Refreshing ${provisionerId}/${instanceId} runner status`);
   const instanceOutput = await dynamodbClient.send(
     new GetItemCommand({
@@ -42,13 +42,13 @@ export async function runnerRefresh({
     console.log(
       `Instance ${provisionerId}/${instanceId} does not have a runner`,
     );
-    return;
+    return RunnerStatus.IDLE;
   }
 
   const runner = runnerAttributeFormat.read(instanceOutput.Item.Runner);
 
   const updatedAt = Temporal.Now.instant();
-  let status: RunnerStatus;
+  let status: RunnerStatus | undefined;
   try {
     let response:
       | RestEndpointMethodTypes["actions"]["getSelfHostedRunnerForOrg"]["response"]
@@ -68,13 +68,14 @@ export async function runnerRefresh({
         });
     }
     status = response.data.busy ? RunnerStatus.ACTIVE : RunnerStatus.IDLE;
-    console.log(`Instance ${provisionerId}/${instanceId} runner is ${status}`);
+    console.log(
+      `Instance ${provisionerId}/${instanceId} runner ${runner.id} is ${status}`,
+    );
   } catch (e) {
     if (e instanceof RequestError && e.status === 404) {
       console.log(
-        `Instance ${provisionerId}/${runner.id} does not have a GitHub runner`,
+        `Instance ${provisionerId}/${instanceId} runner ${runner.id} does not exist`,
       );
-      status = RunnerStatus.IDLE;
     } else {
       throw e;
     }
@@ -83,29 +84,41 @@ export async function runnerRefresh({
   try {
     await dynamodbClient.send(
       new UpdateItemCommand({
-        ConditionExpression: "Runner.Id = :id AND Runner.ActiveAt <= :oldActiveAt",
+        ConditionExpression:
+          "Runner.Id = :id AND Runner.ActiveAt <= :oldActiveAt",
         ExpressionAttributeValues: {
           ...(status === RunnerStatus.ACTIVE && {
             ":activeAt": instantAttributeFormat.write(updatedAt),
           }),
+          ...(status !== undefined && {
+            ":status": stringAttributeFormat.write(status),
+          }),
           ":oldActiveAt": instantAttributeFormat.write(runner.activeAt),
           ":id": numberAttributeFormat.write(runner.id),
-          ":status": stringAttributeFormat.write(status),
         },
-        ExpressionAttributeNames: { "#status": "Status" },
+        ExpressionAttributeNames: status && { "#status": "Status" },
         Key: {
           Id: stringAttributeFormat.write(instanceId),
           ProvisionerId: stringAttributeFormat.write(provisionerId),
         },
         TableName: instanceTableName,
         UpdateExpression:
-          "SET Runner.#status = :status" +
-          (status === RunnerStatus.ACTIVE ? ", Runner.ActiveAt = :activeAt" : ""),
+          status !== undefined
+            ? "SET Runner.#status = :status" +
+              (status === RunnerStatus.ACTIVE
+                ? ", Runner.ActiveAt = :activeAt"
+                : "")
+            : "REMOVE Runner",
       }),
     );
   } catch (e) {
     if (e instanceof ConditionalCheckFailedException) {
-      return;
+      console.log(
+        `Update for ${provisionerId}/${instanceId} runner ${runner.id} is stale`,
+      );
+    } else {
+      throw e;
     }
   }
+  return status ?? RunnerStatus.IDLE;
 }
