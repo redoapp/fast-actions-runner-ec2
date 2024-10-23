@@ -10,7 +10,6 @@ import { CfnLaunchTemplate } from "aws-cdk-lib/aws-ec2";
 import { Aws, CfnCondition, CfnParameter, Fn, Stack } from "aws-cdk-lib/core";
 import { Construct } from "constructs";
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
 
 export function provisionerTemplate(stack: Stack) {
   const amiParam = new CfnParameter(stack, "Ami", {
@@ -26,6 +25,7 @@ export function provisionerTemplate(stack: Stack) {
   const id = idParam.valueAsString;
 
   const {
+    artifactDomain,
     artifactRegion,
     artifactS3Bucket,
     artifactS3KeyPrefix,
@@ -133,6 +133,7 @@ export function provisionerTemplate(stack: Stack) {
   });
 
   provisionerStack(stack, {
+    artifactDomain,
     artifactRegion,
     artifactS3Bucket,
     artifactS3KeyPrefix,
@@ -163,10 +164,11 @@ export function provisionerTemplate(stack: Stack) {
 export function provisionerStack(
   scope: Construct,
   {
+    ami,
+    artifactDomain,
     artifactRegion,
     artifactS3Bucket,
     artifactS3KeyPrefix,
-    ami,
     idleTimeout,
     instanceType,
     keyPair,
@@ -189,6 +191,7 @@ export function provisionerStack(
     volumeSizeGib,
   }: {
     ami: string;
+    artifactDomain: string;
     artifactRegion: string;
     artifactS3Bucket: string;
     artifactS3KeyPrefix: string;
@@ -215,14 +218,16 @@ export function provisionerStack(
   },
 ) {
   const { launchTemplate } = instanceStack(new Construct(scope, "Instance"), {
+    artifactDomain,
     artifactRegion,
     artifactS3Bucket,
     artifactS3KeyPrefix,
     amiId: ami,
-    securityGroupId,
+    id,
     instanceProfileName,
     instanceType,
     keyName: keyPair,
+    securityGroupId,
     setupScriptB64,
     subnetId,
     volumeSizeGib,
@@ -251,9 +256,11 @@ export function instanceStack(
   scope: Construct,
   {
     amiId,
+    artifactDomain,
     artifactRegion,
     artifactS3Bucket,
     artifactS3KeyPrefix,
+    id,
     instanceProfileName,
     instanceType,
     keyName,
@@ -263,9 +270,11 @@ export function instanceStack(
     volumeSizeGib,
   }: {
     amiId: string;
+    artifactDomain: string;
     artifactRegion: string;
     artifactS3Bucket: string;
     artifactS3KeyPrefix: string;
+    id: string;
     instanceProfileName: string;
     instanceType: string;
     keyName: string;
@@ -275,7 +284,15 @@ export function instanceStack(
     volumeSizeGib: number;
   },
 ) {
-  const setup = readFileSync(join(__dirname, "setup.sh.tpl"), "utf-8");
+  const cloudwatchAgent = readFileSync(
+    require.resolve("./cloudwatch-agent.json.tpl"),
+    "utf-8",
+  );
+  const fluentBit = readFileSync(
+    require.resolve("./fluent-bit.conf.tpl"),
+    "utf-8",
+  );
+  const setup = readFileSync(require.resolve("./setup.sh.tpl"), "utf-8");
 
   const keyNameEmpty = new CfnCondition(scope, "KeyNameEmpty", {
     expression: Fn.conditionEquals(keyName, ""),
@@ -314,9 +331,25 @@ export function instanceStack(
       ],
       userData: Fn.base64(
         Fn.sub(setup, {
+          ArtifactDomain: artifactDomain,
           ArtifactRegion: artifactRegion,
           ArtifactS3Bucket: artifactS3Bucket,
           ArtifactS3KeyPrefix: artifactS3KeyPrefix,
+          AwsDomain: Aws.URL_SUFFIX,
+          AwsRegion: Aws.REGION,
+          CloudwatchAgent: Fn.base64(
+            Fn.sub(cloudwatchAgent, {
+              Name: Aws.STACK_NAME,
+              ProvisionerId: id,
+            }),
+          ),
+          FluentBit: Fn.base64(
+            Fn.sub(fluentBit, {
+              AwsRegion: Aws.REGION,
+              Name: Aws.STACK_NAME,
+              ProvisionerId: id,
+            }),
+          ),
           SetupBase64: setupScriptB64,
         }),
       ),

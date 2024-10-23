@@ -51,7 +51,7 @@ js_library(
 
 js_library(
     name = "prettier_config",
-    srcs = [".prettierrc.yml"],
+    srcs = [".prettierrc.yaml"],
     root = ":root",
     deps = [
         "@npm//prettier-plugin-organize-imports:lib",
