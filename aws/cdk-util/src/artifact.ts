@@ -19,6 +19,13 @@ const artifactS3KeyPrefix = readFileSync(
 );
 
 export function artifactParams(scope: Construct) {
+  const artifactDomainParam = new CfnParameter(scope, "ArtifactDomain", {
+    description: "Artifact Domain",
+    default: "amazonaws.com",
+    minLength: 1,
+  });
+  const artifactDomain = artifactDomainParam.valueAsString;
+
   const artifactRegionParam = new CfnParameter(scope, "ArtifactRegion", {
     description: "Artifact Region",
     default: artifactRegion,
@@ -46,21 +53,22 @@ export function artifactParams(scope: Construct) {
   const paramGroup = {
     Label: { default: "Artifacts" },
     Parameters: [
-      ...(artifactRegionParam ? [artifactRegionParam.logicalId] : []),
+      artifactDomainParam.logicalId,
+      artifactRegionParam.logicalId,
       artifactS3BucketParam.logicalId,
       artifactS3KeyPrefixParam.logicalId,
     ],
   };
 
   const paramLabels = {
-    ...(artifactRegionParam && {
-      [artifactRegionParam.logicalId]: { default: "Artifact URL" },
-    }),
+    [artifactDomainParam.logicalId]: { default: "Artifact Domain" },
+    [artifactRegionParam.logicalId]: { default: "Artifact URL" },
     [artifactS3BucketParam.logicalId]: { default: "Artifact S3 Bucket" },
     [artifactS3KeyPrefixParam.logicalId]: { default: "Artifact S3 Key Prefix" },
   };
 
   return {
+    artifactDomain,
     artifactRegion: artifactRegion_,
     artifactS3Bucket: artifactS3Bucket_,
     artifactS3KeyPrefix: artifactS3KeyPrefix_,

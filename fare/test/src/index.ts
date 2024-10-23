@@ -34,7 +34,7 @@ export function fareTestStack(
       ArtifactS3Bucket: bucket.bucket,
       ArtifactS3KeyPrefix: keyPrefix,
     },
-    templateUrl: `https://${bucket.bucketRegionalDomainName}/${appTemplate.key}?${appTemplate.sourceHash}`,
+    templateUrl: `https://${bucket.bucketRegionalDomainName}/${appTemplate.key}?${Fn.substr(appTemplate.sourceHash, 0, 8)}`,
   });
 
   const cluster = new CloudformationStack(scope, "Cluster", {
@@ -69,6 +69,6 @@ export function fareTestStack(
       SubnetId: cluster.outputs.lookup("SubnetId"),
       UserName: "pauldraper",
     },
-    templateUrl: `https://${bucket.bucketRegionalDomainName}/${basicProvisionerTemplate.key}?${basicProvisionerTemplate.sourceHash}`,
+    templateUrl: `https://${bucket.bucketRegionalDomainName}/${basicProvisionerTemplate.key}?${Fn.substr(basicProvisionerTemplate.sourceHash, 0, 8)}`,
   });
 }

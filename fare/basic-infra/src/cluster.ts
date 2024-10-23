@@ -8,6 +8,7 @@ import {
   CfnSubnet,
   CfnSubnetRouteTableAssociation,
   CfnVPC,
+  CfnVPCCidrBlock,
   CfnVPCGatewayAttachment,
 } from "aws-cdk-lib/aws-ec2";
 import {
@@ -116,6 +117,10 @@ export function networkStack(scope: Construct) {
     cidrBlock: "10.83.0.0/16",
     tags: [{ key: "Name", value: getName(scope).toString() }],
   });
+  const vpcIpv6 = new CfnVPCCidrBlock(scope, "VpcIpv6", {
+    amazonProvidedIpv6CidrBlock: true,
+    vpcId: vpc.ref,
+  });
 
   const internet = new CfnInternetGateway(scope, "Internet", {
     tags: [{ key: "Name", value: getName(scope).toString() }],
@@ -147,12 +152,18 @@ export function networkStack(scope: Construct) {
   routeIpv6.addDependency(internetAttachment);
 
   const subnet = new CfnSubnet(scope, "Subnet", {
+    assignIpv6AddressOnCreation: true,
     availabilityZone: Fn.select(0, Fn.getAzs()),
-    cidrBlock: "10.83.16.0/20",
+    cidrBlock: Fn.select(1, Fn.cidr(vpc.attrCidrBlock, 16, "12")),
+    ipv6CidrBlock: Fn.select(
+      1,
+      Fn.cidr(Fn.select(0, vpc.attrIpv6CidrBlocks), 16, "68"),
+    ),
     mapPublicIpOnLaunch: true,
     tags: [{ key: "Name", value: getName(scope).toString() }],
     vpcId: vpc.ref,
   });
+  subnet.addDependency(vpcIpv6);
 
   new CfnSubnetRouteTableAssociation(scope, "SubnetRouteTable", {
     routeTableId: routeTable.ref,
@@ -175,6 +186,7 @@ export function instanceStack(scope: Construct, { vpc }: { vpc: CfnVPC }) {
       Version: "2012-10-17",
     },
     description: getName(scope).toString(),
+    managedPolicyArns: ["arn:aws:iam::aws:policy/CloudWatchAgentAdminPolicy"],
     tags: [{ key: "Name", value: getName(scope).toString() }],
   });
 
@@ -189,8 +201,34 @@ export function instanceStack(scope: Construct, { vpc }: { vpc: CfnVPC }) {
       { cidrIpv6: "::/0", description: "IPv6", ipProtocol: "-1" },
     ],
     securityGroupIngress: [
-      { cidrIp: "0.0.0.0/0", description: "IPv4", ipProtocol: "-1" },
-      { cidrIpv6: "::/0", description: "IPv6", ipProtocol: "-1" },
+      {
+        cidrIp: "0.0.0.0/0",
+        description: "ICMP",
+        ipProtocol: "icmp",
+        fromPort: -1,
+        toPort: -1,
+      },
+      {
+        cidrIpv6: "::/0",
+        description: "ICMPv6",
+        ipProtocol: "icmpv6",
+        fromPort: -1,
+        toPort: -1,
+      },
+      {
+        cidrIp: "0.0.0.0/0",
+        description: "SSH",
+        ipProtocol: "tcp",
+        fromPort: 22,
+        toPort: 22,
+      },
+      {
+        cidrIpv6: "::/0",
+        description: "SSHv6",
+        ipProtocol: "tcp",
+        fromPort: 22,
+        toPort: 22,
+      },
     ],
     tags: [{ key: "Name", value: getName(scope).toString() }],
     vpcId: vpc.ref,
