@@ -5,7 +5,7 @@ package(default_visibility = ["//visibility:public"])
 
 configure_prettier(
     name = "prettier",
-    config = ".prettierrc.yml",
+    config = ".prettierrc.yaml",
     config_dep = "//:prettier_config",
     dep = "@npm//prettier:lib",
 )

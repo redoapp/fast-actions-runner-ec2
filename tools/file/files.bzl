@@ -30,7 +30,10 @@ filegroup(
             "files/**/*.md",
             "files/**/*.tsx",
             "files/**/*.json",
+            "files/**/*.json.tpl",
             "files/**/*.md",
+            "files/**/*.yaml",
+            "files/**/.*.yaml",
         ],
     ),
 )

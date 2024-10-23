@@ -1,0 +1,8 @@
+overrides:
+  - files: "*.json.tpl"
+    options: { parser: json }
+plugins:
+  - prettier-plugin-sort-json
+  - prettier-plugin-organize-imports
+proseWrap: always
+trailingComma: all
