@@ -93,7 +93,9 @@ export async function runnerRefresh({
           ...(status !== undefined && {
             ":status": stringAttributeFormat.write(status),
           }),
-          ":oldActiveAt": instantAttributeFormat.write(runner.activeAt),
+          ":oldActiveAt": instantAttributeFormat.write(
+            runner.activeAt.add({ milliseconds: 1 }),
+          ), // solve round-trip problems
           ":id": numberAttributeFormat.write(runner.id),
         },
         ExpressionAttributeNames: status && { "#status": "Status" },
