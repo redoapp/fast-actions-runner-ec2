@@ -11,6 +11,13 @@ import { Aws, CfnCondition, CfnParameter, Fn, Stack } from "aws-cdk-lib/core";
 import { Construct } from "constructs";
 import { readFileSync } from "node:fs";
 
+export interface Volume {
+  iops?: number;
+  sizeGib: number;
+  throughputMibs?: number;
+  type: string;
+}
+
 export function provisionerTemplate(stack: Stack) {
   const amiParam = new CfnParameter(stack, "Ami", {
     description: "AMI ID",
@@ -110,12 +117,37 @@ export function provisionerTemplate(stack: Stack) {
   });
   const subnetId = subnetIdParam.valueAsString;
 
+  const volumeIopsParam = new CfnParameter(stack, "VolumeIops", {
+    type: "Number",
+    default: -1,
+    description: "Root volume IOPS, or negative for the default",
+  });
+  const volumeIops = volumeIopsParam.valueAsNumber;
+
   const volumeSizeGibParam = new CfnParameter(stack, "VolumeSizeGib", {
     type: "Number",
     default: 64,
     description: "Root volume size in GiB",
   });
   const volumeSizeGib = volumeSizeGibParam.valueAsNumber;
+
+  const volumeThroughputMibsParam = new CfnParameter(
+    stack,
+    "VolumeThroughputMibs",
+    {
+      type: "Number",
+      default: -1,
+      description: "Root volume throughput in MiB/s, or negative for the default",
+    },
+  );
+  const volumeThroughputMibs = volumeThroughputMibsParam.valueAsNumber;
+
+  const volumeTypeParam = new CfnParameter(stack, "VolumeType", {
+    type: "String",
+    default: "gp3",
+    description: "Root volume type",
+  });
+  const volumeType = volumeTypeParam.valueAsString;
 
   stack.addMetadata("AWS::CloudFormation::Interface", {
     ParameterGroups: [
@@ -157,7 +189,13 @@ export function provisionerTemplate(stack: Stack) {
     setupScriptB64,
     subnetId,
     userName,
-    volumeSizeGib,
+    volume: {
+      iops: 0 <= volumeIops ? volumeIops : undefined,
+      sizeGib: volumeSizeGib,
+      throughputMibs:
+        0 <= volumeThroughputMibs ? volumeThroughputMibs : undefined,
+      type: volumeType,
+    },
   });
 }
 
@@ -188,7 +226,7 @@ export function provisionerStack(
     setupScriptB64,
     subnetId,
     userName,
-    volumeSizeGib,
+    volume,
   }: {
     ami: string;
     artifactDomain: string;
@@ -214,7 +252,7 @@ export function provisionerStack(
     setupScriptB64: string;
     subnetId: string;
     userName: string;
-    volumeSizeGib: number;
+    volume: Volume;
   },
 ) {
   const { launchTemplate } = instanceStack(new Construct(scope, "Instance"), {
@@ -230,7 +268,7 @@ export function provisionerStack(
     securityGroupId,
     setupScriptB64,
     subnetId,
-    volumeSizeGib,
+    volume,
   });
 
   baseProvisionerStack(new Construct(scope, "Provisioner"), {
@@ -267,7 +305,7 @@ export function instanceStack(
     securityGroupId,
     setupScriptB64,
     subnetId,
-    volumeSizeGib,
+    volume,
   }: {
     amiId: string;
     artifactDomain: string;
@@ -281,7 +319,7 @@ export function instanceStack(
     securityGroupId: string;
     setupScriptB64: string;
     subnetId: string;
-    volumeSizeGib: number;
+    volume: Volume;
   },
 ) {
   const cloudwatchAgent = readFileSync(
@@ -303,7 +341,12 @@ export function instanceStack(
       blockDeviceMappings: [
         {
           deviceName: "/dev/sda1",
-          ebs: { volumeSize: volumeSizeGib, volumeType: "gp3" },
+          ebs: {
+            iops: volume.iops,
+            throughput: volume.throughputMibs,
+            volumeSize: volume.sizeGib,
+            volumeType: volume.type,
+          },
         },
       ],
       imageId: amiId,
