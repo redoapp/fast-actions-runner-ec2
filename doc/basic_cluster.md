@@ -1,6 +1,7 @@
 ```mermaid
 	flowchart TB;
 		subgraph &nbsp;
+		rootNetworkVpcIpv6[NetworkVpcIpv6<br/>EC2::VPCCidrBlock]-->rootNetworkVpc[NetworkVpc<br/>EC2::VPC]
 		rootNetworkInternetAttachment[NetworkInternetAttachment<br/>EC2::VPCGatewayAttachment]-->rootNetworkInternet[NetworkInternet<br/>EC2::InternetGateway]
 		rootNetworkInternetAttachment[NetworkInternetAttachment<br/>EC2::VPCGatewayAttachment]-->rootNetworkVpc[NetworkVpc<br/>EC2::VPC]
 		rootNetworkRouteTable[NetworkRouteTable<br/>EC2::RouteTable]-->rootNetworkVpc[NetworkVpc<br/>EC2::VPC]

@@ -117,6 +117,13 @@ export function provisionerTemplate(stack: Stack) {
   });
   const volumeSizeGib = volumeSizeGibParam.valueAsNumber;
 
+  const volumeTypeParam = new CfnParameter(stack, "VolumeType", {
+    type: "String",
+    default: "gp3",
+    description: "Root volume type",
+  });
+  const volumeType = volumeTypeParam.valueAsString;
+
   stack.addMetadata("AWS::CloudFormation::Interface", {
     ParameterGroups: [
       artifactParamGroup,
@@ -158,6 +165,7 @@ export function provisionerTemplate(stack: Stack) {
     subnetId,
     userName,
     volumeSizeGib,
+    volumeType,
   });
 }
 
@@ -189,6 +197,7 @@ export function provisionerStack(
     subnetId,
     userName,
     volumeSizeGib,
+    volumeType,
   }: {
     ami: string;
     artifactDomain: string;
@@ -215,6 +224,7 @@ export function provisionerStack(
     subnetId: string;
     userName: string;
     volumeSizeGib: number;
+    volumeType: string;
   },
 ) {
   const { launchTemplate } = instanceStack(new Construct(scope, "Instance"), {
@@ -231,6 +241,7 @@ export function provisionerStack(
     setupScriptB64,
     subnetId,
     volumeSizeGib,
+    volumeType,
   });
 
   baseProvisionerStack(new Construct(scope, "Provisioner"), {
@@ -268,6 +279,7 @@ export function instanceStack(
     setupScriptB64,
     subnetId,
     volumeSizeGib,
+    volumeType,
   }: {
     amiId: string;
     artifactDomain: string;
@@ -282,6 +294,7 @@ export function instanceStack(
     setupScriptB64: string;
     subnetId: string;
     volumeSizeGib: number;
+    volumeType: string;
   },
 ) {
   const cloudwatchAgent = readFileSync(
@@ -303,7 +316,7 @@ export function instanceStack(
       blockDeviceMappings: [
         {
           deviceName: "/dev/sda1",
-          ebs: { volumeSize: volumeSizeGib, volumeType: "gp3" },
+          ebs: { volumeSize: volumeSizeGib, volumeType: volumeType },
         },
       ],
       imageId: amiId,
