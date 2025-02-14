@@ -21,12 +21,6 @@ cdk_synth(
     stack = "App",
 )
 
-cdk_synth(
-    name = "base_cf",
-    project = ":cdk",
-    stack = "Base",
-)
-
 nodejs_binary(
     name = "bin",
     data = [":%s" % name for name in DIGESTS],

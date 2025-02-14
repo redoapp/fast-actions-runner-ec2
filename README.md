@@ -74,3 +74,7 @@ Or use a preset that creates an EC2 launch template for you:
 
 You might also consider using a preset for creating the VPC, subnet, etc.:
 `https://redotech-fare-artifact.s3.us-east-1.amazonaws.com/<version>/fare-basic-cluster.template.yaml`.
+
+## Other
+
+For details, see the [docs](./doc).

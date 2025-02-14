@@ -10730,6 +10730,11 @@ PACKAGES = {
         "name": "yaml",
         "url": "https://registry.npmjs.org/yaml/-/yaml-1.10.2.tgz",
     },
+    "yaml@2.7.0": {
+        "integrity": "sha512-+hSoy/QHluxmC9kCIJyL/uyFmLmc+e5CFR5Wa+bpIhIj85LVb9ZH2nVnqrHoSvKogwODv0ClqZkmiSSaIH5LTA==",
+        "name": "yaml",
+        "url": "https://registry.npmjs.org/yaml/-/yaml-2.7.0.tgz",
+    },
     "yocto-queue@0.1.0": {
         "integrity": "sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==",
         "name": "yocto-queue",
@@ -10925,5 +10930,9 @@ ROOTS = [
     {
         "id": "typescript@5.2.2-5c3d5cbc",
         "name": "typescript",
+    },
+    {
+        "id": "yaml@2.7.0",
+        "name": "yaml",
     },
 ]

@@ -1,4 +1,4 @@
-load("//aws/cfn-rules:rules.bzl", "cfn_mermaid")
+load("//aws/cfn-rules:rules.bzl", "cfn_markdown", "cfn_markdown_part", "cfn_mermaid")
 load("//shell/rules:rules.bzl", "sh_binary")
 
 package(default_visibility = ["//visibility:public"])
@@ -18,13 +18,24 @@ cfn_mermaid(
     src = "//fare/basic-infra:provisioner_cf",
 )
 
+cfn_markdown(
+    name = "basic_templates",
+    parts = [
+        ":template_basic_cluster",
+        ":template_basic_provisioner",
+    ],
+    title = "Basic CloudFormation Templates",
+)
+
 sh_binary(
     name = "gen",
     data = [
         ":app",
         ":basic_cluster",
         ":basic_provisioner",
+        ":basic_templates",
         ":provisioner",
+        ":templates",
     ],
     main = "gen.sh",
 )
@@ -32,4 +43,37 @@ sh_binary(
 cfn_mermaid(
     name = "provisioner",
     src = "//fare/infra:provisioner_cf",
+)
+
+cfn_markdown_part(
+    name = "template_app",
+    src = "//fare/infra:app_cf",
+    title = "fare-app.template.yaml",
+)
+
+cfn_markdown_part(
+    name = "template_provisioner",
+    src = "//fare/infra:provisioner_cf",
+    title = "fare-provisioner.template.yaml",
+)
+
+cfn_markdown_part(
+    name = "template_basic_cluster",
+    src = "//fare/basic-infra:cluster_cf",
+    title = "fare-basic-cluster.template.yaml",
+)
+
+cfn_markdown_part(
+    name = "template_basic_provisioner",
+    src = "//fare/basic-infra:provisioner_cf",
+    title = "fare-basic-provisioner.template.yaml",
+)
+
+cfn_markdown(
+    name = "templates",
+    parts = [
+        ":template_app",
+        ":template_provisioner",
+    ],
+    title = "CloudFormation Templates",
 )

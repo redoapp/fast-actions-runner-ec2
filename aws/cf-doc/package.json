@@ -1,0 +1,16 @@
+{
+  "name": "@redotech/cf-doc",
+  "exports": {
+    ".": "./lib/index.js",
+    "./*": "./lib/*.js"
+  },
+  "private": true,
+  "typesVersions": {
+    "*": {
+      "*": [
+        "lib/*",
+        "src/*"
+      ]
+    }
+  }
+}
