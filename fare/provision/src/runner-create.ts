@@ -129,6 +129,9 @@ async function createRunner({
     | RestEndpointMethodTypes["actions"]["generateRunnerJitconfigForOrg"]["response"]
     | RestEndpointMethodTypes["actions"]["generateRunnerJitconfigForRepo"]["response"];
   if (repoName !== undefined) {
+    console.log(
+      `Creating runner ${instanceId} for ${orgName}/${repoName} in group ${runnerGroupId}`,
+    );
     response =
       await installationClient.client.actions.generateRunnerJitconfigForRepo({
         labels: [...labels],
@@ -138,6 +141,9 @@ async function createRunner({
         name: instanceId,
       });
   } else {
+    console.log(
+      `Creating runner ${instanceId} for ${orgName} in group ${runnerGroupId}`,
+    );
     response =
       await installationClient.client.actions.generateRunnerJitconfigForOrg({
         labels: [...labels],
