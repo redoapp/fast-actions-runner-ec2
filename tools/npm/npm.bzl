@@ -3759,7 +3759,7 @@ PACKAGES = {
         "name": "@balena/dockerignore",
         "url": "https://registry.npmjs.org/@balena/dockerignore/-/dockerignore-1.0.2.tgz",
     },
-    "@cdktf/provider-aws@19.33.0-e45c17ec": {
+    "@cdktf/provider-aws@19.60.1-e45c17ec": {
         "deps": [
             {
                 "id": "cdktf@0.20.8-e45c17ec",
@@ -3768,9 +3768,9 @@ PACKAGES = {
                 "id": "constructs@10.3.0",
             },
         ],
-        "integrity": "sha512-21dhJPSMwTL/lLJacj7R+qnW7NrRFIWcvbSblKrAdNduMf24Th+9fcd8kTHoXv1jPGN9eC6kK/XOPxna6YHdrw==",
+        "integrity": "sha512-1gDbFDQQI+r6IakE1Byojye6BWd8zUoqft5sqzhpY2UW86O3I5n4H1UmPbkZm9vwjxgm6PKTTlnBxxeHlSx44A==",
         "name": "@cdktf/provider-aws",
-        "url": "https://registry.npmjs.org/@cdktf/provider-aws/-/provider-aws-19.33.0.tgz",
+        "url": "https://registry.npmjs.org/@cdktf/provider-aws/-/provider-aws-19.60.1.tgz",
     },
     "@eslint-community/eslint-utils@4.4.0-4286e12a": {
         "deps": [
@@ -10788,7 +10788,7 @@ ROOTS = [
         "name": "@aws-sdk/util-arn-parser",
     },
     {
-        "id": "@cdktf/provider-aws@19.33.0-e45c17ec",
+        "id": "@cdktf/provider-aws@19.60.1-e45c17ec",
         "name": "@cdktf/provider-aws",
     },
     {

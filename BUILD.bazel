@@ -58,3 +58,8 @@ js_library(
         "@npm//prettier-plugin-sort-json:lib",
     ],
 )
+
+alias(
+    name = "terraform_resolve",
+    actual = "//tools/terraform:providers_resolve",
+)

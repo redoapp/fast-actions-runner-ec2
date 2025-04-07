@@ -1745,13 +1745,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cdktf/provider-aws@npm:~19.33":
-  version: 19.33.0
-  resolution: "@cdktf/provider-aws@npm:19.33.0"
+"@cdktf/provider-aws@npm:~19.60":
+  version: 19.60.1
+  resolution: "@cdktf/provider-aws@npm:19.60.1"
   peerDependencies:
     cdktf: ^0.20.0
     constructs: ^10.3.0
-  checksum: 481f9124dfdb3812690895aced43da696a1c3d18a966b54631b1bcb3640a9d56ac5d8d28dbd792f2f4995568b3aa61b8cb009100f7e40314922479e4aceae128
+  checksum: 23a02170dafde60099a1de790c1fa48efe1a03d2cf60235c9bf405964f59ceb2f6be225e0f0b042005b4cb178f3365398c1d2f6b9138ba843642dd7dde0ebee1
   languageName: node
   linkType: hard
 
@@ -2154,7 +2154,7 @@ __metadata:
     "@aws-sdk/client-ssm": ^3
     "@aws-sdk/client-sts": ^3
     "@aws-sdk/util-arn-parser": ^3
-    "@cdktf/provider-aws": ~19.33
+    "@cdktf/provider-aws": ~19.60
     "@mhlabs/cfn-diagram": ^1
     "@octokit/auth-app": ^6
     "@octokit/request-error": ^5
