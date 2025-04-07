@@ -69,6 +69,11 @@ export const handler: APIGatewayProxyHandlerV2 = (
         const installationId = event.installation!.id;
         const jobId = event.workflow_job.id;
         const runnerName = event.workflow_job.runner_name ?? undefined;
+        if (!event.workflow_job.labels.length) {
+          // happens for synthetic check runs?
+          console.log(`No labels for job ${installationId}/${jobId}`);
+          return { statusCode: 204 };
+        }
         console.log(
           `Processing event ${action} for job ${installationId}/${jobId}`,
         );
@@ -134,6 +139,9 @@ export const handler: APIGatewayProxyHandlerV2 = (
     ),
   );
 
+/**
+ * @returns Newly-assigned Provisioner ID
+ */
 async function processJobPending({
   installationId,
   jobId,
@@ -148,7 +156,7 @@ async function processJobPending({
   labels: string[];
   repoName: string;
   userName: string | undefined;
-}) {
+}): Promise<string | undefined> {
   console.log(`Processing pending job ${installationId}/${jobId}`);
   let output: UpdateItemCommandOutput;
   try {
@@ -164,7 +172,6 @@ async function processJobPending({
         ExpressionAttributeValues: {
           ":repoName": stringAttributeFormat.write(repoName),
         },
-        ReturnValues: "ALL_OLD",
       }),
     );
   } catch (e) {
@@ -174,42 +181,35 @@ async function processJobPending({
     throw e;
   }
 
-  if (output.Attributes?.ProvisionerId) {
-    return (
-      output.Attributes.ProvisionerId &&
-      stringAttributeFormat.read(output.Attributes.ProvisionerId)
-    );
-  } else {
-    const owner = (orgName ?? userName)!;
-    const job: JobAspect = { labelNames, repoName };
-    for await (const provisioner of provisionerCandidates({
-      dynamodbClient,
-      owner,
-      provisionerTableName,
-    })) {
-      if (provisionerMatches(provisioner, job)) {
-        console.log(
-          `Found provisioner ${provisioner.id} for ${owner}/${repoName} ${labelNames}`,
-        );
-        await dynamodbClient.send(
-          new UpdateItemCommand({
-            ConditionExpression: "attribute_exists(Id)",
-            ExpressionAttributeValues: {
-              ":provisionerId": stringAttributeFormat.write(provisioner.id),
-            },
-            Key: {
-              Id: numberAttributeFormat.write(jobId),
-              InstallationId: numberAttributeFormat.write(installationId),
-            },
-            TableName: jobTableName,
-            UpdateExpression: "SET ProvisionerId = :provisionerId",
-          }),
-        );
-        return provisioner.id;
-      }
+  const owner = (orgName ?? userName)!;
+  const job: JobAspect = { labelNames, repoName };
+  for await (const provisioner of provisionerCandidates({
+    dynamodbClient,
+    owner,
+    provisionerTableName,
+  })) {
+    if (provisionerMatches(provisioner, job)) {
+      console.log(
+        `Found provisioner ${provisioner.id} for ${owner}/${repoName} ${labelNames}`,
+      );
+      await dynamodbClient.send(
+        new UpdateItemCommand({
+          ConditionExpression: "attribute_exists(Id)",
+          ExpressionAttributeValues: {
+            ":provisionerId": stringAttributeFormat.write(provisioner.id),
+          },
+          Key: {
+            Id: numberAttributeFormat.write(jobId),
+            InstallationId: numberAttributeFormat.write(installationId),
+          },
+          TableName: jobTableName,
+          UpdateExpression: "SET ProvisionerId = :provisionerId",
+        }),
+      );
+      return provisioner.id;
     }
-    console.log(`No provisioner found for ${owner}/${repoName} ${labelNames}`);
   }
+  console.log(`No provisioner found for ${owner}/${repoName} ${labelNames}`);
 }
 
 async function processJobComplete({
