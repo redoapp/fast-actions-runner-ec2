@@ -121,12 +121,6 @@ function aptRepo(
   );
 
   deb(
-    "AwsImdsClientDeb",
-    "redotech_fast_actions_runner_ec2/aws/imds-client/imds-client.deb",
-    "redotech_fast_actions_runner_ec2/fare/publish/aws_imds_client_deb_digest.txt",
-  );
-
-  deb(
     "AwsNetworkDeb",
     "redotech_fast_actions_runner_ec2/aws/network/aws-network.deb",
     "redotech_fast_actions_runner_ec2/fare/publish/aws_network_deb_digest.txt",

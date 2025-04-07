@@ -8,9 +8,9 @@ pkg_deb(
     name = "deb",
     data = ":tar",
     depends = [
+        "amazon-ec2-utils",
         "awscurl",
         # "curl",
-        "imds-client",
     ],
     description = "Fast Actions Runner for EC2 Create",
     enhances = ["actions-runner"],

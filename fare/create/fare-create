@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-create_runner_region="$(imds tags/instance/FastActionsRunnerEc2:Create:Region)"
-create_runner_url="$(imds tags/instance/FastActionsRunnerEc2:Create:Url)"
-instance_id="$(imds instance-id)"
+create_runner_region="$(ec2-metadata -g --quiet | awk '{if ($1 == "FastActionsRunnerEc2:Create:Region:") print $2}')"
+create_runner_url="$(ec2-metadata -g --quiet | awk '{if ($1 == "FastActionsRunnerEc2:Create:Url:") print $2}')"
+instance_id="$(ec2-metadata -i --quiet)"
 config="$(AWS_REGION="$create_runner_region" awscurl -X POST "$create_runner_url$instance_id")"
 
 cat >/var/tmp/fare-create.env <<EOL
