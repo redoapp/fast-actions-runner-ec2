@@ -17,7 +17,7 @@ pkg_deb(
     maintainer = "Redo Tech",
     package = "fare-create",
     package_file_name = "fare-create.deb",
-    postinst = "deb/postinst",
+    postinst = "deb/postinst.sh",
     recommends = ["actions-runner"],
     version_file = "//tools/deb:version",
 )

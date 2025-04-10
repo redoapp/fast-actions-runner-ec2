@@ -1,6 +1,7 @@
 TARGETS = [
     "//:root",
     "//aws/cdk-util:root",
+    "//aws/cf-doc:root",
     "//aws/cf-resource:root",
     "//aws/cf-response:root",
     "//aws/client:root",

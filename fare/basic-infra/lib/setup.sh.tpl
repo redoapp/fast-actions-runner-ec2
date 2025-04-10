@@ -3,22 +3,6 @@ set -euo pipefail
 
 . /etc/os-release
 
-# Cloudwatch Agent
-# collect cloud-init logs
-
-curl -o /tmp/amazon-cloudwatch-agent.deb https://amazoncloudwatch-agent-${AwsRegion}.s3.${AwsRegion}.${AwsDomain}/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
-
-apt-get install -y /tmp/amazon-cloudwatch-agent.deb
-
-rm /tmp/amazon-cloudwatch-agent.deb
-
-usermod -a -G adm cwagent
-
-cloudwatch_agent=${CloudwatchAgent}
-<<< "$cloudwatch_agent" base64 -d > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
-
-systemctl enable --now amazon-cloudwatch-agent
-
 # Configure
 
 curl -fsSL https://packages.fluentbit.io/fluentbit.key | gpg --dearmor > /etc/apt/keyrings/fluentbit.gpg
@@ -40,14 +24,20 @@ mkdir -p /etc/fluent-bit
 
 # Install
 
-apt-get install -y -o Dpkg::Options::=--force-confold fare-basic
+curl -o /tmp/amazon-cloudwatch-agent.deb https://amazoncloudwatch-agent-${AwsRegion}.s3.${AwsRegion}.${AwsDomain}/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
 
-systemctl enable --now fluent-bit
+apt-get install -o Dpkg::Options::=--force-confold -y fare-basic /tmp/amazon-cloudwatch-agent.deb
+
+rm /tmp/amazon-cloudwatch-agent.deb
+
+cloudwatch_agent=${CloudwatchAgent}
+<<< "$cloudwatch_agent" base64 -d > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+
+systemctl preset --now amazon-cloudwatch-agent
 
 # Custom setup
 
 setup_base64=${SetupBase64}
-
 if [ ! -z "$setup_base64" ]; then
   <<< "$setup_base64" base64 -d > /tmp/setup
   chmod +x /tmp/setup

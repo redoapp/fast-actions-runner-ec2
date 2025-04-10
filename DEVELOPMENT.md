@@ -1,5 +1,12 @@
 # Development
 
+## Test
+
+```sh
+bazel run redotech/test -- init
+bazel run redotech/test -- apply -auto-approve
+```
+
 ## Release
 
 ```sh

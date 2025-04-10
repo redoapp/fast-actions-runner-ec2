@@ -45,6 +45,7 @@ multi_generate(
         # ":black_lint",
         ":eslint_lint",
         ":prettier_lint",
+        ":shfmt_lint",
         # ":tslint_lint",
     ],
 )
@@ -53,6 +54,13 @@ generate_test(
     name = "lint_test",
     generate = ":lint",
     tags = ["lint"],
+)
+
+format(
+    name = "shfmt_lint",
+    srcs = ["@files//:shfmt_files"],
+    formatter = "//tools/shfmt",
+    strip_prefix = "/files",
 )
 
 format(

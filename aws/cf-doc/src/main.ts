@@ -1,10 +1,14 @@
-import { parse } from "yaml";
 import { ArgumentParser } from "argparse";
 import { readFile } from "fs/promises";
+import { parse } from "yaml";
 
 (async () => {
   const parser = new ArgumentParser();
-  parser.add_argument("--input", { action: "append", metavar: "NAME PATH", nargs: 2 });
+  parser.add_argument("--input", {
+    action: "append",
+    metavar: "NAME PATH",
+    nargs: 2,
+  });
   parser.add_argument("--name", { required: true });
   const args = parser.parse_args();
 
@@ -15,7 +19,7 @@ import { readFile } from "fs/promises";
     const input = await readFile(path, "utf8");
     templateToMarkdown(name, parse(input));
   }
-})().catch(e => {
+})().catch((e) => {
   console.error(String(e?.stack ?? e));
   process.exit(1);
 });
@@ -28,9 +32,15 @@ function templateToMarkdown(name: string, template: any) {
     console.log("### Parameters");
     console.log();
 
-    const parameters = {...template.Parameters};
-    const parameterLabels = template.Metadata?.['AWS::CloudFormation::Interface']?.['ParameterLabels'] ?? {};
-    const groups = template.Metadata?.['AWS::CloudFormation::Interface']?.['ParameterGroups'] ?? [];
+    const parameters = { ...template.Parameters };
+    const parameterLabels =
+      template.Metadata?.["AWS::CloudFormation::Interface"]?.[
+        "ParameterLabels"
+      ] ?? {};
+    const groups =
+      template.Metadata?.["AWS::CloudFormation::Interface"]?.[
+        "ParameterGroups"
+      ] ?? [];
     for (const group of groups) {
       console.log(`#### ${group.Label.default}`);
       console.log();
@@ -42,7 +52,9 @@ function templateToMarkdown(name: string, template: any) {
         const name = parameterLabels[id]?.default ?? id;
         const type = parameter.Type;
         const default_ = parameter.Default;
-        console.log(`| ${id} | ${name} | ${type} | ${default_ !== undefined ? `\`${JSON.stringify(default_)}\`` : ""} |`);
+        console.log(
+          `| ${id} | ${name} | ${type} | ${default_ !== undefined ? `\`${JSON.stringify(default_)}\`` : ""} |`,
+        );
       }
       console.log();
     }
@@ -52,11 +64,16 @@ function templateToMarkdown(name: string, template: any) {
     }
     console.log("| ID | Name | Description | Default |");
     console.log("| -- | -- | -- | -- |");
-    for (const [id, parameter] of Object.entries(parameters) as [string, any][]) {
+    for (const [id, parameter] of Object.entries(parameters) as [
+      string,
+      any,
+    ][]) {
       const name = parameterLabels[id]?.default ?? id;
       const type = parameter.Type;
       const default_ = parameter.Default;
-      console.log(`| ${id} | ${name} | ${type} | ${default_ !== undefined ? `\`${JSON.stringify(default_)}\`` : ""} |`);
+      console.log(
+        `| ${id} | ${name} | ${type} | ${default_ !== undefined ? `\`${JSON.stringify(default_)}\`` : ""} |`,
+      );
     }
     console.log();
   }
@@ -67,9 +84,12 @@ function templateToMarkdown(name: string, template: any) {
 
     console.log("| ID | Description |");
     console.log("| -- | -- |");
-    for (const [id, output] of Object.entries(template.Outputs) as [string, any][]) {
+    for (const [id, output] of Object.entries(template.Outputs) as [
+      string,
+      any,
+    ][]) {
       console.log(`| ${id} | ${output.Description} |`);
     }
     console.log();
   }
-};
+}

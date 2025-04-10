@@ -1,5 +1,6 @@
 TARGETS = [
     "//aws/cdk-util:lib",
+    "//aws/cf-doc:lib",
     "//aws/cf-resource:lib",
     "//aws/cf-response:lib",
     "//aws/client:lib",

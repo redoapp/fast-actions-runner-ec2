@@ -8,6 +8,7 @@ pkg_deb(
     data = ":tar",
     depends = [
         "actions-runner",
+        "amazon-cloudwatch-agent",
         "aws-network",
         "fare-create",
         "fluent-bit",
@@ -16,6 +17,7 @@ pkg_deb(
     maintainer = "Redo Tech",
     package = "fare-basic",
     package_file_name = "fare-basic.deb",
+    postinst = "deb/postinst.sh",
     version_file = "//tools/deb:version",
 )
 

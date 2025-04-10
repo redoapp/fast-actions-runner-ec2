@@ -12,7 +12,7 @@ pkg_deb(
     maintainer = "Redo Tech",
     package = "aws-network",
     package_file_name = "aws-network.deb",
-    postinst = "deb/postinst",
+    postinst = "deb/postinst.sh",
     section = "contrib/net",
     version_file = "//tools/deb:version",
 )

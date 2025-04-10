@@ -1,0 +1,7 @@
+load("@rules_shell_extra//shfmt:rules.bzl", "shfmt_format")
+
+package(default_visibility = ["//visibility:public"])
+
+shfmt_format(
+    name = "shfmt",
+)

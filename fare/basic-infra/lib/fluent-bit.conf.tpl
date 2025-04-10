@@ -1,9 +1,29 @@
 [INPUT]
+    Name cloud-init
+    Path /var/log/cloud-init.log
+    Tag cloud-init
+
+[INPUT]
+    Name cloud-init-output
+    Path /var/log/cloud-init-output.log
+    Tag cloud-init-output
+
+[INPUT]
     Name systemd
     Systemd_Filter _SYSTEMD_UNIT=actions-runner.service
     Systemd_Filter _SYSTEMD_UNIT=actions-runner-config.service
     Systemd_Filter _SYSTEMD_UNIT=fare-create.service
     Tag systemd.*
+
+[FILTER]
+    Name record_modifier
+    Match cloud-init
+    Record service cloud-init
+
+[FILTER]
+    Name record_modifier
+    Match cloud-init-output
+    Record service cloud-init-output
 
 [FILTER]
     Name record_modifier

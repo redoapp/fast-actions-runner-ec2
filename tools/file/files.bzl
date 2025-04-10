@@ -37,3 +37,8 @@ filegroup(
         ],
     ),
 )
+
+filegroup(
+    name = "shfmt_files",
+    srcs = glob(["files/**/*.sh"]),
+)

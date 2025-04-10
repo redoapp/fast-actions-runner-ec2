@@ -1,25 +1,5 @@
 {
   "agent": { "run_as_user": "cwagent" },
-  "logs": {
-    "logs_collected": {
-      "files": {
-        "collect_list": [
-          {
-            "file_path": "/var/log/cloud-init.log",
-            "log_group_name": "${Name}/cloud-init",
-            "log_stream_name": "{instance_id}",
-            "retention_in_days": 3
-          },
-          {
-            "file_path": "/var/log/cloud-init-output.log",
-            "log_group_name": "${Name}/cloud-init-output",
-            "log_stream_name": "{instance_id}",
-            "retention_in_days": 3
-          }
-        ]
-      }
-    }
-  },
   "metrics": {
     "aggregation_dimensions": [["ProvisionerId"]],
     "append_dimensions": {

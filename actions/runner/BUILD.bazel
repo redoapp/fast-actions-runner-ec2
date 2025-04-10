@@ -14,9 +14,9 @@ pkg_deb(
     maintainer = "Redo Tech",
     package = "actions-runner",
     package_file_name = "actions-runner.deb",
-    postinst = "deb/postinst",
-    postrm = "deb/postrm",
-    preinst = "deb/preinst",
+    postinst = "deb/postinst.sh",
+    postrm = "deb/postrm.sh",
+    preinst = "deb/preinst.sh",
     version_file = "//tools/deb:version",
 )
 
