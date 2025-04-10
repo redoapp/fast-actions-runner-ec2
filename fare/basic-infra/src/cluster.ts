@@ -1,3 +1,4 @@
+import { Bool, BOOL_VALUES } from "@redotech/cdk-util/bool";
 import { iamPolicyName } from "@redotech/cdk-util/iam";
 import { getName } from "@redotech/cdk-util/name";
 import {
@@ -16,7 +17,14 @@ import {
   CfnRole,
   CfnRolePolicy,
 } from "aws-cdk-lib/aws-iam";
-import { CfnOutput, CfnParameter, Fn, Stack } from "aws-cdk-lib/core";
+import {
+  Aws,
+  CfnCondition,
+  CfnOutput,
+  CfnParameter,
+  Fn,
+  Stack,
+} from "aws-cdk-lib/core";
 import { Construct } from "constructs";
 
 export function clusterTemplate(stack: Stack) {
@@ -25,8 +33,15 @@ export function clusterTemplate(stack: Stack) {
   });
   const appRoleArn = appRoleArnParam.valueAsString;
 
+  const sshEnabledParam = new CfnParameter(stack, "SshEnabled", {
+    description: "SSH enabled",
+    default: Bool.FALSE,
+    allowedValues: BOOL_VALUES,
+  });
+  const sshEnabled = sshEnabledParam.valueAsString as Bool;
+
   const { instanceProfile, instanceRole, securityGroup, subnet, role } =
-    clusterStack(stack, { appRoleArn });
+    clusterStack(stack, { appRoleArn, sshEnabled });
 
   new CfnOutput(stack, "InstanceProfileName", {
     description: "Instance profile name",
@@ -56,7 +71,7 @@ export function clusterTemplate(stack: Stack) {
 
 export function clusterStack(
   scope: Construct,
-  { appRoleArn }: { appRoleArn: string },
+  { appRoleArn, sshEnabled }: { appRoleArn: string; sshEnabled: Bool },
 ) {
   const { subnet, vpc } = networkStack(new Construct(scope, "Network"));
 
@@ -64,7 +79,7 @@ export function clusterStack(
     instanceProfile,
     role: instanceRole,
     securityGroup,
-  } = instanceStack(new Construct(scope, "Instance"), { vpc });
+  } = instanceStack(new Construct(scope, "Instance"), { sshEnabled, vpc });
 
   const role = new CfnRole(scope, "Role", {
     assumeRolePolicyDocument: {
@@ -173,7 +188,10 @@ export function networkStack(scope: Construct) {
   return { subnet, vpc };
 }
 
-export function instanceStack(scope: Construct, { vpc }: { vpc: CfnVPC }) {
+export function instanceStack(
+  scope: Construct,
+  { sshEnabled, vpc }: { sshEnabled: Bool; vpc: CfnVPC },
+) {
   const role = new CfnRole(scope, "InstanceRole", {
     assumeRolePolicyDocument: {
       Statement: [
@@ -194,8 +212,12 @@ export function instanceStack(scope: Construct, { vpc }: { vpc: CfnVPC }) {
     roles: [role.ref],
   });
 
+  const sshEnabledCondition = new CfnCondition(scope, "SshEnabled", {
+    expression: Fn.conditionEquals(sshEnabled, Bool.TRUE),
+  });
+
   const securityGroup = new CfnSecurityGroup(scope, "SecurityGroup", {
-    groupDescription: "Fast GitHub EC2 Runner",
+    groupDescription: getName(scope).toString(),
     securityGroupEgress: [
       { cidrIp: "0.0.0.0/0", description: "IPv4", ipProtocol: "-1" },
       { cidrIpv6: "::/0", description: "IPv6", ipProtocol: "-1" },
@@ -215,20 +237,28 @@ export function instanceStack(scope: Construct, { vpc }: { vpc: CfnVPC }) {
         fromPort: -1,
         toPort: -1,
       },
-      {
-        cidrIp: "0.0.0.0/0",
-        description: "SSH",
-        ipProtocol: "tcp",
-        fromPort: 22,
-        toPort: 22,
-      },
-      {
-        cidrIpv6: "::/0",
-        description: "SSHv6",
-        ipProtocol: "tcp",
-        fromPort: 22,
-        toPort: 22,
-      },
+      Fn.conditionIf(
+        sshEnabledCondition.logicalId,
+        {
+          cidrIp: "0.0.0.0/0",
+          description: "SSH",
+          ipProtocol: "tcp",
+          fromPort: 22,
+          toPort: 22,
+        },
+        Aws.NO_VALUE,
+      ),
+      Fn.conditionIf(
+        sshEnabledCondition.logicalId,
+        {
+          cidrIpv6: "::/0",
+          description: "SSH",
+          ipProtocol: "tcp",
+          fromPort: 22,
+          toPort: 22,
+        },
+        Aws.NO_VALUE,
+      ),
     ],
     tags: [{ key: "Name", value: getName(scope).toString() }],
     vpcId: vpc.ref,

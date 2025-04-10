@@ -5,7 +5,6 @@ import {
   DeleteItemCommand,
   DynamoDBClient,
   UpdateItemCommand,
-  UpdateItemCommandOutput,
 } from "@aws-sdk/client-dynamodb";
 import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import {
@@ -158,9 +157,8 @@ async function processJobPending({
   userName: string | undefined;
 }): Promise<string | undefined> {
   console.log(`Processing pending job ${installationId}/${jobId}`);
-  let output: UpdateItemCommandOutput;
   try {
-    output = await dynamodbClient.send(
+    await dynamodbClient.send(
       new UpdateItemCommand({
         ConditionExpression: "attribute_not_exists(Id)",
         Key: {

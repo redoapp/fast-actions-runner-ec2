@@ -4,9 +4,10 @@
 
 ### Parameters
 
-| ID         | Name       | Description | Default |
-| ---------- | ---------- | ----------- | ------- |
-| AppRoleArn | AppRoleArn | String      |         |
+| ID         | Name       | Description | Default   |
+| ---------- | ---------- | ----------- | --------- |
+| AppRoleArn | AppRoleArn | String      |           |
+| SshEnabled | SshEnabled | String      | `"false"` |
 
 ### Outputs
 
@@ -70,7 +71,5 @@
 | SecurityGroupId        | SecurityGroupId        | String              |              |
 | SetupScriptB64         | SetupScriptB64         | String              | `""`         |
 | SubnetId               | SubnetId               | String              |              |
-| VolumeIops             | VolumeIops             | Number              | `-1`         |
 | VolumeSizeGib          | VolumeSizeGib          | Number              | `64`         |
-| VolumeThroughputMibs   | VolumeThroughputMibs   | Number              | `-1`         |
 | VolumeType             | VolumeType             | String              | `"gp3"`      |

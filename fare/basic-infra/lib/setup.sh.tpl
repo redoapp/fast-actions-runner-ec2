@@ -40,11 +40,7 @@ mkdir -p /etc/fluent-bit
 
 # Install
 
-apt-get install -y -o Dpkg::Options::=--force-confold \
-  actions-runner \
-  aws-network \
-  fare-create \
-  fluent-bit
+apt-get install -y -o Dpkg::Options::=--force-confold fare-basic
 
 systemctl enable --now fluent-bit
 

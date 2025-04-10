@@ -15,6 +15,7 @@ DIGESTS = {
     "aws_curl_deb_digest": "//aws/curl:deb",
     "aws_network_deb_digest": "//aws/network:deb",
     "fare_app_function_digest": "//fare/app:function",
+    "fare_basic_deb_digest": "//fare/basic:deb",
     "fare_basic_infra_cluster_cf_digest": "//fare/basic-infra:cluster_cf",
     "fare_basic_infra_provisioner_cf_digest": "//fare/basic-infra:provisioner_cf",
     "fare_cf_resource_function_digest": "//fare/cf-resource:function",
@@ -35,6 +36,7 @@ filegroup(
         "//aws/curl:deb",
         "//aws/network:deb",
         "//fare/app:function",
+        "//fare/basic:deb",
         "//fare/basic-infra:cluster_cf",
         "//fare/basic-infra:provisioner_cf",
         "//fare/cf-resource:function",
@@ -71,6 +73,7 @@ apt_packages_index(
         "//aws/cli-installer:deb",
         "//aws/curl:deb",
         "//aws/network:deb",
+        "//fare/basic:deb",
         "//fare/create:deb",
     ],
 )

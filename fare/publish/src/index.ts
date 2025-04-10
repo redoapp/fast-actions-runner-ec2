@@ -127,6 +127,12 @@ function aptRepo(
   );
 
   deb(
+    "FareBasicDeb",
+    "redotech_fast_actions_runner_ec2/fare/basic/fare-basic.deb",
+    "redotech_fast_actions_runner_ec2/fare/publish/fare_basic_deb_digest.txt",
+  );
+
+  deb(
     "FareCreateDeb",
     "redotech_fast_actions_runner_ec2/fare/create/fare-create.deb",
     "redotech_fast_actions_runner_ec2/fare/publish/fare_create_deb_digest.txt",
