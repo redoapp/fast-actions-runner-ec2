@@ -78,11 +78,11 @@ python_register_toolchains(
 
 # Rules Javascript
 
-RULES_JAVASCRIPT_VERSION = "3a33078b1b792fd322df2d233c664e9ccfa87ccf"
+RULES_JAVASCRIPT_VERSION = "a648fbe4ee132daafbe1349da46fdf63285931da"
 
 http_archive(
     name = "better_rules_javascript",
-    sha256 = "fe08f3b046ff1ec1cece2c935832c9274d4903866958115f6326fee803b426f4",
+    sha256 = "e2cd936696c67948b8e66c93efab4ed49a3fe34cb5a4df2012308811b12b102d",
     strip_prefix = "rules_javascript-%s" % RULES_JAVASCRIPT_VERSION,
     url = "https://github.com/redoapp/rules_javascript/archive/%s.tar.gz" % RULES_JAVASCRIPT_VERSION,
 )

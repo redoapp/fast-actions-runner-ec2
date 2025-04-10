@@ -1,9 +1,19 @@
+load("@better_rules_javascript//javascript:rules.bzl", "js_export")
 load("@better_rules_javascript//nodejs:rules.bzl", "nodejs_binary")
 
 package(default_visibility = ["//visibility:public"])
 
 nodejs_binary(
     name = "cfn_dia",
-    dep = "@npm//@mhlabs/cfn-diagram:lib",
+    dep = ":cfn_diagram",
     main = "index.js",
+)
+
+js_export(
+    name = "cfn_diagram",
+    dep = "@npm//@mhlabs/cfn-diagram:lib",
+    global_deps = [
+        "@npm_aws-sdk_core_3.775.0//:lib",
+        "@npm_smithy_core_3.2.0//:lib",
+    ],
 )

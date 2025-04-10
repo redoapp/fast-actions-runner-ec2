@@ -22,6 +22,7 @@ ts_library(
     root = ":root",
     strip_prefix = "src",
     deps = [
+        "@npm//@types/argparse:lib",
         "@npm//@types/node:lib",
         "@npm//argparse:lib",
         "@npm//yaml:lib",

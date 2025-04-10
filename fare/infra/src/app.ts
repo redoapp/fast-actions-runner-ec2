@@ -723,6 +723,7 @@ function provisionStack(
     batchSize: 1,
     functionName: function_.ref,
     eventSourceArn: queue.attrArn,
+    tags: [{ key: "Name", value: getName(scope).toString() }],
   });
 
   return { queue };
