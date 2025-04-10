@@ -2,12 +2,8 @@ load("@rules_shell_extra//shell:rules.bzl", "sh_binary")
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files([
-    "app.sh.tpl",
-    "project-runner.sh.tpl",
-])
-
 sh_binary(
-    name = "synth",
-    main = "synth.sh",
+    name = "runner_publish",
+    data = ["//fare/publish"],
+    main = "runner-publish.sh",
 )
