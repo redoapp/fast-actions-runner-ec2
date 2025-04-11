@@ -1,6 +1,0 @@
-nodeLinker: node-modules
-
-packageExtensions:
-  "@aws-sdk/util-dynamodb@*":
-    dependencies:
-      "@smithy/types": "*"

@@ -78,18 +78,20 @@ python_register_toolchains(
 
 # Rules Javascript
 
-RULES_JAVASCRIPT_VERSION = "a648fbe4ee132daafbe1349da46fdf63285931da"
+RULES_JAVASCRIPT_VERSION = "d1989ea35a6e63962b1b72b98d1170e73660d6bb"
 
 http_archive(
     name = "better_rules_javascript",
-    sha256 = "e2cd936696c67948b8e66c93efab4ed49a3fe34cb5a4df2012308811b12b102d",
+    sha256 = "a9fc20f2e7c2b339162f39691aacee483b8710ca1c0ae99ee5fcca6db35d3c8a",
     strip_prefix = "rules_javascript-%s" % RULES_JAVASCRIPT_VERSION,
     url = "https://github.com/redoapp/rules_javascript/archive/%s.tar.gz" % RULES_JAVASCRIPT_VERSION,
 )
 
 load("@better_rules_javascript//rules:workspace.bzl", javascript_repositories = "repositories")
 
-javascript_repositories()
+javascript_repositories(
+    version = "20.15.1",
+)
 
 # Aspect Bazel Lib
 
