@@ -3,6 +3,11 @@ set -euo pipefail
 
 . /etc/os-release
 
+# Disable auto-update
+
+systemctl mask apt-daily apt-daily-upgrade unattended-upgrades
+systemctl stop apt-daily apt-daily-upgrade unattended-upgrades
+
 # Configure
 
 curl -fsSL https://packages.fluentbit.io/fluentbit.key | gpg --dearmor > /etc/apt/keyrings/fluentbit.gpg
@@ -46,5 +51,8 @@ if [ ! -z "$setup_base64" ]; then
 fi
 
 # Enable services
+
+systemctl unmask apt-daily apt-daily-upgrade unattended-upgrades
+systemctl start unattended-upgrades
 
 systemctl enable --now actions-runner
