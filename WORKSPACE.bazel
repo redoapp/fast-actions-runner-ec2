@@ -112,11 +112,11 @@ aspect_bazel_lib_register_toolchains()
 
 # Rules Terraform
 
-RULES_TERRAFORM_VERSION = "47e82fc8146b3c24a6ebe97d801aa1c468085803"
+RULES_TERRAFORM_VERSION = "13c10b055b87868d934a230ed770f6b5aa71e3b8"
 
 http_archive(
     name = "rules_terraform",
-    sha256 = "0460eddec0ac389d3038d9a995835d32080459ecd99653546488193b89a19845",
+    sha256 = "4068750f65c83d48eac071d47dfc86bd61bddcb2291572c5aa0b229e96434af1",
     strip_prefix = "rules_terraform-%s" % RULES_TERRAFORM_VERSION,
     url = "https://github.com/redoapp/rules_terraform/archive/%s.zip" % RULES_TERRAFORM_VERSION,
 )
