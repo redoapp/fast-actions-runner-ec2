@@ -5,6 +5,7 @@ set -euo pipefail
 
 # Disable auto-update
 
+systemctl disable --now packagekit
 systemctl mask apt-daily apt-daily-upgrade unattended-upgrades
 systemctl stop apt-daily apt-daily-upgrade unattended-upgrades
 
