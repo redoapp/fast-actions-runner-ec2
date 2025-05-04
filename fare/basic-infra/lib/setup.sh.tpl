@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Read env
+
 . /etc/os-release
 
-# Lock dpkg
+# Bootstrap
 
-exec {dpkg_frontend_lock}>/var/lib/dpkg/lock-frontend
-flock "$dpkg_frontend_lock"
+fcntl_lock_base64=${FcntlLockBase64}
+<<< "$fcntl_lock_base64" base64 -d > /usr/local/bin/fcntl-lock
+chmod +x /usr/local/bin/fcntl-lock
 
 # Configure
 
@@ -15,7 +18,8 @@ echo "deb [signed-by=/etc/apt/keyrings/fluentbit.gpg] https://packages.fluentbit
 
 echo 'deb [trusted=yes] https://${ArtifactS3Bucket}.s3.${ArtifactRegion}.${ArtifactDomain}/${ArtifactS3KeyPrefix}apt /' > /etc/apt/sources.list.d/fare.list
 
-apt-get update
+# wait for lists lock
+fcntl-lock /var/lib/apt/lists/lock apt-get update
 
 mkdir -p /etc/systemd/system-preset
 echo 'disable actions-runner.service' > /etc/systemd/system-preset/10-fare.preset
@@ -31,7 +35,7 @@ mkdir -p /etc/fluent-bit
 
 curl -o /tmp/amazon-cloudwatch-agent.deb https://amazoncloudwatch-agent-${AwsRegion}.s3.${AwsRegion}.${AwsDomain}/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
 
-apt-get install -o Dpkg::Options::=--force-confold -y fare-basic /tmp/amazon-cloudwatch-agent.deb
+apt-get install -o DPkg::Lock::Timeout=180 -o Dpkg::Options::=--force-confold -y fare-basic /tmp/amazon-cloudwatch-agent.deb
 
 rm /tmp/amazon-cloudwatch-agent.deb
 

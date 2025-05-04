@@ -305,6 +305,10 @@ export function instanceStack(
     require.resolve("./fluent-bit.conf.tpl"),
     "utf-8",
   );
+  const fcntlLock = readFileSync(
+    require.resolve("./fcntl-lock.py"),
+    "utf-8",
+  );
   const setup = readFileSync(require.resolve("./setup.sh.tpl"), "utf-8");
 
   const keyNameEmpty = new CfnCondition(scope, "KeyNameEmpty", {
@@ -363,6 +367,7 @@ export function instanceStack(
               ProvisionerId: id,
             }),
           ),
+          FcntlLockBase64: Fn.base64(fcntlLock),
           SetupBase64: setupScriptB64,
         }),
       ),
