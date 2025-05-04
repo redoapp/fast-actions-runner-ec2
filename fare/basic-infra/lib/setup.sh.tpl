@@ -3,10 +3,10 @@ set -euo pipefail
 
 . /etc/os-release
 
-# Disable auto-update
+# Lock dpkg
 
-systemctl mask apt-daily apt-daily-upgrade unattended-upgrades
-systemctl stop apt-daily apt-daily-upgrade unattended-upgrades
+exec {lock_fd}>/var/lib/dpkg/lock
+flock "$lock_fd"
 
 # Configure
 
@@ -51,8 +51,5 @@ if [ ! -z "$setup_base64" ]; then
 fi
 
 # Enable services
-
-systemctl unmask apt-daily apt-daily-upgrade unattended-upgrades
-systemctl start unattended-upgrades
 
 systemctl enable --now actions-runner
