@@ -3,10 +3,16 @@ set -euo pipefail
 
 . /etc/os-release
 
-# Lock dpkg
+# Lock dpkg and apt
 
-exec {lock_fd}>/var/lib/dpkg/lock
-flock "$lock_fd"
+exec {dpkg_frontend_lock}>/var/lib/dpkg/lock-frontend
+flock "$dpkg_frontend_lock"
+exec {apt_lists_lock}>/var/lib/apt/lists/lock
+flock "$apt_lists_lock"
+exec {apt_archives_lock}>/var/lib/apt/archives/lock
+flock "$apt_archives_lock"
+exec {dpkg_lock}>/var/lib/dpkg/lock
+flock "$dpkg_lock"
 
 # Configure
 
