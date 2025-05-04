@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Read env
+
 . /etc/os-release
-
-# Disable auto-update
-
-systemctl mask apt-daily apt-daily-upgrade unattended-upgrades
-systemctl stop apt-daily apt-daily-upgrade unattended-upgrades
 
 # Configure
 
@@ -31,7 +28,7 @@ mkdir -p /etc/fluent-bit
 
 curl -o /tmp/amazon-cloudwatch-agent.deb https://amazoncloudwatch-agent-${AwsRegion}.s3.${AwsRegion}.${AwsDomain}/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
 
-apt-get install -o Dpkg::Options::=--force-confold -y fare-basic /tmp/amazon-cloudwatch-agent.deb
+apt-get install -o DPkg::Lock::Timeout=180 -o Dpkg::Options::=--force-confold -y fare-basic /tmp/amazon-cloudwatch-agent.deb
 
 rm /tmp/amazon-cloudwatch-agent.deb
 
@@ -51,8 +48,5 @@ if [ ! -z "$setup_base64" ]; then
 fi
 
 # Enable services
-
-systemctl unmask apt-daily apt-daily-upgrade unattended-upgrades
-systemctl start unattended-upgrades
 
 systemctl enable --now actions-runner
