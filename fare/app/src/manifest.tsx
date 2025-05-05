@@ -62,7 +62,8 @@ function manifest({
     default_events: ["workflow_job"],
     default_permissions: {
       actions: "read",
-      ...(orgName ? { organization_self_hosted_runners: "write" } : undefined),
+      administration: "write", // repo runners
+      ...(orgName ? { organization_self_hosted_runners: "write" } : undefined), // org runners
     },
     hook_attributes: { url: webhookUrl },
     name: appName,
