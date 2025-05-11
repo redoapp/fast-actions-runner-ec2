@@ -1,7 +1,7 @@
 load("@better_rules_javascript//commonjs:rules.bzl", "cjs_root")
 load("@better_rules_javascript//nodejs:rules.bzl", "nodejs_install", "nodejs_modules_package")
 load("@better_rules_javascript//typescript:rules.bzl", "js_import_ts")
-load("//bazel/rules:rules.bzl", "query_bzl")
+load("@r_tools//bazel/rules:rules.bzl", "query_bzl")
 load("//tools/npm:npm.bzl", NPM_ROOTS = "ROOTS")
 load(":roots.bzl", ROOTS = "TARGETS")
 

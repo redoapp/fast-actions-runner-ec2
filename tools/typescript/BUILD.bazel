@@ -1,7 +1,7 @@
 load("@better_rules_javascript//commonjs:rules.bzl", "cjs_root")
 load("@better_rules_javascript//javascript:rules.bzl", "js_export", "js_library")
 load("@better_rules_javascript//typescript:rules.bzl", "configure_ts_compiler")
-load("//bazel/rules:rules.bzl", "query_bzl")
+load("@r_tools//bazel/rules:rules.bzl", "query_bzl")
 load(":libs.bzl", LIBS = "TARGETS")
 
 package(default_visibility = ["//visibility:public"])

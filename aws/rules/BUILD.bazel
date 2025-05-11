@@ -1,6 +1,0 @@
-package(default_visibility = ["//visibility:public"])
-
-exports_files([
-    "s3-web-deploy-runner.sh.tpl",
-    "ssm-conf-runner.sh.tpl",
-])

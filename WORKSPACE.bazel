@@ -76,6 +76,17 @@ python_register_toolchains(
     python_version = "3.11",
 )
 
+# Rules Debian Extra
+
+RULES_DEBIAN_EXTRA_VERSION = "7561056b1173c1bc93e1c2e2a8bc5d14763ab94c"
+
+http_archive(
+    name = "rules_debian_extra",
+    sha256 = "13dc52a89a9ef8ca53f30d6cf710b934d4f17dcde4cd80557123a543f0aae936",
+    strip_prefix = "rules_debian_extra-%s" % RULES_DEBIAN_EXTRA_VERSION,
+    url = "https://github.com/redoapp/rules_debian_extra/archive/%s.tar.gz" % RULES_DEBIAN_EXTRA_VERSION,
+)
+
 # Rules Javascript
 
 RULES_JAVASCRIPT_VERSION = "d1989ea35a6e63962b1b72b98d1170e73660d6bb"
@@ -124,6 +135,29 @@ http_archive(
 load("@rules_terraform//:workspace.bzl", rules_terraform_deps = "deps")
 
 rules_terraform_deps()
+
+# Rivet Bazel Util
+
+RIVET_BAZEL_UTIL_VERSION = "068ebb2fe6400516f761b729f6061e966c582abd"
+
+http_archive(
+    name = "rivet_bazel_util",
+    sha256 = "446661ae8fde977fe6aebf0a145acf1962cd096be272c1ec7e79e57ccc0ec162",
+    strip_prefix = "rivet-bazel-util-%s" % RIVET_BAZEL_UTIL_VERSION,
+    url = "https://github.com/redoapp/rivet-bazel-util/archive/%s.tar.gz" % RIVET_BAZEL_UTIL_VERSION,
+)
+
+
+# R Tools
+
+R_TOOLS_VERSION = "7fdf08c4441af686a22c776d91f87f0c90f8252c"
+
+http_archive(
+    name = "r_tools",
+    sha256 = "894651d1a86d22c869f30cb87bf5dd9381a0835733c440cbbcbc50899a55fabd",
+    strip_prefix = "r-tools-%s" % R_TOOLS_VERSION,
+    url = "https://github.com/redoapp/r-tools/archive/%s.tar.gz" % R_TOOLS_VERSION,
+)
 
 # Fast GitHub EC2 Runner
 

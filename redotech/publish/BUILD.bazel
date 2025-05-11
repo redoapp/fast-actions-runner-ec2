@@ -34,7 +34,7 @@ tf_import_cdktf(
     name = "fare_publish",
     data = [
         ":fare_artifacts",
-        "//bazel/rules:build_embed_label",
+        "@r_tools//bazel/rules:build_embed_label",
     ],
     data_dir = "/data/redotech/publish/fare-publish",
     providers = [
