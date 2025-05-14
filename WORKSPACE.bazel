@@ -147,7 +147,6 @@ http_archive(
     url = "https://github.com/redoapp/rivet-bazel-util/archive/%s.tar.gz" % RIVET_BAZEL_UTIL_VERSION,
 )
 
-
 # R Tools
 
 R_TOOLS_VERSION = "7fdf08c4441af686a22c776d91f87f0c90f8252c"

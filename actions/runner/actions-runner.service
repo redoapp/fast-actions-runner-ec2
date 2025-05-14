@@ -3,6 +3,9 @@ WantedBy=multi-user.target
 
 [Service]
 ExecStart=/opt/actions-runner/run.sh
+ExecStartPost=/opt/actions-runner/config.sh remove --local
+ExecStartPre=/opt/actions-runner/config.sh remove --local
+ExecStartPre=/opt/actions-runner/config.sh --ephemeral --unattended
 Group=actions-runner
 KillMode=mixed
 Restart=on-success
@@ -12,8 +15,5 @@ User=actions-runner
 WorkingDirectory=/opt/actions-runner
 
 [Unit]
-After=actions-runner-config.service
 After=network-online.target
 Description=GitHub Actions Runner
-Requires=actions-runner-config.service
-StartLimitIntervalSec=0

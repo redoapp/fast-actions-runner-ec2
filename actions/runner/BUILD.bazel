@@ -24,11 +24,9 @@ pkg_files(
     name = "files",
     srcs = [
         "actions-runner.service",
-        "actions-runner-config.service",
     ],
     renames = {
         "actions-runner.service": "/usr/lib/systemd/system/actions-runner.service",
-        "actions-runner-config.service": "/usr/lib/systemd/system/actions-runner-config.service",
     },
 )
 

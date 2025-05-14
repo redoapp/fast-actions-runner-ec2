@@ -55,7 +55,7 @@ function farePublish({ bucket }: { bucket: S3Bucket }) {
   const buildEmbedLabel = Fn.file(
     rlocation(
       scope,
-      "redotech_fast_actions_runner_ec2/bazel/rules/build_embed_label.txt",
+      "r_tools/bazel/rules/build_embed_label.txt",
     ),
   );
 

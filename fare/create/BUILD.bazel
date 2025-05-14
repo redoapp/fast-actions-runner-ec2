@@ -17,7 +17,6 @@ pkg_deb(
     maintainer = "Redo Tech",
     package = "fare-create",
     package_file_name = "fare-create.deb",
-    postinst = "deb/postinst.sh",
     recommends = ["actions-runner"],
     version_file = "//tools/deb:version",
 )
@@ -26,15 +25,9 @@ pkg_files(
     name = "files",
     srcs = [
         "actions-runner-10.conf",
-        "actions-runner-config-10.conf",
-        "fare-create.preset",
-        "fare-create.service",
     ],
     renames = {
         "actions-runner-10.conf": "/etc/systemd/system/actions-runner.service.d/10-fare.conf",
-        "actions-runner-config-10.conf": "/etc/systemd/system/actions-runner-config.service.d/10-fare.conf",
-        "fare-create.preset": "/usr/lib/systemd/system-preset/fare-create-50.preset",
-        "fare-create.service": "/usr/lib/systemd/system/fare-create.service",
     },
 )
 

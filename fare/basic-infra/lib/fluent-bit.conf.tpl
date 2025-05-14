@@ -11,8 +11,6 @@
 [INPUT]
     Name systemd
     Systemd_Filter _SYSTEMD_UNIT=actions-runner.service
-    Systemd_Filter _SYSTEMD_UNIT=actions-runner-config.service
-    Systemd_Filter _SYSTEMD_UNIT=fare-create.service
     Tag systemd.*
 
 [FILTER]
@@ -29,16 +27,6 @@
     Name record_modifier
     Match systemd.actions-runner.service
     Record service actions-runner
-
-[FILTER]
-    Name record_modifier
-    Match systemd.actions-runner-config.service
-    Record service actions-runner-config
-
-[FILTER]
-    Name record_modifier
-    Match systemd.fare-create.service
-    Record service fare-create
 
 [FILTER]
     Name record_modifier
