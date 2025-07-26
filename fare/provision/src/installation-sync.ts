@@ -101,7 +101,12 @@ async function jobsRefresh({
           repo: repoName,
           job_id: jobId,
         });
-      if (jobResponse.data.status === "completed") {
+      if (
+        // sometimes GitHub has eternal conclusion=cancelled,status=in_progress
+        // jobs
+        jobResponse.data.conclusion === "cancelled" ||
+        jobResponse.data.status === "completed"
+      ) {
         console.log(`Deleting job ${installationId}/${jobId}`);
         await dynamodbClient.send(
           new DeleteItemCommand({
