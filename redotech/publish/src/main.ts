@@ -53,10 +53,7 @@ function farePublish({ bucket }: { bucket: S3Bucket }) {
   awsProvider(scope, { Environment: "FarePublish" });
 
   const buildEmbedLabel = Fn.file(
-    rlocation(
-      scope,
-      "r_tools/bazel/rules/build_embed_label.txt",
-    ),
+    rlocation(scope, "r_tools/bazel/rules/build_embed_label.txt"),
   );
 
   farePublishStack(scope, {
