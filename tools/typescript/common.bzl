@@ -1,8 +1,8 @@
 load("@better_rules_javascript//commonjs:rules.bzl", "cjs_root")
-load("//tools/jest:test.bzl", "jest_test")
 load("@better_rules_javascript//javascript:rules.bzl", "js_library")
 load("@better_rules_javascript//rollup:rules.bzl", "configure_rollup", "rollup_bundle")
 load("@better_rules_javascript//typescript:rules.bzl", "ts_library")
+load("//tools/jest:test.bzl", "jest_test")
 
 def redo_ts_package(package_name, deps = [], compile_deps = [], prefix = True, target = None, rollup_deps = [], test_deps = [], test_size = None, test_timeout = None):
     assets = native.glob(["src/**/*.css"])

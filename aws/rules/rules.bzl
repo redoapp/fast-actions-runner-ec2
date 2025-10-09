@@ -1,5 +1,5 @@
-load("@better_rules_javascript//nodejs:rules.bzl", "nodejs_binary_package")
 load("@bazel_skylib//lib:shell.bzl", "shell")
+load("@better_rules_javascript//nodejs:rules.bzl", "nodejs_binary_package")
 load("@rules_file//util:path.bzl", "runfile_path")
 load("@rules_pkg//pkg:zip.bzl", "pkg_zip")
 

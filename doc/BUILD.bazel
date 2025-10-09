@@ -1,5 +1,5 @@
-load("//aws/cfn-rules:rules.bzl", "cfn_markdown", "cfn_markdown_part", "cfn_mermaid")
 load("@rules_shell_extra//shell:rules.bzl", "sh_binary")
+load("//aws/cfn-rules:rules.bzl", "cfn_markdown", "cfn_markdown_part", "cfn_mermaid")
 
 package(default_visibility = ["//visibility:public"])
 

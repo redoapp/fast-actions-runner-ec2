@@ -1,4 +1,5 @@
 load("@better_rules_javascript//eslint:rules.bzl", "configure_eslint")
+load("@better_rules_javascript//typescript-eslint:rules.bzl", "configure_ts_eslint")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -6,6 +7,17 @@ configure_eslint(
     name = "eslint",
     config = ".eslintrc.js",
     config_dep = "//:eslint_config",
+    plugins = [
+        "@npm//typescript:lib",
+        "@npm//@typescript-eslint/eslint-plugin:lib",
+        "@npm//@typescript-eslint/parser:lib",
+    ],
+)
+
+configure_ts_eslint(
+    name = "tslint",
+    config = ".ts.eslintrc.js",
+    config_dep = "//:tslint_config",
     plugins = [
         "@npm//typescript:lib",
         "@npm//@typescript-eslint/eslint-plugin:lib",

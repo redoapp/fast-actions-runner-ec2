@@ -1,4 +1,6 @@
+load("@better_rules_javascript//typescript-eslint:rules.bzl", "ts_eslint_format")
 load("@rules_file//generate:rules.bzl", "format", "formatter_composite", "generate_test", "multi_generate")
+load("//tools/typescript:libs.bzl", TS_LIBS = "TARGETS")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -9,12 +11,12 @@ format(
     strip_prefix = "/files",
 )
 
-# format(
-#     name = "black_lint",
-#     srcs = ["@files//:black_files"],
-#     formatter = "//tools/black",
-#     strip_prefix = "/files",
-# )
+format(
+    name = "black_lint",
+    srcs = ["@files//:black_files"],
+    formatter = "//tools/black",
+    strip_prefix = "/files",
+)
 
 formatter_composite(
     name = "eslint",
@@ -42,11 +44,10 @@ multi_generate(
     name = "lint",
     deps = [
         ":bazel_lint",
-        # ":black_lint",
+        ":black_lint",
         ":eslint_lint",
         ":prettier_lint",
         ":shfmt_lint",
-        # ":tslint_lint",
     ],
 )
 
@@ -63,11 +64,12 @@ format(
     strip_prefix = "/files",
 )
 
-format(
+multi_generate(
     name = "tslint",
-    srcs = ["@files//:tslint_files"],
-    formatter = "//tools/eslint:tslint",
-    strip_prefix = "/files",
+    deps = [
+        ":%s" % lib.replace("//", "").replace("/", "_").replace(":", "_")
+        for lib in TS_LIBS
+    ],
 )
 
 generate_test(
@@ -75,3 +77,12 @@ generate_test(
     generate = ":tslint",
     tags = ["lint"],
 )
+
+[
+    ts_eslint_format(
+        name = lib.replace("//", "").replace("/", "_").replace(":", "_"),
+        ts = lib,
+        ts_eslint = "//tools/eslint:tslint",
+    )
+    for lib in TS_LIBS
+]

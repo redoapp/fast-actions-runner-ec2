@@ -3,7 +3,7 @@ load("@rules_file//file:workspace.bzl", "files")
 def file_repositories():
     files(
         name = "files",
-        build = "//tools/file:files.bzl",
+        build = "//tools/file:files.bazel",
         ignores = [
             ".bazel-npm-cache.json",
             ".git",

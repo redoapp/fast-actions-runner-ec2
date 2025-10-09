@@ -68,3 +68,14 @@ test_suite(
     name = "test",
     tests = ["//tools/test"],
 )
+
+alias(
+    name = "tslint",
+    actual = "//tools/lint:tslint",
+)
+
+js_library(
+    name = "tslint_config",
+    srcs = [".ts.eslintrc.js"],
+    root = ":root",
+)

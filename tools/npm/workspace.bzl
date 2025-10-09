@@ -1,7 +1,7 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
 load("@better_rules_javascript//commonjs:workspace.bzl", "cjs_directory_npm_plugin")
-load("@better_rules_javascript//typescript:workspace.bzl", "ts_directory_npm_plugin")
 load("@better_rules_javascript//npm:workspace.bzl", "npm")
+load("@better_rules_javascript//typescript:workspace.bzl", "ts_directory_npm_plugin")
 load(":npm.bzl", "PACKAGES", "ROOTS")
 
 def _strip_bundled_impl(ctx):
