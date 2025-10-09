@@ -1,0 +1,8 @@
+name: Setup
+description: Setup Bazel
+runs:
+  steps:
+    - name: Configure Bazel
+      run: .github/actions/setup/bazel-configure
+      shell: bash
+  using: composite

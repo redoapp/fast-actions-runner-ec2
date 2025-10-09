@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -ueo pipefail
+
+cat >.bazelrc.user <<EOF
+build --config ci
+
+build:linux --sandbox_base=/dev/shm # /tmp would be better, but not in memory
+EOF

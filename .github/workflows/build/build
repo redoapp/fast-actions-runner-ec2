@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -ueo pipefail
+
+exec bazel test //tools/lint:lint_test //tools/lint:tslint_test
