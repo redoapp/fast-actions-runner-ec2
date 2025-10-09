@@ -19,6 +19,7 @@ sh_binary_(
     data = [
         ":bazelrc",
         "//tools/nodejs:roots",
+        "//tools/test:jest_tests_bzl",
         "//tools/typescript:libs_bzl",
     ],
     main = "refresh.sh",

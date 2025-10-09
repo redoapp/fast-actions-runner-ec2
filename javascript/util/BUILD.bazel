@@ -1,12 +1,16 @@
 load("@better_rules_javascript//commonjs:rules.bzl", "cjs_root")
 load("@better_rules_javascript//javascript:rules.bzl", "js_library")
+load("@better_rules_javascript//jest:rules.bzl", "jest_test")
 load("@better_rules_javascript//typescript:rules.bzl", "ts_library")
 
 package(default_visibility = ["//visibility:public"])
 
 ts_library(
     name = "lib",
-    srcs = glob(["src/**/*.ts"]),
+    srcs = glob(
+        ["src/**/*.ts"],
+        ["src/**/*.spec.ts"],
+    ),
     compiler = "//tools/typescript:tsc",
     config = "tsconfig.json",
     config_dep = ":tsconfig",
@@ -16,10 +20,37 @@ ts_library(
     strip_prefix = "src",
 )
 
+js_library(
+    name = "jest_config",
+    srcs = ["jest.config.js"],
+    root = ":root",
+)
+
 cjs_root(
     name = "root",
     package_name = "@redotech/util",
     descriptors = ["package.json"],
+)
+
+jest_test(
+    name = "test",
+    config = "jest.config.js",
+    config_dep = ":jest_config",
+    dep = ":test_lib",
+    jest = "@npm//jest:lib",
+)
+
+ts_library(
+    name = "test_lib",
+    srcs = glob(["src/**/*.spec.ts"]),
+    compiler = "//tools/typescript:tsc",
+    config = "tsconfig.json",
+    config_dep = ":tsconfig",
+    declaration_prefix = "lib",
+    js_prefix = "lib",
+    root = ":root",
+    strip_prefix = "src",
+    deps = [":lib"],
 )
 
 js_library(

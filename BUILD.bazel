@@ -63,3 +63,8 @@ alias(
     name = "terraform_resolve",
     actual = "//tools/terraform:providers_resolve",
 )
+
+test_suite(
+    name = "test",
+    tests = ["//tools/test"],
+)

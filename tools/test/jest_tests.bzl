@@ -1,0 +1,3 @@
+TARGETS = [
+    "//javascript/util:test",
+]

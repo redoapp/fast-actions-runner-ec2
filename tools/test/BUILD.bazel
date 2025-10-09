@@ -1,0 +1,15 @@
+load("@r_tools//bazel/rules:rules.bzl", "query_bzl")
+load(":jest_tests.bzl", JEST_TESTS = "TARGETS")
+
+package(default_visibility = ["//visibility:public"])
+
+query_bzl(
+    name = "jest_tests_bzl",
+    out = "jest_tests.bzl",
+    query = "kind('jest_test', ...)",
+)
+
+test_suite(
+    name = "test",
+    tests = JEST_TESTS,
+)

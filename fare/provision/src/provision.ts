@@ -6,6 +6,7 @@
 import "./polyfill";
 
 import {
+  BatchWriteItemCommand,
   DeleteItemCommand,
   DynamoDBClient,
   GetItemCommand,
@@ -34,8 +35,14 @@ import {
 } from "@redotech/dynamodb/attribute";
 import { arnAttributeCodec } from "@redotech/dynamodb/aws";
 import { envNumberRead, envStringRead, envUrlRead } from "@redotech/lambda/env";
+import {
+  SortDirection,
+  chunks,
+  counts,
+  sortBy,
+  take,
+} from "@redotech/util/iterator";
 import { SQSHandler } from "aws-lambda";
-import { countBy, sortBy } from "lodash";
 import { Temporal } from "temporal-polyfill";
 import {
   awsCredentialsProvider,
@@ -295,20 +302,21 @@ async function provision({ provisionerId }: { provisionerId: string }) {
   console.log(
     `Total instance count for ${provisionerId} is ${instances.length}`,
   );
-  const statusCounts = countBy(instances, (instance) => instance.status);
+  const statusCounts = counts(instances.map((instance) => instance.status));
   console.log(
-    `Instance statuses for ${provisionerId}: ${statusCounts[InstanceStatus.ENABLED] ?? 0} enabled, ${statusCounts[InstanceStatus.DISABLED] ?? 0} disabled`,
+    `Instance statuses for ${provisionerId}: ${statusCounts.get(InstanceStatus.ENABLED) ?? 0} enabled, ${statusCounts.get(InstanceStatus.DISABLED) ?? 0} disabled`,
   );
-  const ec2StatusCounts = countBy(instances, (instance) => instance.ec2Status);
-  console.log(
-    `EC2 statuses for ${provisionerId}: ${ec2StatusCounts[Ec2InstanceStatus.STARTING] ?? 0} starting, ${ec2StatusCounts[Ec2InstanceStatus.STARTED] ?? 0} started, ${ec2StatusCounts[Ec2InstanceStatus.STOPPING] ?? 0} stopping, ${ec2StatusCounts[Ec2InstanceStatus.STOPPED] ?? 0} stopped`,
-  );
-  const runnerStatusCounts = countBy(
-    instances,
-    (instance) => instance.runner?.status,
+  const ec2StatusCounts = counts(
+    instances.map((instance) => instance.ec2Status),
   );
   console.log(
-    `Runner statuses for ${provisionerId}: ${runnerStatusCounts[RunnerStatus.ACTIVE] ?? 0} active, ${runnerStatusCounts[RunnerStatus.IDLE] ?? 0} idle`,
+    `EC2 statuses for ${provisionerId}: ${ec2StatusCounts.get(Ec2InstanceStatus.STARTING) ?? 0} starting, ${ec2StatusCounts.get(Ec2InstanceStatus.STARTED) ?? 0} started, ${ec2StatusCounts.get(Ec2InstanceStatus.STOPPING) ?? 0} stopping, ${ec2StatusCounts.get(Ec2InstanceStatus.STOPPED) ?? 0} stopped`,
+  );
+  const runnerStatusCounts = counts(
+    instances.map((instance) => instance.runner?.status),
+  );
+  console.log(
+    `Runner statuses for ${provisionerId}: ${runnerStatusCounts.get(RunnerStatus.ACTIVE) ?? 0} active, ${runnerStatusCounts.get(RunnerStatus.IDLE) ?? 0} idle`,
   );
 
   // stop idle runners
@@ -317,10 +325,12 @@ async function provision({ provisionerId }: { provisionerId: string }) {
   let idleCandidates = instances.filter(
     (instance) => instance.runner?.status === RunnerStatus.IDLE,
   );
-  idleCandidates = sortBy(
-    idleCandidates,
-    (instance) => instance.runner!.activeAt.epochNanoseconds,
-  );
+  idleCandidates = [
+    ...sortBy(idleCandidates, {
+      direction: SortDirection.ASCENDING,
+      key: (instance) => instance.runner!.activeAt.epochNanoseconds,
+    }),
+  ];
   for (const instance of idleCandidates) {
     if (idleMax <= 0) {
       break;
@@ -352,15 +362,26 @@ async function provision({ provisionerId }: { provisionerId: string }) {
   }
 
   // scale down within the maximum
-  instances = sortBy(
-    instances,
-    (instance) => instance.status === InstanceStatus.ENABLED,
-    (instance) => !!instance.runner,
-    (instance) =>
-      instance.runner
-        ? instance.runner.activeAt.epochNanoseconds
-        : instance.startedAt.epochNanoseconds,
-  );
+  instances = [
+    ...sortBy(
+      instances,
+      {
+        direction: SortDirection.ASCENDING,
+        key: (instance) => instance.status === InstanceStatus.ENABLED,
+      },
+      {
+        direction: SortDirection.ASCENDING,
+        key: (instance) => !!instance.runner,
+      },
+      {
+        direction: SortDirection.ASCENDING,
+        key: (instance) =>
+          instance.runner
+            ? instance.runner.activeAt.epochNanoseconds
+            : instance.startedAt.epochNanoseconds,
+      },
+    ),
+  ];
   const excessCount = instances.length - countMax;
   if (0 < excessCount) {
     console.log(
@@ -396,11 +417,15 @@ async function provision({ provisionerId }: { provisionerId: string }) {
   let startInstances = instances.filter(
     (instance) => instance.ec2Status === Ec2InstanceStatus.STOPPED,
   );
-  startInstances = sortBy(
-    startInstances,
-    (instance) => -instance.startedAt.epochNanoseconds,
-  );
-  startInstances = startInstances.slice(0, instancePlannedCount);
+  startInstances = [
+    ...take(
+      sortBy(startInstances, {
+        direction: SortDirection.DESCENDING,
+        key: (instance) => instance.startedAt.epochNanoseconds,
+      }),
+      instancePlannedCount,
+    ),
+  ];
   console.log(`Starting ${startInstances.length} instances`);
   for (const instance of startInstances) {
     await start(instance);
@@ -722,6 +747,9 @@ enum Ec2InstanceStatus {
   STARTING = "starting",
 }
 
+/**
+ * Get current instances
+ */
 async function* getInstances({
   ec2Client,
   provisionerId,
@@ -812,18 +840,28 @@ async function* getInstances({
     }
   }
 
-  for (const id of records.keys()) {
-    console.log(`Cleaning up record for instance ${id}`);
+  for (const ids of chunks(records.keys(), 25)) {
+    const idList = [...ids];
+    for (const id of idList) {
+      console.log(`Cleaning up record for instance ${id}`);
+    }
     await dynamodbClient.send(
-      new DeleteItemCommand({
-        TableName: instanceTableName,
-        Key: {
-          Id: stringAttributeCodec.write(id),
-          ProvisionerId: stringAttributeCodec.write(provisionerId),
+      new BatchWriteItemCommand({
+        RequestItems: {
+          [instanceTableName]: idList.map((id) => ({
+            DeleteRequest: {
+              Key: {
+                Id: stringAttributeCodec.write(id),
+                ProvisionerId: stringAttributeCodec.write(provisionerId),
+              },
+            },
+          })),
         },
       }),
     );
-    console.log(`Cleaned up record for instance ${id}`);
+    for (const id of idList) {
+      console.log(`Cleaned up record for instance ${id}`);
+    }
   }
 }
 

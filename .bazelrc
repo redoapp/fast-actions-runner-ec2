@@ -52,5 +52,8 @@ build --nozip_undeclared_test_outputs
 build --test_output=errors
 test --build_tests_only
 
+# Test debug
+build:test_debug --test_output=streamed
+
 # User settings
 try-import %workspace%/user.bazelrc

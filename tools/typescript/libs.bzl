@@ -17,6 +17,7 @@ TARGETS = [
     "//github/util:lib",
     "//github/webhook:lib",
     "//javascript/util:lib",
+    "//javascript/util:test_lib",
     "//redotech/publish:lib",
     "//redotech/test:lib",
     "//terraform/util:lib",
