@@ -10,18 +10,14 @@ import { ARN, parse } from "@aws-sdk/util-arn-parser";
 import { RestEndpointMethodTypes } from "@octokit/rest";
 import { instanceResourceRead } from "@redotech/aws-util/ec2";
 import {
-  numberAttributeFormat,
-  stringAttributeFormat,
-  stringSetAttributeFormat,
+  numberAttributeCodec,
+  stringAttributeCodec,
+  stringSetAttributeCodec,
 } from "@redotech/dynamodb/attribute";
 import { envNumberRead, envStringRead } from "@redotech/lambda/env";
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { appGithubClient, provisionerInstallationClient } from "./github";
-import {
-  InstanceStatus,
-  RunnerStatus,
-  runnerAttributeFormat,
-} from "./instance";
+import { InstanceStatus, RunnerStatus, runnerAttributeCodec } from "./instance";
 
 const githubAppId = envNumberRead("GITHUB_APP_ID");
 
@@ -54,8 +50,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   const output = await dynamodbClient.send(
     new GetItemCommand({
       Key: {
-        Id: stringAttributeFormat.write(instanceId),
-        ProvisionerId: stringAttributeFormat.write(provisionerId),
+        Id: stringAttributeCodec.write(instanceId),
+        ProvisionerId: stringAttributeCodec.write(provisionerId),
       },
       TableName: instanceTableName,
       ProjectionExpression: "ProvisionerId",
@@ -67,7 +63,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     return { statusCode: 404, body: `No instance ${instanceId}` };
   }
 
-  if (provisionerId !== stringAttributeFormat.read(item.ProvisionerId)) {
+  if (provisionerId !== stringAttributeCodec.read(item.ProvisionerId)) {
     console.log(`Does not have ${provisionerId}`);
     return {
       statusCode: 404,
@@ -101,7 +97,7 @@ async function createRunner({
 }): Promise<{ config: string }> {
   const provisionerOutput = await dynamodbClient.send(
     new GetItemCommand({
-      Key: { Id: stringAttributeFormat.write(provisionerId) },
+      Key: { Id: stringAttributeCodec.write(provisionerId) },
       TableName: provisionerTableName,
       ProjectionExpression:
         "Labels, OrgName, RepoName, RunnerGroupId, UserName",
@@ -112,11 +108,11 @@ async function createRunner({
     throw new Error("No provisioner found");
   }
 
-  const labels = stringSetAttributeFormat.read(item.Labels);
-  const orgName = item.OrgName && stringAttributeFormat.read(item.OrgName);
-  const repoName = item.RepoName && stringAttributeFormat.read(item.RepoName);
-  const runnerGroupId = numberAttributeFormat.read(item.RunnerGroupId);
-  const userName = item.UserName && stringAttributeFormat.read(item.UserName);
+  const labels = stringSetAttributeCodec.read(item.Labels);
+  const orgName = item.OrgName && stringAttributeCodec.read(item.OrgName);
+  const repoName = item.RepoName && stringAttributeCodec.read(item.RepoName);
+  const runnerGroupId = numberAttributeCodec.read(item.RunnerGroupId);
+  const userName = item.UserName && stringAttributeCodec.read(item.UserName);
 
   const installationClient = await provisionerInstallationClient({
     dynamodbClient,
@@ -158,8 +154,8 @@ async function createRunner({
       new UpdateItemCommand({
         ConditionExpression: "#status <> :disabled",
         ExpressionAttributeValues: {
-          ":disabled": stringAttributeFormat.write(InstanceStatus.DISABLED),
-          ":runner": runnerAttributeFormat.write({
+          ":disabled": stringAttributeCodec.write(InstanceStatus.DISABLED),
+          ":runner": runnerAttributeCodec.write({
             activeAt: Temporal.Now.instant(),
             id: response.data.runner.id,
             status: RunnerStatus.IDLE,
@@ -167,8 +163,8 @@ async function createRunner({
         },
         ExpressionAttributeNames: { "#status": "Status" },
         Key: {
-          Id: stringAttributeFormat.write(instanceId),
-          ProvisionerId: stringAttributeFormat.write(provisionerId),
+          Id: stringAttributeCodec.write(instanceId),
+          ProvisionerId: stringAttributeCodec.write(provisionerId),
         },
         UpdateExpression: "SET Runner = :runner",
         TableName: instanceTableName,

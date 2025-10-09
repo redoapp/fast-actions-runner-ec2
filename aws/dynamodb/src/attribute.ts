@@ -1,11 +1,11 @@
 import { AttributeValue } from "@aws-sdk/client-dynamodb";
 
-export interface AttributeFormat<T> {
+export interface AttributeCodec<T> {
   read(attribute: AttributeValue): T;
   write(value: T): AttributeValue;
 }
 
-export const bufferAttributeFormat: AttributeFormat<ArrayBuffer> = {
+export const bufferAttributeCodec: AttributeCodec<ArrayBuffer> = {
   read(attribute) {
     if (attribute.B === undefined) {
       throw new Error("Expected binary");
@@ -17,7 +17,7 @@ export const bufferAttributeFormat: AttributeFormat<ArrayBuffer> = {
   },
 };
 
-export const durationAttributeFormat: AttributeFormat<Temporal.Duration> = {
+export const durationAttributeCodec: AttributeCodec<Temporal.Duration> = {
   read(attribute: AttributeValue) {
     if (attribute.N === undefined) {
       throw new Error("Expected number");
@@ -31,7 +31,7 @@ export const durationAttributeFormat: AttributeFormat<Temporal.Duration> = {
   },
 };
 
-export const instantAttributeFormat: AttributeFormat<Temporal.Instant> = {
+export const instantAttributeCodec: AttributeCodec<Temporal.Instant> = {
   read(attribute: AttributeValue) {
     if (attribute.N === undefined) {
       throw new Error("Expected number");
@@ -43,7 +43,7 @@ export const instantAttributeFormat: AttributeFormat<Temporal.Instant> = {
   },
 };
 
-export const numberAttributeFormat: AttributeFormat<number> = {
+export const numberAttributeCodec: AttributeCodec<number> = {
   read(attribute: AttributeValue) {
     if (attribute.N === undefined) {
       throw new Error("Expected number");
@@ -55,7 +55,7 @@ export const numberAttributeFormat: AttributeFormat<number> = {
   },
 };
 
-export const stringAttributeFormat: AttributeFormat<string> = {
+export const stringAttributeCodec: AttributeCodec<string> = {
   read(attribute: AttributeValue) {
     if (attribute.S === undefined) {
       throw new Error("Expected string");
@@ -67,13 +67,13 @@ export const stringAttributeFormat: AttributeFormat<string> = {
   },
 };
 
-export function stringEnumAttributeFormat<T extends string>(
+export function stringEnumAttributeCodec<T extends string>(
   values: Iterable<T>,
-): AttributeFormat<T> {
+): AttributeCodec<T> {
   const valuesSet = new Set<string>(values);
   return {
     read(attribute: AttributeValue) {
-      const value = stringAttributeFormat.read(attribute);
+      const value = stringAttributeCodec.read(attribute);
       if (!valuesSet.has(value)) {
         throw new Error(`${value} is not an allowed value`);
       }
@@ -83,12 +83,12 @@ export function stringEnumAttributeFormat<T extends string>(
       if (!valuesSet.has(value)) {
         throw new Error(`${value} is not an allowed value`);
       }
-      return stringAttributeFormat.write(value);
+      return stringAttributeCodec.write(value);
     },
   };
 }
 
-export const stringSetAttributeFormat: AttributeFormat<Set<string>> = {
+export const stringSetAttributeCodec: AttributeCodec<Set<string>> = {
   read(attribute: AttributeValue) {
     if (attribute.NULL) {
       return new Set();

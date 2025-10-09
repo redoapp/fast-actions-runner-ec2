@@ -7,12 +7,12 @@ import {
 import { RequestError } from "@octokit/request-error";
 import { RestEndpointMethodTypes } from "@octokit/rest";
 import {
-  instantAttributeFormat,
-  numberAttributeFormat,
-  stringAttributeFormat,
+  instantAttributeCodec,
+  numberAttributeCodec,
+  stringAttributeCodec,
 } from "@redotech/dynamodb/attribute";
 import { InstallationClient } from "./github";
-import { RunnerStatus, runnerAttributeFormat } from "./instance";
+import { RunnerStatus, runnerAttributeCodec } from "./instance";
 
 export async function runnerRefresh({
   dynamodbClient,
@@ -31,8 +31,8 @@ export async function runnerRefresh({
   const instanceOutput = await dynamodbClient.send(
     new GetItemCommand({
       Key: {
-        Id: stringAttributeFormat.write(instanceId),
-        ProvisionerId: stringAttributeFormat.write(provisionerId),
+        Id: stringAttributeCodec.write(instanceId),
+        ProvisionerId: stringAttributeCodec.write(provisionerId),
       },
       TableName: instanceTableName,
       ProjectionExpression: "Runner",
@@ -45,7 +45,7 @@ export async function runnerRefresh({
     return RunnerStatus.IDLE;
   }
 
-  const runner = runnerAttributeFormat.read(instanceOutput.Item.Runner);
+  const runner = runnerAttributeCodec.read(instanceOutput.Item.Runner);
 
   const updatedAt = Temporal.Now.instant();
   let status: RunnerStatus | undefined;
@@ -88,20 +88,20 @@ export async function runnerRefresh({
           "Runner.Id = :id AND Runner.ActiveAt <= :oldActiveAt",
         ExpressionAttributeValues: {
           ...(status === RunnerStatus.ACTIVE && {
-            ":activeAt": instantAttributeFormat.write(updatedAt),
+            ":activeAt": instantAttributeCodec.write(updatedAt),
           }),
           ...(status !== undefined && {
-            ":status": stringAttributeFormat.write(status),
+            ":status": stringAttributeCodec.write(status),
           }),
-          ":oldActiveAt": instantAttributeFormat.write(
+          ":oldActiveAt": instantAttributeCodec.write(
             runner.activeAt.add({ milliseconds: 1 }),
           ), // solve round-trip problems
-          ":id": numberAttributeFormat.write(runner.id),
+          ":id": numberAttributeCodec.write(runner.id),
         },
         ExpressionAttributeNames: status && { "#status": "Status" },
         Key: {
-          Id: stringAttributeFormat.write(instanceId),
-          ProvisionerId: stringAttributeFormat.write(provisionerId),
+          Id: stringAttributeCodec.write(instanceId),
+          ProvisionerId: stringAttributeCodec.write(provisionerId),
         },
         TableName: instanceTableName,
         UpdateExpression:

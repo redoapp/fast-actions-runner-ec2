@@ -1,22 +1,22 @@
 import { ARN, build, parse } from "@aws-sdk/util-arn-parser";
 import { AwsCredentialIdentity } from "@smithy/types";
 import {
-  AttributeFormat,
-  instantAttributeFormat,
-  stringAttributeFormat,
+  AttributeCodec,
+  instantAttributeCodec,
+  stringAttributeCodec,
 } from "./attribute";
 import { Item } from "./item";
 
-export const arnAttributeFormat: AttributeFormat<ARN> = {
+export const arnAttributeCodec: AttributeCodec<ARN> = {
   read(attribute) {
-    return parse(stringAttributeFormat.read(attribute));
+    return parse(stringAttributeCodec.read(attribute));
   },
   write(value) {
-    return stringAttributeFormat.write(build(value));
+    return stringAttributeCodec.write(build(value));
   },
 };
 
-export const credentialsAttributeFormat: AttributeFormat<AwsCredentialIdentity> =
+export const credentialsAttributeCodec: AttributeCodec<AwsCredentialIdentity> =
   {
     read(attribute) {
       if (attribute.M === undefined) {
@@ -25,28 +25,27 @@ export const credentialsAttributeFormat: AttributeFormat<AwsCredentialIdentity> 
       const map = attribute.M;
       return {
         accessKeyId:
-          map.AccessKeyId && stringAttributeFormat.read(map.AccessKeyId),
+          map.AccessKeyId && stringAttributeCodec.read(map.AccessKeyId),
         secretAccessKey:
-          map.SecretAccessKey &&
-          stringAttributeFormat.read(map.SecretAccessKey),
+          map.SecretAccessKey && stringAttributeCodec.read(map.SecretAccessKey),
         sessionToken:
-          map.SessionToken && stringAttributeFormat.read(map.SessionToken),
+          map.SessionToken && stringAttributeCodec.read(map.SessionToken),
         expiration:
           map.Expiration &&
           new Date(
-            instantAttributeFormat.read(map.Expiration).epochMilliseconds,
+            instantAttributeCodec.read(map.Expiration).epochMilliseconds,
           ),
       };
     },
     write(value) {
       const map: Item = {
-        AccessKeyId: stringAttributeFormat.write(value.accessKeyId),
-        SecretAccessKey: stringAttributeFormat.write(value.secretAccessKey),
+        AccessKeyId: stringAttributeCodec.write(value.accessKeyId),
+        SecretAccessKey: stringAttributeCodec.write(value.secretAccessKey),
         ...(value.sessionToken !== undefined && {
-          SessionToken: stringAttributeFormat.write(value.sessionToken),
+          SessionToken: stringAttributeCodec.write(value.sessionToken),
         }),
         ...(value.expiration !== undefined && {
-          Expiration: instantAttributeFormat.write(
+          Expiration: instantAttributeCodec.write(
             value.expiration.toTemporalInstant(),
           ),
         }),

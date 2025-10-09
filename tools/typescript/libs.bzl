@@ -6,7 +6,6 @@ TARGETS = [
     "//aws/client:lib",
     "//aws/dynamodb:lib",
     "//aws/function:lib",
-    "//aws/sqs:lib",
     "//aws/util:lib",
     "//fare/app:lib",
     "//fare/basic-infra:lib",

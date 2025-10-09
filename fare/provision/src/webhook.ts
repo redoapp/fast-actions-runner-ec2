@@ -8,8 +8,8 @@ import {
 } from "@aws-sdk/client-dynamodb";
 import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import {
-  numberAttributeFormat,
-  stringAttributeFormat,
+  numberAttributeCodec,
+  stringAttributeCodec,
 } from "@redotech/dynamodb/attribute";
 import { GithubWebhookBodyMalformedError } from "@redotech/github-webhook";
 import { reportError } from "@redotech/lambda/api-gateway";
@@ -162,13 +162,13 @@ async function processJobPending({
       new UpdateItemCommand({
         ConditionExpression: "attribute_not_exists(Id)",
         Key: {
-          Id: numberAttributeFormat.write(jobId),
-          InstallationId: numberAttributeFormat.write(installationId),
+          Id: numberAttributeCodec.write(jobId),
+          InstallationId: numberAttributeCodec.write(installationId),
         },
         UpdateExpression: "SET RepoName = :repoName",
         TableName: jobTableName,
         ExpressionAttributeValues: {
-          ":repoName": stringAttributeFormat.write(repoName),
+          ":repoName": stringAttributeCodec.write(repoName),
         },
       }),
     );
@@ -194,11 +194,11 @@ async function processJobPending({
         new UpdateItemCommand({
           ConditionExpression: "attribute_exists(Id)",
           ExpressionAttributeValues: {
-            ":provisionerId": stringAttributeFormat.write(provisioner.id),
+            ":provisionerId": stringAttributeCodec.write(provisioner.id),
           },
           Key: {
-            Id: numberAttributeFormat.write(jobId),
-            InstallationId: numberAttributeFormat.write(installationId),
+            Id: numberAttributeCodec.write(jobId),
+            InstallationId: numberAttributeCodec.write(installationId),
           },
           TableName: jobTableName,
           UpdateExpression: "SET ProvisionerId = :provisionerId",
@@ -221,8 +221,8 @@ async function processJobComplete({
   const output = await dynamodbClient.send(
     new DeleteItemCommand({
       Key: {
-        Id: numberAttributeFormat.write(jobId),
-        InstallationId: numberAttributeFormat.write(installationId),
+        Id: numberAttributeCodec.write(jobId),
+        InstallationId: numberAttributeCodec.write(installationId),
       },
       TableName: jobTableName,
       ReturnValues: "ALL_OLD",
@@ -235,6 +235,6 @@ async function processJobComplete({
 
   return (
     output.Attributes.ProvisionerId &&
-    stringAttributeFormat.read(output.Attributes.ProvisionerId)
+    stringAttributeCodec.read(output.Attributes.ProvisionerId)
   );
 }

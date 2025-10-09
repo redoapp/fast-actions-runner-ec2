@@ -1,7 +1,7 @@
-import { stringSetAttributeFormat } from "@redotech/dynamodb/attribute";
+import { stringSetAttributeCodec } from "@redotech/dynamodb/attribute";
 
 import { DynamoDBClient, paginateQuery } from "@aws-sdk/client-dynamodb";
-import { stringAttributeFormat } from "@redotech/dynamodb/attribute";
+import { stringAttributeCodec } from "@redotech/dynamodb/attribute";
 
 export interface ProvisionerCandidate {
   id: string;
@@ -38,7 +38,7 @@ export async function* provisionerCandidates({
     {
       ExpressionAttributeNames: { "#owner": "Owner" },
       ExpressionAttributeValues: {
-        ":owner": stringAttributeFormat.write(owner),
+        ":owner": stringAttributeCodec.write(owner),
       },
       IndexName: "Owner",
       KeyConditionExpression: "#owner = :owner",
@@ -48,9 +48,9 @@ export async function* provisionerCandidates({
   )) {
     for (const item of output.Items!) {
       yield {
-        id: stringAttributeFormat.read(item.Id),
-        labelNames: stringSetAttributeFormat.read(item.Labels),
-        repoName: item.RepoName && stringAttributeFormat.read(item.RepoName),
+        id: stringAttributeCodec.read(item.Id),
+        labelNames: stringSetAttributeCodec.read(item.Labels),
+        repoName: item.RepoName && stringAttributeCodec.read(item.RepoName),
       };
     }
   }

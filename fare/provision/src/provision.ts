@@ -27,12 +27,12 @@ import { ARN } from "@aws-sdk/util-arn-parser";
 import { RequestError } from "@octokit/request-error";
 import { launchTemplateResourceRead } from "@redotech/aws-util/ec2";
 import {
-  durationAttributeFormat,
-  instantAttributeFormat,
-  numberAttributeFormat,
-  stringAttributeFormat,
+  durationAttributeCodec,
+  instantAttributeCodec,
+  numberAttributeCodec,
+  stringAttributeCodec,
 } from "@redotech/dynamodb/attribute";
-import { arnAttributeFormat } from "@redotech/dynamodb/aws";
+import { arnAttributeCodec } from "@redotech/dynamodb/aws";
 import { envNumberRead, envStringRead, envUrlRead } from "@redotech/lambda/env";
 import { SQSHandler } from "aws-lambda";
 import { countBy, sortBy } from "lodash";
@@ -52,8 +52,8 @@ import {
   InstanceStatus,
   Runner,
   RunnerStatus,
-  instanceStatusAttributeFormat,
-  runnerAttributeFormat,
+  instanceStatusAttributeCodec,
+  runnerAttributeCodec,
 } from "./instance";
 import { runnerRefresh } from "./runner";
 
@@ -103,7 +103,7 @@ function debouceProvisioned({
   return async (f) => {
     const output = await dynamodbClient.send(
       new GetItemCommand({
-        Key: { Id: stringAttributeFormat.write(provisionerId) },
+        Key: { Id: stringAttributeCodec.write(provisionerId) },
         TableName: provisionerTableName,
         ProjectionExpression: "ProvisionedAt",
       }),
@@ -113,7 +113,7 @@ function debouceProvisioned({
     }
     let provisionedAt =
       output.Item.ProvisionedAt &&
-      instantAttributeFormat.read(output.Item.ProvisionedAt);
+      instantAttributeCodec.read(output.Item.ProvisionedAt);
 
     if (provisionedAt) {
       if (Temporal.Instant.compare(effectiveAt, provisionedAt) < 0) {
@@ -133,9 +133,9 @@ function debouceProvisioned({
         ConditionExpression:
           "attribute_exists(Id) AND (attribute_not_exists(ProvisionedAt) OR ProvisionedAt < :provisioned_at)",
         ExpressionAttributeValues: {
-          ":provisioned_at": instantAttributeFormat.write(provisionedAt),
+          ":provisioned_at": instantAttributeCodec.write(provisionedAt),
         },
-        Key: { Id: stringAttributeFormat.write(provisionerId) },
+        Key: { Id: stringAttributeCodec.write(provisionerId) },
         TableName: provisionerTableName,
         UpdateExpression: "SET ProvisionedAt = :provisioned_at",
       }),
@@ -150,7 +150,7 @@ async function provision({ provisionerId }: { provisionerId: string }) {
 
   const provisionerOutput = await dynamodbClient.send(
     new GetItemCommand({
-      Key: { Id: stringAttributeFormat.write(provisionerId) },
+      Key: { Id: stringAttributeCodec.write(provisionerId) },
       TableName: provisionerTableName,
       ProjectionExpression:
         "CountMax, CountMin, IdleTimeout, RepoName, LaunchTemplateArn, LaunchTemplateVersion, LaunchTimeout, ScaleFactor",
@@ -160,25 +160,25 @@ async function provision({ provisionerId }: { provisionerId: string }) {
   if (!provisionerItem) {
     throw new Error(`No provisioner ${provisionerId}`);
   }
-  let countMax = numberAttributeFormat.read(provisionerItem.CountMax);
+  let countMax = numberAttributeCodec.read(provisionerItem.CountMax);
   if (countMax < 0) {
     countMax = Infinity;
   }
-  const countMin = numberAttributeFormat.read(provisionerItem.CountMin);
-  const idleTimeout = durationAttributeFormat.read(provisionerItem.IdleTimeout);
-  const launchTemplateArn = arnAttributeFormat.read(
+  const countMin = numberAttributeCodec.read(provisionerItem.CountMin);
+  const idleTimeout = durationAttributeCodec.read(provisionerItem.IdleTimeout);
+  const launchTemplateArn = arnAttributeCodec.read(
     provisionerItem.LaunchTemplateArn,
   );
-  const launchTemplateVersion = stringAttributeFormat.read(
+  const launchTemplateVersion = stringAttributeCodec.read(
     provisionerItem.LaunchTemplateVersion,
   );
-  const launchTimeout = durationAttributeFormat.read(
+  const launchTimeout = durationAttributeCodec.read(
     provisionerItem.LaunchTimeout,
   );
   const repoName =
     provisionerItem.RepoName &&
-    stringAttributeFormat.read(provisionerItem.RepoName);
-  const scaleFactor = numberAttributeFormat.read(provisionerItem.ScaleFactor);
+    stringAttributeCodec.read(provisionerItem.RepoName);
+  const scaleFactor = numberAttributeCodec.read(provisionerItem.ScaleFactor);
 
   const credentials = awsCredentialsProvider({
     dynamodbClient,
@@ -435,7 +435,7 @@ async function pendingJobsCount({
       TableName: jobTableName,
       KeyConditionExpression: "ProvisionerId = :provisionerId",
       ExpressionAttributeValues: {
-        ":provisionerId": stringAttributeFormat.write(provisionerId),
+        ":provisionerId": stringAttributeCodec.write(provisionerId),
       },
       Select: "COUNT",
     },
@@ -491,9 +491,9 @@ async function createInstance({
   await dynamodbClient.send(
     new PutItemCommand({
       Item: {
-        Id: stringAttributeFormat.write(instance.InstanceId!),
-        Status: stringAttributeFormat.write(InstanceStatus.ENABLED),
-        ProvisionerId: stringAttributeFormat.write(provisionerId),
+        Id: stringAttributeCodec.write(instance.InstanceId!),
+        Status: stringAttributeCodec.write(InstanceStatus.ENABLED),
+        ProvisionerId: stringAttributeCodec.write(provisionerId),
       },
       TableName: instanceTableName,
     }),
@@ -520,9 +520,9 @@ async function startInstance({
   await dynamodbClient.send(
     new PutItemCommand({
       Item: {
-        Id: stringAttributeFormat.write(instance.id),
-        Status: stringAttributeFormat.write(InstanceStatus.ENABLED),
-        ProvisionerId: stringAttributeFormat.write(provisionerId),
+        Id: stringAttributeCodec.write(instance.id),
+        Status: stringAttributeCodec.write(InstanceStatus.ENABLED),
+        ProvisionerId: stringAttributeCodec.write(provisionerId),
       },
       TableName: instanceTableName,
     }),
@@ -591,21 +591,21 @@ async function disableInstance({
     const output = await dynamodbClient.send(
       new UpdateItemCommand({
         Key: {
-          Id: stringAttributeFormat.write(instance.id),
-          ProvisionerId: stringAttributeFormat.write(provisionerId),
+          Id: stringAttributeCodec.write(instance.id),
+          ProvisionerId: stringAttributeCodec.write(provisionerId),
         },
         TableName: instanceTableName,
         UpdateExpression: "SET #status = :status",
         ExpressionAttributeNames: { "#status": "Status" },
         ExpressionAttributeValues: {
-          ":status": stringAttributeFormat.write(InstanceStatus.DISABLED),
+          ":status": stringAttributeCodec.write(InstanceStatus.DISABLED),
         },
         ReturnValues: "ALL_NEW",
       }),
     );
     console.log(`Disabled instance ${provisionerId}/${instance.id}`);
     if (output.Attributes!.Runner) {
-      runner = runnerAttributeFormat.read(output.Attributes!.Runner);
+      runner = runnerAttributeCodec.read(output.Attributes!.Runner);
     }
   }
   return (
@@ -648,8 +648,8 @@ async function stopInstance({
   await dynamodbClient.send(
     new UpdateItemCommand({
       Key: {
-        Id: stringAttributeFormat.write(instance.id),
-        ProvisionerId: stringAttributeFormat.write(provisionerId),
+        Id: stringAttributeCodec.write(instance.id),
+        ProvisionerId: stringAttributeCodec.write(provisionerId),
       },
       TableName: instanceTableName,
       UpdateExpression: "REMOVE Runner",
@@ -694,8 +694,8 @@ async function terminateInstance({
   await dynamodbClient.send(
     new DeleteItemCommand({
       Key: {
-        Id: stringAttributeFormat.write(instance.id),
-        ProvisionerId: stringAttributeFormat.write(provisionerId),
+        Id: stringAttributeCodec.write(instance.id),
+        ProvisionerId: stringAttributeCodec.write(provisionerId),
       },
       TableName: instanceTableName,
     }),
@@ -738,7 +738,7 @@ async function* getInstances({
     {
       ExpressionAttributeNames: { "#status": "Status" },
       ExpressionAttributeValues: {
-        ":provisionerId": stringAttributeFormat.write(provisionerId),
+        ":provisionerId": stringAttributeCodec.write(provisionerId),
       },
       KeyConditionExpression: "ProvisionerId = :provisionerId",
       ProjectionExpression: "Id, Runner, #status",
@@ -746,10 +746,10 @@ async function* getInstances({
     },
   )) {
     for (const item of result.Items!) {
-      const id = stringAttributeFormat.read(item.Id);
-      const runner = item.Runner && runnerAttributeFormat.read(item.Runner);
+      const id = stringAttributeCodec.read(item.Id);
+      const runner = item.Runner && runnerAttributeCodec.read(item.Runner);
       const status =
-        item.Status && instanceStatusAttributeFormat.read(item.Status);
+        item.Status && instanceStatusAttributeCodec.read(item.Status);
       records.set(id, { runner, status });
     }
   }
@@ -818,8 +818,8 @@ async function* getInstances({
       new DeleteItemCommand({
         TableName: instanceTableName,
         Key: {
-          Id: stringAttributeFormat.write(id),
-          ProvisionerId: stringAttributeFormat.write(provisionerId),
+          Id: stringAttributeCodec.write(id),
+          ProvisionerId: stringAttributeCodec.write(provisionerId),
         },
       }),
     );

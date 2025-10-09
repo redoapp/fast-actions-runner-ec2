@@ -1,6 +1,6 @@
 import { GetParametersCommand, SSMClient } from "@aws-sdk/client-ssm";
 import { withClient } from "@redotech/aws-client";
-import { batch } from "@redotech/util/iterator";
+import { chunks } from "@redotech/util/iterator";
 import { Handler } from "aws-lambda";
 import { handlerLoad } from "./handler";
 
@@ -24,8 +24,8 @@ async function resolveEnv() {
   const ssmEnv = <[string, string][]>(
     Object.entries(process.env).filter(([name]) => name.endsWith("_SSM"))
   );
-  for (const envVars of batch(ssmEnv, 10)) {
-    const names = [...new Set(envVars.map(([_, value]) => value!))];
+  for (const envVars of chunks(ssmEnv, 10)) {
+    const names = [...new Set(Array.from(envVars, ([_, value]) => value!))];
     const output = await ssmClient.send(
       new GetParametersCommand({ Names: names, WithDecryption: true }),
     );

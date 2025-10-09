@@ -4,8 +4,8 @@ import {
   UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import { AssumeRoleCommand, STSClient } from "@aws-sdk/client-sts";
-import { stringAttributeFormat } from "@redotech/dynamodb/attribute";
-import { credentialsAttributeFormat } from "@redotech/dynamodb/aws";
+import { stringAttributeCodec } from "@redotech/dynamodb/attribute";
+import { credentialsAttributeCodec } from "@redotech/dynamodb/aws";
 import {
   AwsCredentialIdentity,
   AwsCredentialIdentityProvider,
@@ -27,7 +27,7 @@ export function awsCredentialsProvider({
   return async () => {
     const output = await dynamodbClient.send(
       new GetItemCommand({
-        Key: { Id: stringAttributeFormat.write(provisionerId) },
+        Key: { Id: stringAttributeCodec.write(provisionerId) },
         TableName: provisionerTableName,
         ProjectionExpression: "AwsCredentials, RoleArn",
       }),
@@ -38,7 +38,7 @@ export function awsCredentialsProvider({
     }
 
     if (item.AwsCredentials) {
-      const credentials = credentialsAttributeFormat.read(item.AwsCredentials);
+      const credentials = credentialsAttributeCodec.read(item.AwsCredentials);
       if (
         !credentials.expiration ||
         Temporal.Instant.compare(
@@ -52,7 +52,7 @@ export function awsCredentialsProvider({
 
     const stsOutput = await stsClient.send(
       new AssumeRoleCommand({
-        RoleArn: stringAttributeFormat.read(item.RoleArn),
+        RoleArn: stringAttributeCodec.read(item.RoleArn),
         RoleSessionName: provisionerId,
       }),
     );
@@ -68,11 +68,11 @@ export function awsCredentialsProvider({
     await dynamodbClient.send(
       new UpdateItemCommand({
         ConditionExpression: "attribute_exists(Id)",
-        Key: { Id: stringAttributeFormat.write(provisionerId) },
+        Key: { Id: stringAttributeCodec.write(provisionerId) },
         TableName: provisionerTableName,
         UpdateExpression: "SET AwsCredentials = :awsCredentials",
         ExpressionAttributeValues: {
-          ":awsCredentials": credentialsAttributeFormat.write(credentials),
+          ":awsCredentials": credentialsAttributeCodec.write(credentials),
         },
       }),
     );

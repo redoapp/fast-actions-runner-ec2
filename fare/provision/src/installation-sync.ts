@@ -13,8 +13,8 @@ import {
 } from "@aws-sdk/client-dynamodb";
 import { Octokit } from "@octokit/rest";
 import {
-  numberAttributeFormat,
-  stringAttributeFormat,
+  numberAttributeCodec,
+  stringAttributeCodec,
 } from "@redotech/dynamodb/attribute";
 import { envNumberRead, envStringRead } from "@redotech/lambda/env";
 import { Handler } from "aws-lambda";
@@ -88,13 +88,13 @@ async function jobsRefresh({
       KeyConditionExpression: "InstallationId = :installationId",
       ProjectionExpression: "Id, ProvisionerId, RepoName",
       ExpressionAttributeValues: {
-        ":installationId": numberAttributeFormat.write(installationId),
+        ":installationId": numberAttributeCodec.write(installationId),
       },
     },
   )) {
     for (const item of output.Items!) {
-      const jobId = numberAttributeFormat.read(item.Id);
-      const repoName = stringAttributeFormat.read(item.RepoName);
+      const jobId = numberAttributeCodec.read(item.Id);
+      const repoName = stringAttributeCodec.read(item.RepoName);
       const jobResponse =
         await installationGithubClient.actions.getJobForWorkflowRun({
           owner,
@@ -107,8 +107,8 @@ async function jobsRefresh({
           new DeleteItemCommand({
             TableName: jobTableName,
             Key: {
-              Id: numberAttributeFormat.write(jobId),
-              InstallationId: numberAttributeFormat.write(installationId),
+              Id: numberAttributeCodec.write(jobId),
+              InstallationId: numberAttributeCodec.write(installationId),
             },
           }),
         );
@@ -121,7 +121,7 @@ async function jobsRefresh({
       );
       if (
         provisioner?.id ===
-        (item.ProvisionerId && stringAttributeFormat.read(item.ProvisionerId))
+        (item.ProvisionerId && stringAttributeCodec.read(item.ProvisionerId))
       ) {
         continue;
       }
@@ -133,13 +133,13 @@ async function jobsRefresh({
           new UpdateItemCommand({
             ConditionExpression: "attribute_exists(Id)",
             Key: {
-              Id: numberAttributeFormat.write(jobId),
-              InstallationId: numberAttributeFormat.write(installationId),
+              Id: numberAttributeCodec.write(jobId),
+              InstallationId: numberAttributeCodec.write(installationId),
             },
             TableName: jobTableName,
             UpdateExpression: "SET ProvisionerId = :provisionerId",
             ExpressionAttributeValues: {
-              ":provisionerId": stringAttributeFormat.write(provisioner.id),
+              ":provisionerId": stringAttributeCodec.write(provisioner.id),
             },
           }),
         );
@@ -151,8 +151,8 @@ async function jobsRefresh({
           new UpdateItemCommand({
             ConditionExpression: "attribute_exists(Id)",
             Key: {
-              Id: numberAttributeFormat.write(jobId),
-              InstallationId: numberAttributeFormat.write(installationId),
+              Id: numberAttributeCodec.write(jobId),
+              InstallationId: numberAttributeCodec.write(installationId),
             },
             TableName: jobTableName,
             UpdateExpression: "REMOVE ProvisionerId",

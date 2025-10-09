@@ -7,7 +7,7 @@ import "./polyfill";
 
 import { DynamoDBClient, paginateQuery } from "@aws-sdk/client-dynamodb";
 import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
-import { stringAttributeFormat } from "@redotech/dynamodb/attribute";
+import { stringAttributeCodec } from "@redotech/dynamodb/attribute";
 import { envNumberRead, envStringRead } from "@redotech/lambda/env";
 import { Handler } from "aws-lambda";
 import {
@@ -61,7 +61,7 @@ async function runnersRefresh({
     { client: dynamodbClient },
     {
       ExpressionAttributeValues: {
-        ":provisionerId": stringAttributeFormat.write(provisionerId),
+        ":provisionerId": stringAttributeCodec.write(provisionerId),
       },
       FilterExpression: "attribute_exists(Runner)",
       KeyConditionExpression: "ProvisionerId = :provisionerId",
@@ -70,7 +70,7 @@ async function runnersRefresh({
     },
   )) {
     for (const item of output.Items!) {
-      const id = stringAttributeFormat.read(item.Id);
+      const id = stringAttributeCodec.read(item.Id);
       await runnerRefresh({
         dynamodbClient,
         installationClient,

@@ -23,7 +23,6 @@ ts_library(
     deps = [
         "//aws/dynamodb:lib",
         "//aws/function:lib",
-        "//aws/sqs:lib",
         "//aws/util:lib",
         "//github/webhook:lib",
         "//javascript/temporal-types:lib",

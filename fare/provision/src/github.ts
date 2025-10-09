@@ -8,8 +8,8 @@ import { createAppAuth } from "@octokit/auth-app";
 import { Octokit } from "@octokit/rest";
 import { Schema } from "@octokit/webhooks-types";
 import {
-  instantAttributeFormat,
-  stringAttributeFormat,
+  instantAttributeCodec,
+  stringAttributeCodec,
 } from "@redotech/dynamodb/attribute";
 import { Item } from "@redotech/dynamodb/item";
 import {
@@ -133,8 +133,8 @@ interface AccessToken {
 
 function accessTokenWrite(accessToken: AccessToken): AttributeValue {
   const map: Item = {
-    Token: stringAttributeFormat.write(accessToken.token),
-    ExpiresAt: instantAttributeFormat.write(accessToken.expiresAt),
+    Token: stringAttributeCodec.write(accessToken.token),
+    ExpiresAt: instantAttributeCodec.write(accessToken.expiresAt),
   };
   return { M: map };
 }
@@ -145,8 +145,8 @@ function accessTokenRead(item: AttributeValue): AccessToken {
   }
   const map = item.M;
   return {
-    token: stringAttributeFormat.read(map.Token),
-    expiresAt: instantAttributeFormat.read(map.ExpiresAt),
+    token: stringAttributeCodec.read(map.Token),
+    expiresAt: instantAttributeCodec.read(map.ExpiresAt),
   };
 }
 
@@ -168,7 +168,7 @@ async function providerAccess({
 }> {
   const output = await dynamodbClient.send(
     new GetItemCommand({
-      Key: { Id: stringAttributeFormat.write(provisionerId) },
+      Key: { Id: stringAttributeCodec.write(provisionerId) },
       TableName: provisionerTableName,
       ProjectionExpression: "AccessToken, OrgName, RepoName, UserName",
     }),
@@ -178,9 +178,9 @@ async function providerAccess({
     throw new Error(`No provisioner ${provisionerId}`);
   }
 
-  const orgName = item.OrgName && stringAttributeFormat.read(item.OrgName);
-  const repoName = item.RepoName && stringAttributeFormat.read(item.RepoName);
-  const userName = item.UserName && stringAttributeFormat.read(item.UserName);
+  const orgName = item.OrgName && stringAttributeCodec.read(item.OrgName);
+  const repoName = item.RepoName && stringAttributeCodec.read(item.RepoName);
+  const userName = item.UserName && stringAttributeCodec.read(item.UserName);
   let accessToken = item.AccessToken && accessTokenRead(item.AccessToken);
 
   if (
@@ -215,7 +215,7 @@ async function providerAccess({
     await dynamodbClient.send(
       new UpdateItemCommand({
         ConditionExpression: "attribute_exists(Id)",
-        Key: { Id: stringAttributeFormat.write(provisionerId) },
+        Key: { Id: stringAttributeCodec.write(provisionerId) },
         TableName: provisionerTableName,
         UpdateExpression: "SET AccessToken = :accessToken",
         ExpressionAttributeValues: {

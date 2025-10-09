@@ -7,7 +7,6 @@ TARGETS = [
     "//aws/client:root",
     "//aws/dynamodb:root",
     "//aws/function:root",
-    "//aws/sqs:root",
     "//aws/util:root",
     "//fare/app:root",
     "//fare/basic-infra:root",

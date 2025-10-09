@@ -7,7 +7,7 @@ import "./polyfill";
 
 import { DynamoDBClient, paginateScan } from "@aws-sdk/client-dynamodb";
 import { InvokeCommand, LambdaClient } from "@aws-sdk/client-lambda";
-import { stringAttributeFormat } from "@redotech/dynamodb/attribute";
+import { stringAttributeCodec } from "@redotech/dynamodb/attribute";
 import { envStringRead } from "@redotech/lambda/env";
 import { ProvisionerSyncEvent } from "./provisioner-sync";
 
@@ -48,7 +48,7 @@ async function* provisioners({
     { ProjectionExpression: "Id", TableName: provisionerTableName },
   )) {
     for (const item of output.Items!) {
-      const id = stringAttributeFormat.read(item.Id);
+      const id = stringAttributeCodec.read(item.Id);
       yield { id };
     }
   }

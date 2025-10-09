@@ -8,12 +8,12 @@ import {
 import { parse } from "@aws-sdk/util-arn-parser";
 import { sendFailure, sendSuccess } from "@redotech/cf-response";
 import {
-  durationAttributeFormat,
-  numberAttributeFormat,
-  stringAttributeFormat,
-  stringSetAttributeFormat,
+  durationAttributeCodec,
+  numberAttributeCodec,
+  stringAttributeCodec,
+  stringSetAttributeCodec,
 } from "@redotech/dynamodb/attribute";
-import { arnAttributeFormat } from "@redotech/dynamodb/aws";
+import { arnAttributeCodec } from "@redotech/dynamodb/aws";
 import {
   CloudFormationCustomResourceEvent,
   CloudFormationCustomResourceHandler,
@@ -69,7 +69,7 @@ async function doUpdate(event: CloudFormationCustomResourceEvent) {
               event.RequestType === "Create"
                 ? "attribute_not_exists(Id)"
                 : undefined,
-            Key: { Id: stringAttributeFormat.write(id) },
+            Key: { Id: stringAttributeCodec.write(id) },
             TableName: provisionerTableName,
             UpdateExpression:
               "SET" +
@@ -94,27 +94,27 @@ async function doUpdate(event: CloudFormationCustomResourceEvent) {
               (repoName !== undefined ? "" : ", RepoName"),
             ExpressionAttributeNames: { "#owner": "Owner" },
             ExpressionAttributeValues: {
-              ":countMax": numberAttributeFormat.write(countMax),
-              ":countMin": numberAttributeFormat.write(countMin),
-              ":idleTimeout": durationAttributeFormat.write(idleTimeout),
-              ":labels": stringSetAttributeFormat.write(labels),
-              ":launchTemplateArn": arnAttributeFormat.write(launchTemplateArn),
-              ":launchTemplateVersion": stringAttributeFormat.write(
+              ":countMax": numberAttributeCodec.write(countMax),
+              ":countMin": numberAttributeCodec.write(countMin),
+              ":idleTimeout": durationAttributeCodec.write(idleTimeout),
+              ":labels": stringSetAttributeCodec.write(labels),
+              ":launchTemplateArn": arnAttributeCodec.write(launchTemplateArn),
+              ":launchTemplateVersion": stringAttributeCodec.write(
                 launchTemplateVersion,
               ),
-              ":launchTimeout": durationAttributeFormat.write(launchTimeout),
-              ":runnerGroupId": numberAttributeFormat.write(runnerGroupId),
-              ":owner": stringAttributeFormat.write((orgName ?? userName)!),
-              ":scaleFactor": numberAttributeFormat.write(scaleFactor),
-              ":roleArn": arnAttributeFormat.write(roleArn),
+              ":launchTimeout": durationAttributeCodec.write(launchTimeout),
+              ":runnerGroupId": numberAttributeCodec.write(runnerGroupId),
+              ":owner": stringAttributeCodec.write((orgName ?? userName)!),
+              ":scaleFactor": numberAttributeCodec.write(scaleFactor),
+              ":roleArn": arnAttributeCodec.write(roleArn),
               ...(orgName !== undefined && {
-                ":orgName": stringAttributeFormat.write(orgName),
+                ":orgName": stringAttributeCodec.write(orgName),
               }),
               ...(userName !== undefined && {
-                ":userName": stringAttributeFormat.write(userName),
+                ":userName": stringAttributeCodec.write(userName),
               }),
               ...(repoName !== undefined && {
-                ":repoName": stringAttributeFormat.write(repoName),
+                ":repoName": stringAttributeCodec.write(repoName),
               }),
             },
             ReturnValues: "ALL_NEW",
@@ -128,7 +128,7 @@ async function doUpdate(event: CloudFormationCustomResourceEvent) {
       case "Delete":
         await dynamodbClient.send(
           new DeleteItemCommand({
-            Key: { Id: stringAttributeFormat.write(id) },
+            Key: { Id: stringAttributeCodec.write(id) },
             TableName: provisionerTableName,
           }),
         );
