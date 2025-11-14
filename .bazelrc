@@ -56,4 +56,5 @@ test --build_tests_only
 build:test_debug --test_output=streamed
 
 # User settings
-try-import %workspace%/user.bazelrc
+try-import %workspace%/.bazelrc.user
+try-import %workspace%/user.bazelrc # deprecated

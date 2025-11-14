@@ -13,6 +13,18 @@ jobs:
       - name: Build
         run: .github/workflows/build/build
     timeout-minutes: 30
+  release:
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+    name: Release
+    runs-on: ubuntu-22.04
+    needs: lint
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions/setup
+      - name: Release
+        run: .github/workflows/build/release
 name: Build
 on:
   push:

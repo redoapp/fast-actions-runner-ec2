@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -ueo pipefail
+
+version="${GITHUB_REF_NAME#v}"
+
+cat >.bazelrc.user <<EOF
+build --embed_label=$version
+build --stamp
+build --//aws/artifact:s3_key_prefix=$version/
+EOF
+
+bazel run fare_publish -- init
+bazel run fare_publish -- apply -auto-approve
