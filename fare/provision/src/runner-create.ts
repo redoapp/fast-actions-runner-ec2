@@ -103,16 +103,24 @@ async function createRunner({
         "Labels, OrgName, RepoName, RunnerGroupId, UserName",
     }),
   );
-  const item = provisionerOutput.Item;
-  if (!item) {
+  const provisionerItem = provisionerOutput.Item;
+  if (!provisionerItem) {
     throw new Error("No provisioner found");
   }
 
-  const labels = stringSetAttributeCodec.read(item.Labels);
-  const orgName = item.OrgName && stringAttributeCodec.read(item.OrgName);
-  const repoName = item.RepoName && stringAttributeCodec.read(item.RepoName);
-  const runnerGroupId = numberAttributeCodec.read(item.RunnerGroupId);
-  const userName = item.UserName && stringAttributeCodec.read(item.UserName);
+  const labels = stringSetAttributeCodec.read(provisionerItem.Labels);
+  const orgName =
+    provisionerItem.OrgName &&
+    stringAttributeCodec.read(provisionerItem.OrgName);
+  const repoName =
+    provisionerItem.RepoName &&
+    stringAttributeCodec.read(provisionerItem.RepoName);
+  const runnerGroupId = numberAttributeCodec.read(
+    provisionerItem.RunnerGroupId,
+  );
+  const userName =
+    provisionerItem.UserName &&
+    stringAttributeCodec.read(provisionerItem.UserName);
 
   const installationClient = await provisionerInstallationClient({
     dynamodbClient,
@@ -120,6 +128,45 @@ async function createRunner({
     githubClient,
     provisionerId,
   });
+
+  const instanceOutput = await dynamodbClient.send(
+    new GetItemCommand({
+      ExpressionAttributeNames: { "#status": "Status" },
+      ProjectionExpression: "Runner, #status",
+      Key: {
+        Id: stringAttributeCodec.write(instanceId),
+        ProvisionerId: stringAttributeCodec.write(provisionerId),
+      },
+      TableName: instanceTableName,
+    }),
+  );
+  const instanceItem = instanceOutput.Item;
+  if (!instanceItem) {
+    throw new Error(`No instance ${instanceId}`);
+  }
+  const instanceStatus = stringAttributeCodec.read(instanceItem.Status);
+  if (instanceStatus === InstanceStatus.DISABLED) {
+    throw new InstanceDisabledError(instanceId);
+  }
+
+  if (instanceItem.Runner) {
+    const runner = runnerAttributeCodec.read(instanceItem.Runner);
+    console.log(
+      `Deleting previous runner ${runner.id} on instance ${instanceId}`,
+    );
+    if (repoName !== undefined) {
+      await installationClient.client.actions.deleteSelfHostedRunnerFromRepo({
+        owner: orgName ?? userName,
+        repo: repoName,
+        runner_id: runner.id,
+      });
+    } else {
+      await installationClient.client.actions.deleteSelfHostedRunnerFromOrg({
+        org: orgName,
+        runner_id: runner.id,
+      });
+    }
+  }
 
   let response:
     | RestEndpointMethodTypes["actions"]["generateRunnerJitconfigForOrg"]["response"]
@@ -172,6 +219,9 @@ async function createRunner({
     );
   } catch (e) {
     if (e instanceof ConditionalCheckFailedException) {
+      console.log(
+        `Instance ${instanceId} disabled, deleting runner ${response.data.runner.id}`,
+      );
       if (repoName !== undefined) {
         await installationClient.client.actions.deleteSelfHostedRunnerFromRepo({
           owner: orgName ?? userName,

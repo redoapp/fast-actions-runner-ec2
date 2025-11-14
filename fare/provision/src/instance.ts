@@ -5,11 +5,14 @@ import {
   stringEnumAttributeCodec,
 } from "@redotech/dynamodb/attribute";
 import { Item } from "@redotech/dynamodb/item";
+import { Values } from "@redotech/util/type";
 
-export enum RunnerStatus {
-  ACTIVE = "active",
-  IDLE = "idle",
-}
+export const RunnerStatus = {
+  ACTIVE: "active",
+  IDLE: "idle",
+} as const;
+
+export type RunnerStatus = Values<typeof RunnerStatus>;
 
 export const runnerStatusAttributeCodec =
   stringEnumAttributeCodec<RunnerStatus>([
@@ -17,10 +20,12 @@ export const runnerStatusAttributeCodec =
     RunnerStatus.IDLE,
   ]);
 
-export enum InstanceStatus {
-  ENABLED = "enabled",
-  DISABLED = "inactive",
-}
+export const InstanceStatus = {
+  ENABLED: "enabled",
+  DISABLED: "inactive",
+} as const;
+
+export type InstanceStatus = Values<typeof InstanceStatus>;
 
 export const instanceStatusAttributeCodec =
   stringEnumAttributeCodec<InstanceStatus>([

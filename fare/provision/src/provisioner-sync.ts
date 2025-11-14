@@ -39,6 +39,7 @@ export interface ProvisionerSyncEvent {
 
 export const handler: Handler<ProvisionerSyncEvent, void> = async (event) => {
   const provisionerId = event.provisionerId;
+  console.log(`Syncing provisioner ${provisionerId}`);
 
   const installationClient = await provisionerInstallationClient({
     dynamodbClient,
