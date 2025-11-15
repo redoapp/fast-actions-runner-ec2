@@ -58,6 +58,7 @@ export function provisionerTemplate(stack: Stack) {
     runnerScaleFactor,
     paramGroup: scalingParamGroup,
     paramLabels: scalingParamLabels,
+    stoppedTimeout,
   } = scalingParams(stack);
 
   stack.addMetadata("AWS::CloudFormation::Interface", {
@@ -98,6 +99,7 @@ export function provisionerTemplate(stack: Stack) {
     runnerCountMax,
     runnerCountMin,
     runnerScaleFactor,
+    stoppedTimeout,
   });
 }
 
@@ -250,7 +252,7 @@ export function scalingParams(scope: Construct) {
 
   const runnerCountMinParam = new CfnParameter(scope, "RunnerCountMin", {
     default: 0,
-    description: "Maximum number of runners",
+    description: "Minimum number of runners",
     minValue: 0,
     type: "Number",
   });
@@ -264,11 +266,20 @@ export function scalingParams(scope: Construct) {
   });
   const runnerScaleFactor = runnerScaleFactorParam.valueAsNumber;
 
+  const stoppedTimeoutParam = new CfnParameter(scope, "StoppedTimeout", {
+    allowedPattern: `|${durationPattern}`,
+    description:
+      "How long time keep unused stopped instances, or empty for no timeout",
+    default: "",
+  });
+  const stoppedTimeout = stoppedTimeoutParam.valueAsString;
+
   const paramLabels = {
     [idleTimeoutParam.logicalId]: { default: "Idle timeout" },
     [runnerCountMaxParam.logicalId]: { default: "Maximum runners" },
     [runnerCountMinParam.logicalId]: { default: "Minimum runners" },
     [runnerScaleFactorParam.logicalId]: { default: "Scale factor" },
+    [stoppedTimeoutParam.logicalId]: { default: "Stopped timeout" },
   };
 
   const paramGroup = {
@@ -277,6 +288,7 @@ export function scalingParams(scope: Construct) {
       runnerCountMinParam.logicalId,
       runnerCountMaxParam.logicalId,
       idleTimeoutParam.logicalId,
+      stoppedTimeoutParam.logicalId,
     ],
   };
 
@@ -288,6 +300,7 @@ export function scalingParams(scope: Construct) {
     runnerScaleFactor,
     paramLabels,
     paramGroup,
+    stoppedTimeout,
   };
 }
 
@@ -308,6 +321,7 @@ export function provisionerStack(
     runnerScaleFactor,
     runnerGroupId,
     runnerLabels,
+    stoppedTimeout,
     userName,
   }: {
     userName: string;
@@ -325,6 +339,7 @@ export function provisionerStack(
     runnerScaleFactor: number;
     runnerGroupId: number;
     runnerLabels: string[];
+    stoppedTimeout: string;
   },
 ) {
   const orgNameEmpty = new CfnCondition(scope, "OrgNameEmpty", {
@@ -353,6 +368,7 @@ export function provisionerStack(
       RoleArn: roleArn,
       RunnerGroupId: runnerGroupId,
       ScaleFactor: runnerScaleFactor,
+      StoppedTimeout: stoppedTimeout,
       UserName: Fn.conditionIf(userNameEmpty.logicalId, Aws.NO_VALUE, userName),
     },
   });

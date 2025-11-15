@@ -54,6 +54,7 @@
 | RunnerCountMin | Minimum runners | Number      | `0`      |
 | RunnerCountMax | Maximum runners | Number      | `-1`     |
 | IdleTimeout    | Idle timeout    | String      | `"PT2M"` |
+| StoppedTimeout | Stopped timeout | String      | `""`     |
 
 #### Other
 

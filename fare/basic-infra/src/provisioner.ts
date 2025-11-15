@@ -56,6 +56,7 @@ export function provisionerTemplate(stack: Stack) {
     runnerScaleFactor,
     paramGroup: scalingParamGroup,
     paramLabels: scalingParamLabels,
+    stoppedTimeout,
   } = scalingParams(stack);
 
   const roleArnParam = new CfnParameter(stack, "RoleArn", {
@@ -162,6 +163,7 @@ export function provisionerTemplate(stack: Stack) {
     runnerLabels,
     securityGroupId,
     setupScriptB64,
+    stoppedTimeout,
     subnetId,
     userName,
     volumeSizeGib,
@@ -194,6 +196,7 @@ export function provisionerStack(
     runnerLabels,
     securityGroupId,
     setupScriptB64,
+    stoppedTimeout,
     subnetId,
     userName,
     volumeSizeGib,
@@ -221,6 +224,7 @@ export function provisionerStack(
     runnerScaleFactor: number;
     securityGroupId: string;
     setupScriptB64: string;
+    stoppedTimeout: string;
     subnetId: string;
     userName: string;
     volumeSizeGib: number;
@@ -257,6 +261,7 @@ export function provisionerStack(
     launchTemplateVersion: launchTemplate.attrLatestVersionNumber,
     runnerGroupId,
     runnerLabels,
+    stoppedTimeout,
     provisionerFunctionArn,
     roleArn,
     userName,

@@ -35,13 +35,7 @@ import {
 } from "@redotech/dynamodb/attribute";
 import { arnAttributeCodec } from "@redotech/dynamodb/aws";
 import { envNumberRead, envStringRead, envUrlRead } from "@redotech/lambda/env";
-import {
-  SortDirection,
-  chunks,
-  counts,
-  sortBy,
-  take,
-} from "@redotech/util/iterator";
+import { SortDirection, chunks, counts, sortBy } from "@redotech/util/iterator";
 import { SQSHandler } from "aws-lambda";
 import { Temporal } from "temporal-polyfill";
 import {
@@ -160,7 +154,7 @@ async function provision({ provisionerId }: { provisionerId: string }) {
       Key: { Id: stringAttributeCodec.write(provisionerId) },
       TableName: provisionerTableName,
       ProjectionExpression:
-        "CountMax, CountMin, IdleTimeout, RepoName, LaunchTemplateArn, LaunchTemplateVersion, LaunchTimeout, ScaleFactor",
+        "CountMax, CountMin, IdleTimeout, RepoName, LaunchTemplateArn, LaunchTemplateVersion, LaunchTimeout, ScaleFactor, StoppedTimeout",
     }),
   );
   const provisionerItem = provisionerOutput.Item;
@@ -186,6 +180,9 @@ async function provision({ provisionerId }: { provisionerId: string }) {
     provisionerItem.RepoName &&
     stringAttributeCodec.read(provisionerItem.RepoName);
   const scaleFactor = numberAttributeCodec.read(provisionerItem.ScaleFactor);
+  const stoppedTimeout =
+    provisionerItem.StoppedTimeout &&
+    durationAttributeCodec.read(provisionerItem.StoppedTimeout);
 
   const credentials = awsCredentialsProvider({
     dynamodbClient,
@@ -376,9 +373,11 @@ async function provision({ provisionerId }: { provisionerId: string }) {
       {
         direction: SortDirection.ASCENDING,
         key: (instance) =>
-          instance.runner
-            ? instance.runner.activeAt.epochNanoseconds
-            : instance.startedAt.epochNanoseconds,
+          (
+            instance.runner?.activeAt ??
+            instance.stoppedAt ??
+            instance.startedAt
+          ).epochNanoseconds,
       },
     ),
   ];
@@ -414,21 +413,36 @@ async function provision({ provisionerId }: { provisionerId: string }) {
   }
 
   // start stopped instances, most recent first
-  let startInstances = instances.filter(
+  const startInstances = instances.filter(
     (instance) => instance.ec2Status === Ec2InstanceStatus.STOPPED,
   );
-  startInstances = [
-    ...take(
-      sortBy(startInstances, {
-        direction: SortDirection.DESCENDING,
-        key: (instance) => instance.startedAt.epochNanoseconds,
-      }),
-      instancePlannedCount,
-    ),
+  instances = [
+    ...sortBy(startInstances, {
+      direction: SortDirection.DESCENDING,
+      key: (instance) =>
+        (instance.stoppedAt ?? instance.startedAt).epochNanoseconds,
+    }),
   ];
-  console.log(`Starting ${startInstances.length} instances`);
-  for (const instance of startInstances) {
-    await start(instance);
+  console.log(
+    `Starting ${Math.min(instances.length, instancePlannedCount)} instances`,
+  );
+  for (const [index, instance] of startInstances.entries()) {
+    if (index < instancePlannedCount) {
+      await start(instance);
+      continue;
+    }
+
+    if (!stoppedTimeout || !instance.stoppedAt) {
+      continue;
+    }
+    const stoppedDuration = instance.stoppedAt.until(Temporal.Now.instant());
+    if (Temporal.Duration.compare(stoppedDuration, stoppedTimeout) <= 0) {
+      continue;
+    }
+    console.log(
+      `Instance ${provisionerId}/${instance.id} has been stopped for ${durationDisplay(stoppedDuration)}, exceeding the timeout ${durationDisplay(stoppedTimeout)}`,
+    );
+    await terminate(instance);
   }
 
   // limit total instances to maximum
@@ -555,7 +569,7 @@ async function startInstance({
   console.log(`Instance ${instance.id} started`);
 }
 
-async function stopRunner({
+async function deleteRunner({
   installationClient,
   repoName,
   id,
@@ -635,7 +649,7 @@ async function disableInstance({
   }
   return (
     !runner ||
-    (await stopRunner({ installationClient, repoName, id: runner.id }))
+    (await deleteRunner({ installationClient, repoName, id: runner.id }))
   );
 }
 
@@ -672,12 +686,15 @@ async function stopInstance({
   );
   await dynamodbClient.send(
     new UpdateItemCommand({
+      ExpressionAttributeValues: {
+        ":now": instantAttributeCodec.write(Temporal.Now.instant()),
+      },
       Key: {
         Id: stringAttributeCodec.write(instance.id),
         ProvisionerId: stringAttributeCodec.write(provisionerId),
       },
       TableName: instanceTableName,
-      UpdateExpression: "REMOVE Runner",
+      UpdateExpression: "REMOVE Runner, SET StoppedAt = :now",
     }),
   );
   console.log(`Stopped instance ${provisionerId}/${instance.id}`);
@@ -734,6 +751,7 @@ interface Instance {
   id: string;
   startedAt: Temporal.Instant;
   status: InstanceStatus | undefined;
+  stoppedAt: Temporal.Instant | undefined;
   ec2Status: Ec2InstanceStatus;
   runner: Runner | undefined;
   launchTemplateId: string;
@@ -759,7 +777,11 @@ async function* getInstances({
 }): AsyncIterableIterator<Instance> {
   const records = new Map<
     string,
-    { runner: Runner | undefined; status: InstanceStatus }
+    {
+      runner: Runner | undefined;
+      status: InstanceStatus;
+      stoppedAt: Temporal.Instant | undefined;
+    }
   >();
   for await (const result of paginateQuery(
     { client: dynamodbClient },
@@ -769,7 +791,7 @@ async function* getInstances({
         ":provisionerId": stringAttributeCodec.write(provisionerId),
       },
       KeyConditionExpression: "ProvisionerId = :provisionerId",
-      ProjectionExpression: "Id, Runner, #status",
+      ProjectionExpression: "#status, Id, Runner, StoppedAt",
       TableName: instanceTableName,
     },
   )) {
@@ -778,7 +800,9 @@ async function* getInstances({
       const runner = item.Runner && runnerAttributeCodec.read(item.Runner);
       const status =
         item.Status && instanceStatusAttributeCodec.read(item.Status);
-      records.set(id, { runner, status });
+      const stoppedAt =
+        item.StoppedAt && instantAttributeCodec.read(item.StoppedAt);
+      records.set(id, { runner, status, stoppedAt });
     }
   }
 
@@ -835,6 +859,7 @@ async function* getInstances({
           startedAt: instance.LaunchTime!.toTemporalInstant(),
           launchTemplateId: launchTemplateId || "",
           launchTemplateVersion: launchTemplateVersion || "",
+          stoppedAt: record?.stoppedAt,
         };
       }
     }

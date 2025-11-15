@@ -63,6 +63,9 @@ async function doUpdate(event: CloudFormationCustomResourceEvent) {
         const userName = resourceProperties.UserName;
         const repoName = resourceProperties.RepoName;
         const runnerGroupId = resourceProperties.RunnerGroupId;
+        const stoppedTimeout = resourceProperties.StoppedTimeout
+          ? Temporal.Duration.from(resourceProperties.StoppedTimeout)
+          : undefined;
         const result = await dynamodbClient.send(
           new UpdateItemCommand({
             ConditionExpression:
@@ -87,11 +90,15 @@ async function doUpdate(event: CloudFormationCustomResourceEvent) {
               (orgName !== undefined ? ", OrgName = :orgName" : "") +
               (userName !== undefined ? ", UserName = :userName" : "") +
               (repoName !== undefined ? ", RepoName = :repoName" : "") +
+              (stoppedTimeout !== undefined
+                ? ", StoppedTimeout = :stoppedTimeout"
+                : "") +
               "\n" +
               "REMOVE dummy" +
               (orgName !== undefined ? "" : ", OrgName") +
               (userName !== undefined ? "" : ", UserName") +
-              (repoName !== undefined ? "" : ", RepoName"),
+              (repoName !== undefined ? "" : ", RepoName") +
+              (stoppedTimeout !== undefined ? "" : ", StoppedTimeout"),
             ExpressionAttributeNames: { "#owner": "Owner" },
             ExpressionAttributeValues: {
               ":countMax": numberAttributeCodec.write(countMax),
@@ -115,6 +122,9 @@ async function doUpdate(event: CloudFormationCustomResourceEvent) {
               }),
               ...(repoName !== undefined && {
                 ":repoName": stringAttributeCodec.write(repoName),
+              }),
+              ...(stoppedTimeout !== undefined && {
+                ":stoppedTimeout": durationAttributeCodec.write(stoppedTimeout),
               }),
             },
             ReturnValues: "ALL_NEW",
