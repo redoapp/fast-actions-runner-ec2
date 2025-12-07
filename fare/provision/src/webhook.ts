@@ -25,7 +25,7 @@ import {
   provisionerCandidates,
   provisionerMatches,
 } from "./provisioner";
-import { runnerRefresh } from "./runner";
+import { runnerNameInstanceId, runnerRefresh } from "./runner";
 
 const githubAppId = envNumberRead("GITHUB_APP_ID");
 
@@ -118,7 +118,7 @@ export const handler: APIGatewayProxyHandlerV2 = (
             await runnerRefresh({
               dynamodbClient,
               installationClient,
-              instanceId: runnerName,
+              instanceId: runnerNameInstanceId(runnerName),
               instanceTableName,
               provisionerId,
             });

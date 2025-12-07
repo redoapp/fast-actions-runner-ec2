@@ -18,6 +18,7 @@ import { envNumberRead, envStringRead } from "@redotech/lambda/env";
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { appGithubClient, provisionerInstallationClient } from "./github";
 import { InstanceStatus, RunnerStatus, runnerAttributeCodec } from "./instance";
+import { runnerName } from "./runner";
 
 const githubAppId = envNumberRead("GITHUB_APP_ID");
 
@@ -168,12 +169,13 @@ async function createRunner({
     }
   }
 
+  const name = runnerName(instanceId);
   let response:
     | RestEndpointMethodTypes["actions"]["generateRunnerJitconfigForOrg"]["response"]
     | RestEndpointMethodTypes["actions"]["generateRunnerJitconfigForRepo"]["response"];
   if (repoName !== undefined) {
     console.log(
-      `Creating runner ${instanceId} for ${orgName}/${repoName} in group ${runnerGroupId}`,
+      `Creating runner ${name} for ${orgName}/${repoName} in group ${runnerGroupId}`,
     );
     response =
       await installationClient.client.actions.generateRunnerJitconfigForRepo({
@@ -181,7 +183,7 @@ async function createRunner({
         runner_group_id: runnerGroupId,
         repo: repoName,
         owner: orgName ?? userName,
-        name: instanceId,
+        name,
       });
   } else {
     console.log(

@@ -14,6 +14,25 @@ import {
 import { InstallationClient } from "./github";
 import { RunnerStatus, runnerAttributeCodec } from "./instance";
 
+/**
+ * Generate a runner name.
+ *
+ * Randomized. There are too many problems with having runners with duplicate
+ * names, even with JIT. And bizarely, GitHub requires unique names, but does
+ * not support lookup or deletion by name.
+ *
+ * From runner:
+ * A valid runner name is 64 characters or less in length and does not
+ * include '"', '/', ':', '<', '>', '\', '|', '*' and '?'.
+ */
+export function runnerName(instanceId: string) {
+  return `${instanceId}.${Math.random().toString(26).slice(2, 10)}`;
+}
+
+export function runnerNameInstanceId(runnerName: string) {
+  return runnerName.split(".")[0]; // support old format as well
+}
+
 export async function runnerRefresh({
   dynamodbClient,
   installationClient,
