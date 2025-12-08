@@ -24,8 +24,9 @@ async function resolveEnv() {
   const ssmEnv = <[string, string][]>(
     Object.entries(process.env).filter(([name]) => name.endsWith("_SSM"))
   );
-  for (const envVars of chunks(ssmEnv, 10)) {
-    const names = [...new Set(Array.from(envVars, ([_, value]) => value!))];
+  for (const chunk of chunks(ssmEnv, 10)) {
+    const envVars = [...chunk];
+    const names = [...new Set(envVars.map(([_, value]) => value!))];
     const output = await ssmClient.send(
       new GetParametersCommand({ Names: names, WithDecryption: true }),
     );
