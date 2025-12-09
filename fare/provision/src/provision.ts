@@ -694,7 +694,7 @@ async function stopInstance({
         ProvisionerId: stringAttributeCodec.write(provisionerId),
       },
       TableName: instanceTableName,
-      UpdateExpression: "REMOVE Runner, SET StoppedAt = :now",
+      UpdateExpression: "REMOVE Runner SET StoppedAt = :now",
     }),
   );
   console.log(`Stopped instance ${provisionerId}/${instance.id}`);
