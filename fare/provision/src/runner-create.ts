@@ -54,8 +54,12 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   }
   const { instanceArn, provisionerId } = pathResult.data;
 
+  const headers = new Headers(
+    Object.entries(event.headers as Record<string, string>),
+  );
+
   let json: unknown;
-  const contentType = event.headers["content-type"];
+  const contentType = headers.get("Content-Type");
   if (contentType?.split(";")[0].trim() === "application/json") {
     const body = event.isBase64Encoded
       ? Buffer.from(event.body!, "base64").toString()
