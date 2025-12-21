@@ -55,6 +55,10 @@ test --build_tests_only
 # Test debug
 build:test_debug --test_output=streamed
 
+# FARE
+build --//aws/artifact:s3_bucket=redotech-fare-artifact
+build --//aws/artifact:region=us-east-1
+
 # User settings
 try-import %workspace%/.bazelrc.user
 try-import %workspace%/user.bazelrc # deprecated

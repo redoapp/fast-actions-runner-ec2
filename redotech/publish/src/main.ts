@@ -1,3 +1,5 @@
+import { IamRole } from "@cdktf/provider-aws/lib/iam-role";
+import { IamRolePolicyAttachment } from "@cdktf/provider-aws/lib/iam-role-policy-attachment";
 import { AwsProvider } from "@cdktf/provider-aws/lib/provider";
 import { S3Bucket } from "@cdktf/provider-aws/lib/s3-bucket";
 import { farePublishBaseStack, farePublishStack } from "@redotech/fare-publish";
@@ -44,6 +46,40 @@ function farePublishBase() {
       ),
     ),
   });
+
+  // TODO: Should live in a CI stack
+  const role = new IamRole(scope, "Role", {
+    name: "FareCi",
+    assumeRolePolicy: Fn.jsonencode({
+      Statement: [
+        {
+          Effect: "Allow",
+          Principal: {
+            Federated:
+              "arn:aws:iam::260890374087:oidc-provider/token.actions.githubusercontent.com",
+          },
+          Action: "sts:AssumeRoleWithWebIdentity",
+          Condition: {
+            StringEquals: {
+              "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+            },
+            StringLike: {
+              "token.actions.githubusercontent.com:sub": [
+                "repo:redoapp/fast-actions-runner-ec2:*",
+              ],
+            },
+          },
+        },
+      ],
+      Version: "2012-10-17",
+    }),
+  });
+
+  new IamRolePolicyAttachment(scope, "Adminstrator", {
+    policyArn: "arn:aws:iam::aws:policy/AdministratorAccess",
+    role: role.id,
+  });
+
   return { bucket };
 }
 
