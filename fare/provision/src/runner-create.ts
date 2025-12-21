@@ -86,15 +86,18 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     };
   }
 
-  const bodyResult = bodySchema.safeParse(json);
-  if (!bodyResult.success) {
-    return {
-      body: `Invalid content: ${zodDisplayError(bodyResult.error)}`,
-      headers: { "Content-Type": "text/plain" },
-      statusCode: 400,
-    };
+  let workDirectory: string | undefined;
+  if (json !== undefined) {
+    const bodyResult = bodySchema.safeParse(json);
+    if (!bodyResult.success) {
+      return {
+        body: `Invalid content: ${zodDisplayError(bodyResult.error)}`,
+        headers: { "Content-Type": "text/plain" },
+        statusCode: 400,
+      };
+    }
+    ({ workDirectory } = bodyResult.data);
   }
-  const { workDirectory } = bodyResult.data;
 
   let instanceId: string;
   try {
@@ -246,7 +249,7 @@ async function createRunner({
         repo: repoName,
         owner: orgName ?? userName,
         name,
-        work_directory: workDirectory,
+        work_folder: workDirectory,
       });
   } else {
     console.log(
@@ -258,7 +261,7 @@ async function createRunner({
         runner_group_id: runnerGroupId,
         org: orgName,
         name: instanceId,
-        work_directory: workDirectory,
+        work_folder: workDirectory,
       });
   }
 
