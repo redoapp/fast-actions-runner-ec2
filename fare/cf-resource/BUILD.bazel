@@ -23,6 +23,7 @@ ts_library(
     deps = [
         "//aws/cf-response:lib",
         "//aws/dynamodb:lib",
+        "//javascript/temporal-types:lib",
         "@npm//@aws-sdk/client-dynamodb:lib",
         "@npm//@aws-sdk/util-arn-parser:lib",
         "@npm//@types/aws-lambda:lib",

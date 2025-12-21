@@ -6,7 +6,6 @@ import {
   GetItemCommand,
   UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
-import { ARN, parse } from "@aws-sdk/util-arn-parser";
 import { RestEndpointMethodTypes } from "@octokit/rest";
 import { instanceResourceRead } from "@redotech/aws-util/ec2";
 import {
@@ -16,9 +15,12 @@ import {
 } from "@redotech/dynamodb/attribute";
 import { envNumberRead, envStringRead } from "@redotech/lambda/env";
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
+import * as z from "zod";
+import { arnSchema } from "./aws";
 import { appGithubClient, provisionerInstallationClient } from "./github";
 import { InstanceStatus, RunnerStatus, runnerAttributeCodec } from "./instance";
 import { runnerName } from "./runner";
+import { zodDisplayError } from "./zod";
 
 const githubAppId = envNumberRead("GITHUB_APP_ID");
 
@@ -32,21 +34,78 @@ const dynamodbClient = new DynamoDBClient();
 
 const githubClient = appGithubClient(githubAppId, githubPrivateKey);
 
-export const handler: APIGatewayProxyHandlerV2 = async (event) => {
-  const provisionerId = event.pathParameters!.provisionerId!;
+const bodySchema = z.object({
+  workDirectory: z.string().optional(),
+});
 
-  let instanceArn: ARN;
-  try {
-    instanceArn = parse(event.pathParameters!.instanceArn!);
-  } catch (e) {
-    console.error(String(e));
+const pathSchema = z.object({
+  instanceArn: arnSchema,
+  provisionerId: z.string(),
+});
+
+export const handler: APIGatewayProxyHandlerV2 = async (event) => {
+  const pathResult = pathSchema.safeParse(event.pathParameters);
+  if (!pathResult.success) {
     return {
-      body: "Invalid instance ARN",
+      body: `Invalid path parameters: ${zodDisplayError(pathResult.error)}`,
       headers: { "Content-Type": "text/plain" },
       statusCode: 400,
     };
   }
-  const { instanceId } = instanceResourceRead(instanceArn.resource);
+  const { instanceArn, provisionerId } = pathResult.data;
+
+  let json: unknown;
+  const contentType = event.headers["content-type"];
+  if (contentType?.split(";")[0].trim() === "application/json") {
+    const body = event.isBase64Encoded
+      ? Buffer.from(event.body!, "base64").toString()
+      : (event.body ?? "");
+    try {
+      json = JSON.parse(body);
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        return {
+          body: `Malformed JSON: ${error.message}`,
+          headers: { "Content-Type": "text/plain" },
+          statusCode: 400,
+        };
+      }
+      throw error;
+    }
+  } else if (contentType) {
+    return {
+      body: `Unsupported content type ${contentType}`,
+      headers: { "Content-Type": "text/plain" },
+      statusCode: 415,
+    };
+  } else if (event.body) {
+    return {
+      body: "Missing content type",
+      headers: { "Content-Type": "text/plain" },
+      statusCode: 400,
+    };
+  }
+
+  const bodyResult = bodySchema.safeParse(json);
+  if (!bodyResult.success) {
+    return {
+      body: `Invalid content: ${zodDisplayError(bodyResult.error)}`,
+      headers: { "Content-Type": "text/plain" },
+      statusCode: 400,
+    };
+  }
+  const { workDirectory } = bodyResult.data;
+
+  let instanceId: string;
+  try {
+    ({ instanceId } = instanceResourceRead(instanceArn.resource));
+  } catch (error) {
+    return {
+      body: `Invalid instance ARN`,
+      headers: { "Content-Type": "text/plain" },
+      statusCode: 400,
+    };
+  }
 
   const output = await dynamodbClient.send(
     new GetItemCommand({
@@ -77,6 +136,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     ({ config } = await createRunner({
       instanceId: instanceId,
       provisionerId,
+      workDirectory,
     }));
   } catch (e) {
     if (e instanceof InstanceDisabledError) {
@@ -92,9 +152,11 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 async function createRunner({
   instanceId,
   provisionerId,
+  workDirectory,
 }: {
   instanceId: string;
   provisionerId: string;
+  workDirectory?: string;
 }): Promise<{ config: string }> {
   const provisionerOutput = await dynamodbClient.send(
     new GetItemCommand({
@@ -184,6 +246,7 @@ async function createRunner({
         repo: repoName,
         owner: orgName ?? userName,
         name,
+        work_directory: workDirectory,
       });
   } else {
     console.log(
@@ -195,6 +258,7 @@ async function createRunner({
         runner_group_id: runnerGroupId,
         org: orgName,
         name: instanceId,
+        work_directory: workDirectory,
       });
   }
 

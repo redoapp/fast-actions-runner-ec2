@@ -4825,7 +4825,7 @@ PACKAGES = {
                 "id": "ts-api-utils@1.4.3-401dcd8d",
             },
             {
-                "id": "typescript@5.2.2-5c3d5cbc",
+                "id": "typescript@5.9.3-d305d436",
             },
         ],
         "integrity": "sha512-94EQTWZ40mzBc42ATNIBimBEDltSJ9RQHCC8vc/PDbxi4k8dVwUAv4o98dk50M1zB+JGFxp43FP7f8+FP8R6Sw==",
@@ -4853,7 +4853,7 @@ PACKAGES = {
                 "id": "eslint@8.57.1",
             },
             {
-                "id": "typescript@5.2.2-5c3d5cbc",
+                "id": "typescript@5.9.3-d305d436",
             },
         ],
         "integrity": "sha512-4Z+L8I2OqhZV8qA132M4wNL30ypZGYOQVBfMgxDH/K5UX0PNqTu1c6za9ST5r9+tavvHiTWmBnKzpCJ/GlVFtg==",
@@ -4891,7 +4891,7 @@ PACKAGES = {
                 "id": "ts-api-utils@1.4.3-401dcd8d",
             },
             {
-                "id": "typescript@5.2.2-5c3d5cbc",
+                "id": "typescript@5.9.3-d305d436",
             },
         ],
         "integrity": "sha512-XL0FJXuCLaDuX2sYqZUUSOJ2sG5/i1AAze+axqmLnSkNEVMVYLF+cbwlB2w8D1tinFuSikHmFta+P+HOofrLeA==",
@@ -4930,7 +4930,7 @@ PACKAGES = {
                 "id": "ts-api-utils@1.4.3-401dcd8d",
             },
             {
-                "id": "typescript@5.2.2-5c3d5cbc",
+                "id": "typescript@5.9.3-d305d436",
             },
         ],
         "integrity": "sha512-aP1v/BSPnnyhMHts8cf1qQ6Q1IFwwRvAQGRvBFkWlo3/lH29OXA3Pts+c10nxRxIBrDnoMqzhgdwVe5f2D6OzA==",
@@ -10068,7 +10068,7 @@ PACKAGES = {
                 "id": "prettier@3.3.3",
             },
             {
-                "id": "typescript@5.2.2-5c3d5cbc",
+                "id": "typescript@5.9.3-d305d436",
             },
         ],
         "integrity": "sha512-6m8WBhIp0dfwu0SkgfOxJqh+HpdyfqSSLfKKRZSFbDuEQXDDndb8fTpRWkUrX/uBenkex3MgnVk0J3b3Y5byog==",
@@ -10955,7 +10955,7 @@ PACKAGES = {
     "ts-api-utils@1.4.3-401dcd8d": {
         "deps": [
             {
-                "id": "typescript@5.2.2-5c3d5cbc",
+                "id": "typescript@5.9.3-d305d436",
             },
         ],
         "integrity": "sha512-i3eMG77UTMD0hZhgRS562pv83RC6ukSAC2GMNWc+9dieh/+jDM5u5YG+NHX6VNDRHQcHwmsTHctP9LhbC3WxVw==",
@@ -11002,10 +11002,10 @@ PACKAGES = {
         "name": "type",
         "url": "https://registry.npmjs.org/type/-/type-2.7.3.tgz",
     },
-    "typescript@5.2.2-5c3d5cbc": {
-        "integrity": "sha512-mI4WrpHsbCIcwT9cF4FZvr80QUeKvsUsUvKDoR+X/7XHQH98xYD8YHZg7ANtz2GtZt/CBq2QJ0thkGJMHfqc1w==",
+    "typescript@5.9.3-d305d436": {
+        "integrity": "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==",
         "name": "typescript",
-        "url": "https://registry.npmjs.org/typescript/-/typescript-5.2.2.tgz",
+        "url": "https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz",
     },
     "undici-types@6.19.8": {
         "integrity": "sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==",
@@ -11420,6 +11420,11 @@ PACKAGES = {
         "name": "zip-stream",
         "url": "https://registry.npmjs.org/zip-stream/-/zip-stream-5.0.2.tgz",
     },
+    "zod@4.2.1": {
+        "integrity": "sha512-0wZ1IRqGGhMP76gLqz8EyfBXKk0J2qo2+H3fi4mcUP/KtTocoX08nmIAHl1Z2kJIZbZee8KOpBCSNPRgauucjw==",
+        "name": "zod",
+        "url": "https://registry.npmjs.org/zod/-/zod-4.2.1.tgz",
+    },
 }
 
 ROOTS = [
@@ -11592,11 +11597,15 @@ ROOTS = [
         "name": "tslib",
     },
     {
-        "id": "typescript@5.2.2-5c3d5cbc",
+        "id": "typescript@5.9.3-d305d436",
         "name": "typescript",
     },
     {
         "id": "yaml@2.7.1",
         "name": "yaml",
+    },
+    {
+        "id": "zod@4.2.1",
+        "name": "zod",
     },
 ]

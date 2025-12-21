@@ -42,6 +42,7 @@ ts_library(
         "@npm//@types/aws-lambda:lib",
         "@npm//@types/node:lib",
         "@npm//temporal-polyfill:lib",
+        "@npm//zod:lib",
     ],
 )
 

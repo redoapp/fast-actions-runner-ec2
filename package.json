@@ -42,8 +42,9 @@
     "temporal-polyfill": "~0.2.5",
     "temporal-spec": "~0.2.4",
     "tslib": "^2.6",
-    "typescript": "~5.2",
-    "yaml": "^2"
+    "typescript": "^5.4",
+    "yaml": "^2",
+    "zod": "^4"
   },
   "name": "@redotech/fare",
   "private": true

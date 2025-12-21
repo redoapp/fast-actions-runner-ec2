@@ -4,12 +4,14 @@ import {
   UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import { AssumeRoleCommand, STSClient } from "@aws-sdk/client-sts";
+import { parse } from "@aws-sdk/util-arn-parser";
 import { stringAttributeCodec } from "@redotech/dynamodb/attribute";
 import { credentialsAttributeCodec } from "@redotech/dynamodb/aws";
 import {
   AwsCredentialIdentity,
   AwsCredentialIdentityProvider,
 } from "@smithy/types";
+import * as z from "zod";
 
 const expirationMargin = Temporal.Duration.from({ minutes: 1 });
 
@@ -86,3 +88,15 @@ export const createRegionTag = "FastActionsRunnerEc2:Create:Region";
 export const createUrlTag = "FastActionsRunnerEc2:Create:Url";
 
 export const provisionerIdTag = "FastActionsRunnerEc2:ProvisionerId";
+
+export const arnSchema = z.string().transform((string, ctx) => {
+  try {
+    return parse(string);
+  } catch (error) {
+    ctx.addIssue({
+      code: "custom",
+      message: `Invalid ARN: ${error instanceof Error ? error.message : error}`,
+    });
+    return z.NEVER;
+  }
+});

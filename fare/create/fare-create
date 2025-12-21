@@ -4,7 +4,13 @@ set -euo pipefail
 create_runner_region="$(ec2-metadata -g --quiet | awk '{if ($1 == "FastActionsRunnerEc2:Create:Region:") print $2}')"
 create_runner_url="$(ec2-metadata -g --quiet | awk '{if ($1 == "FastActionsRunnerEc2:Create:Url:") print $2}')"
 instance_id="$(ec2-metadata -i --quiet)"
-config="$(AWS_REGION="$create_runner_region" awscurl -X POST "$create_runner_url$instance_id")"
+config="$(
+  AWS_REGION="$create_runner_region" \
+  awscurl \
+  -d '{ "workDirectory": "/var/lib/actions-runner" }' \
+  -H 'Content-Type: application/json' \
+  -X POST "$create_runner_url$instance_id"
+)"
 
 cat >/var/tmp/fare-create.env <<EOL
 ACTIONS_RUNNER_INPUT_JITCONFIG=$config
