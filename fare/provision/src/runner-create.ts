@@ -106,7 +106,7 @@ async function createRunner({
   );
   const provisionerItem = provisionerOutput.Item;
   if (!provisionerItem) {
-    throw new Error("No provisioner found");
+    throw new Error(`Provisioner ${provisionerId} not found`);
   }
 
   const labels = stringSetAttributeCodec.read(provisionerItem.Labels);

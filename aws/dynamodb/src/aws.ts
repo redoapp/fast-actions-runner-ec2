@@ -2,38 +2,66 @@ import { ARN, build, parse } from "@aws-sdk/util-arn-parser";
 import { AwsCredentialIdentity } from "@smithy/types";
 import {
   AttributeCodec,
+  AttributeReadError,
   instantAttributeCodec,
+  pathEmpty,
   stringAttributeCodec,
 } from "./attribute";
 import { Item } from "./item";
 
+/**
+ * ARN
+ */
 export const arnAttributeCodec: AttributeCodec<ARN> = {
-  read(attribute) {
-    return parse(stringAttributeCodec.read(attribute));
+  read(attribute, path = pathEmpty) {
+    const string = stringAttributeCodec.read(attribute, path);
+    try {
+      return parse(string);
+    } catch (error) {
+      throw new AttributeReadError(
+        `Invalid ARN: ${error instanceof Error ? error.message : error}`,
+        path,
+      );
+    }
   },
   write(value) {
     return stringAttributeCodec.write(build(value));
   },
 };
 
+/**
+ * AWS credentials
+ */
 export const credentialsAttributeCodec: AttributeCodec<AwsCredentialIdentity> =
   {
-    read(attribute) {
+    read(attribute, path = pathEmpty) {
       if (attribute.M === undefined) {
-        throw new Error("Expected map");
+        throw new AttributeReadError("Expected map", path);
       }
       const map = attribute.M;
       return {
         accessKeyId:
-          map.AccessKeyId && stringAttributeCodec.read(map.AccessKeyId),
+          map.AccessKeyId &&
+          stringAttributeCodec.read(map.AccessKeyId, [...path, "accessKeyId"]),
         secretAccessKey:
-          map.SecretAccessKey && stringAttributeCodec.read(map.SecretAccessKey),
+          map.SecretAccessKey &&
+          stringAttributeCodec.read(map.SecretAccessKey, [
+            ...path,
+            "secretAccessKey",
+          ]),
         sessionToken:
-          map.SessionToken && stringAttributeCodec.read(map.SessionToken),
+          map.SessionToken &&
+          stringAttributeCodec.read(map.SessionToken, [
+            ...path,
+            "sessionToken",
+          ]),
         expiration:
           map.Expiration &&
           new Date(
-            instantAttributeCodec.read(map.Expiration).epochMilliseconds,
+            instantAttributeCodec.read(map.Expiration, [
+              ...path,
+              "expiration",
+            ]).epochMilliseconds,
           ),
       };
     },

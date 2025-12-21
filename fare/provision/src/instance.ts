@@ -1,8 +1,11 @@
 import {
   AttributeCodec,
+  AttributeReadError,
   instantAttributeCodec,
   numberAttributeCodec,
+  pathEmpty,
   stringEnumAttributeCodec,
+  typeName,
 } from "@redotech/dynamodb/attribute";
 import { Item } from "@redotech/dynamodb/item";
 import { Values } from "@redotech/util/type";
@@ -40,22 +43,31 @@ export interface Runner {
 }
 
 export const runnerAttributeCodec: AttributeCodec<Runner> = {
-  read(attribute) {
+  read(attribute, path = pathEmpty) {
     if (!attribute.M) {
-      throw new Error("Expected a map");
+      throw new AttributeReadError(
+        `Expected a map, got ${typeName(attribute)}`,
+        path,
+      );
     }
     const map = attribute.M;
     return {
-      id: numberAttributeCodec.read(map.Id),
-      activeAt: instantAttributeCodec.read(map.ActiveAt),
-      status: runnerStatusAttributeCodec.read(map.Status),
+      id: numberAttributeCodec.read(map.Id, [...path, "id"]),
+      activeAt: instantAttributeCodec.read(map.ActiveAt, [...path, "activeAt"]),
+      status: runnerStatusAttributeCodec.read(map.Status, [...path, "status"]),
     };
   },
-  write(value) {
+  write(value, path = pathEmpty) {
     const map: Item = {
-      Id: numberAttributeCodec.write(value.id),
-      ActiveAt: instantAttributeCodec.write(value.activeAt),
-      Status: runnerStatusAttributeCodec.write(value.status),
+      Id: numberAttributeCodec.write(value.id, [...path, "id"]),
+      ActiveAt: instantAttributeCodec.write(value.activeAt, [
+        ...path,
+        "activeAt",
+      ]),
+      Status: runnerStatusAttributeCodec.write(value.status, [
+        ...path,
+        "status",
+      ]),
     };
     return { M: map };
   },
