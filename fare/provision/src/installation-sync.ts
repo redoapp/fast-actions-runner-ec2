@@ -81,6 +81,7 @@ async function jobsRefresh({
     provisioners.push(provisioner);
   }
 
+  let count = 0;
   for await (const output of paginateQuery(
     { client: dynamodbClient },
     {
@@ -92,6 +93,12 @@ async function jobsRefresh({
       },
     },
   )) {
+    const limit = 500;
+    if (limit < count++) {
+      throw new Error(
+        `Checked ${limit} jobs, stopping to conserve GitHub API usage`,
+      );
+    }
     for (const item of output.Items!) {
       const jobId = numberAttributeCodec.read(item.Id);
       const repoName = stringAttributeCodec.read(item.RepoName);

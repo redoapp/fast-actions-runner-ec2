@@ -616,8 +616,9 @@ function installationSyncStack(
   });
   allFunction.addDependency(allPolicy);
 
+  // queries every pending job, don't do too frequently else it exceeds API rate limit
   const rule = new CfnRule(scope, "Rule", {
-    scheduleExpression: "rate(2 minutes)",
+    scheduleExpression: "rate(15 minutes)",
     state: "ENABLED",
     targets: [{ id: "InstallationSyncAll", arn: allFunction.attrArn }],
   });
