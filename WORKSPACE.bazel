@@ -84,17 +84,6 @@ shfmt_repositories()
 
 shfmt_toolchains()
 
-# Rules Debian Extra
-
-RULES_DEBIAN_EXTRA_VERSION = "7561056b1173c1bc93e1c2e2a8bc5d14763ab94c"
-
-http_archive(
-    name = "rules_debian_extra",
-    sha256 = "13dc52a89a9ef8ca53f30d6cf710b934d4f17dcde4cd80557123a543f0aae936",
-    strip_prefix = "rules_debian_extra-%s" % RULES_DEBIAN_EXTRA_VERSION,
-    url = "https://github.com/redoapp/rules_debian_extra/archive/%s.tar.gz" % RULES_DEBIAN_EXTRA_VERSION,
-)
-
 # Rules Javascript
 
 RULES_JAVASCRIPT_VERSION = "d1989ea35a6e63962b1b72b98d1170e73660d6bb"
