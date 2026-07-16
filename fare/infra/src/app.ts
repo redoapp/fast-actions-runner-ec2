@@ -338,7 +338,7 @@ function githubAppStack(
     handler: "redotech_fast_actions_runner_ec2/aws/function/lib/init.handler",
     memorySize: 256,
     role: role.attrArn,
-    runtime: "nodejs20.x",
+    runtime: "nodejs24.x",
     tags: [{ key: "Name", value: getName(scope).child("Callback").toString() }],
     timeout: Temporal.Duration.from({ seconds: 10 }).total("seconds"),
   });
@@ -373,7 +373,7 @@ function githubAppStack(
     },
     memorySize: 256,
     role: role.attrArn,
-    runtime: "nodejs20.x",
+    runtime: "nodejs24.x",
     tags: [{ key: "Name", value: getName(scope).child("Manifest").toString() }],
     timeout: Temporal.Duration.from({ seconds: 10 }).total("seconds"),
   });
@@ -422,7 +422,7 @@ function githubAppStack(
     handler: "redotech_fast_actions_runner_ec2/aws/function/lib/init.handler",
     memorySize: 256,
     role: role.attrArn,
-    runtime: "nodejs20.x",
+    runtime: "nodejs24.x",
     tags: [{ key: "Name", value: getName(scope).child("Url").toString() }],
     timeout: Temporal.Duration.from({ seconds: 10 }).total("seconds"),
   });
@@ -479,7 +479,7 @@ function provisionerStack(
       "redotech_fast_actions_runner_ec2/fare/cf-resource/lib/provisioner.handler",
     memorySize: 256,
     role: role.attrArn,
-    runtime: "nodejs20.x",
+    runtime: "nodejs24.x",
     tags: [{ key: "Name", value: getName(scope).toString() }],
     timeout: Temporal.Duration.from({ seconds: 10 }).total("seconds"),
   });
@@ -563,7 +563,7 @@ function installationSyncStack(
     handler: "redotech_fast_actions_runner_ec2/aws/function/lib/init.handler",
     memorySize: 256,
     role: role.attrArn,
-    runtime: "nodejs20.x",
+    runtime: "nodejs24.x",
     tags: [{ key: "Name", value: getName(scope).toString() }],
     timeout: Temporal.Duration.from({ seconds: 60 }).total("seconds"),
   });
@@ -610,7 +610,7 @@ function installationSyncStack(
     handler: "redotech_fast_actions_runner_ec2/aws/function/lib/init.handler",
     memorySize: 256,
     role: role.attrArn,
-    runtime: "nodejs20.x",
+    runtime: "nodejs24.x",
     tags: [{ key: "Name", value: getName(scope).child("All").toString() }],
     timeout: Temporal.Duration.from({ seconds: 60 }).total("seconds"),
   });
@@ -714,7 +714,7 @@ function provisionStack(
     handler: "redotech_fast_actions_runner_ec2/aws/function/lib/init.handler",
     memorySize: 256,
     role: role.attrArn,
-    runtime: "nodejs20.x",
+    runtime: "nodejs24.x",
     tags: [{ key: "Name", value: getName(scope).toString() }],
     timeout: Temporal.Duration.from({ seconds: 15 }).total("seconds"),
   });
@@ -799,7 +799,7 @@ function provisionerSyncStack(
     handler: "redotech_fast_actions_runner_ec2/aws/function/lib/init.handler",
     memorySize: 256,
     role: role.attrArn,
-    runtime: "nodejs20.x",
+    runtime: "nodejs24.x",
     tags: [{ key: "Name", value: getName(scope).toString() }],
     timeout: Temporal.Duration.from({ seconds: 60 }).total("seconds"),
   });
@@ -836,7 +836,7 @@ function provisionerSyncStack(
       "redotech_fast_actions_runner_ec2/fare/provision/lib/provisioner-sync-all.handler",
     memorySize: 256,
     role: role.attrArn,
-    runtime: "nodejs20.x",
+    runtime: "nodejs24.x",
     tags: [{ key: "Name", value: getName(scope).child("All").toString() }],
     timeout: Temporal.Duration.from({ seconds: 15 }).total("seconds"),
   });
@@ -900,7 +900,7 @@ function runnerCreateStack(
     handler: "redotech_fast_actions_runner_ec2/aws/function/lib/init.handler",
     memorySize: 256,
     role: role.attrArn,
-    runtime: "nodejs20.x",
+    runtime: "nodejs24.x",
     tags: [{ key: "Name", value: getName(scope).toString() }],
     timeout: Temporal.Duration.from({ seconds: 10 }).total("seconds"),
   });
@@ -1019,7 +1019,7 @@ function secretStack(
       "redotech_fast_actions_runner_ec2/aws/cf-resource/lib/secret-lambda.handler",
     memorySize: 256,
     role: role.attrArn,
-    runtime: "nodejs20.x",
+    runtime: "nodejs24.x",
     tags: [{ key: "Name", value: getName(scope).toString() }],
     timeout: 10,
   });
@@ -1120,7 +1120,7 @@ function webhookStack(
     handler: "redotech_fast_actions_runner_ec2/aws/function/lib/init.handler",
     memorySize: 256,
     role: role.attrArn,
-    runtime: "nodejs20.x",
+    runtime: "nodejs24.x",
     tags: [{ key: "Name", value: getName(scope).toString() }],
     timeout: Temporal.Duration.from({ seconds: 10 }).total("seconds"),
   });
