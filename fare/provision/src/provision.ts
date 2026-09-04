@@ -413,18 +413,20 @@ async function provision({ provisionerId }: { provisionerId: string }) {
   }
 
   // start stopped instances, most recent first
-  const startInstances = instances.filter(
-    (instance) => instance.ec2Status === Ec2InstanceStatus.STOPPED,
-  );
-  instances = [
-    ...sortBy(startInstances, {
-      direction: SortDirection.DESCENDING,
-      key: (instance) =>
-        (instance.stoppedAt ?? instance.startedAt).epochNanoseconds,
-    }),
+  const startInstances = [
+    ...sortBy(
+      instances.filter(
+        (instance) => instance.ec2Status === Ec2InstanceStatus.STOPPED,
+      ),
+      {
+        direction: SortDirection.DESCENDING,
+        key: (instance) =>
+          (instance.stoppedAt ?? instance.startedAt).epochNanoseconds,
+      },
+    ),
   ];
   console.log(
-    `Starting ${Math.min(instances.length, instancePlannedCount)} instances`,
+    `Starting ${Math.min(startInstances.length, instancePlannedCount)} instances`,
   );
   for (const [index, instance] of startInstances.entries()) {
     if (index < instancePlannedCount) {
