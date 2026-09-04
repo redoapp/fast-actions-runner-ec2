@@ -12,6 +12,16 @@ echo "deb [signed-by=/etc/apt/keyrings/fluentbit.gpg] https://packages.fluentbit
 
 echo 'deb [trusted=yes] https://${ArtifactS3Bucket}.s3.${ArtifactRegion}.${ArtifactDomain}/${ArtifactS3KeyPrefix}apt /' > /etc/apt/sources.list.d/fare.list
 
+cat > /etc/apt/apt.conf.d/99-fare <<'EOF'
+Acquire::Languages "none";
+Acquire::IndexTargets::deb::Contents-deb::DefaultEnabled "false";
+Acquire::IndexTargets::deb::Contents-udeb::DefaultEnabled "false";
+Acquire::IndexTargets::deb::DEP-11::DefaultEnabled "false";
+Acquire::IndexTargets::deb::DEP-11-icons-small::DefaultEnabled "false";
+Acquire::IndexTargets::deb::DEP-11-icons::DefaultEnabled "false";
+Acquire::IndexTargets::deb::CNF::DefaultEnabled "false";
+EOF
+
 apt-get update
 
 mkdir -p /etc/systemd/system-preset
