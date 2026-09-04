@@ -19,6 +19,7 @@ import {
 import { envNumberRead, envStringRead } from "@redotech/lambda/env";
 import { Handler } from "aws-lambda";
 import { appGithubClient } from "./github";
+import { githubJobGet } from "./job";
 import {
   JobAspect,
   ProvisionerCandidate,
@@ -81,6 +82,7 @@ async function jobsRefresh({
     provisioners.push(provisioner);
   }
 
+  const limit = 500;
   let count = 0;
   for await (const output of paginateQuery(
     { client: dynamodbClient },
@@ -93,32 +95,27 @@ async function jobsRefresh({
       },
     },
   )) {
-    const limit = 500;
-    if (limit < count++) {
-      throw new Error(
-        `Checked ${limit} jobs, stopping to conserve GitHub API usage`,
-      );
-    }
     for (const item of output.Items!) {
+      if (limit <= count) {
+        console.log(
+          `Checked ${limit} jobs, stopping to conserve GitHub API usage`,
+        );
+        return;
+      }
+      count++;
+
       const jobId = numberAttributeCodec.read(item.Id);
       const repoName = stringAttributeCodec.read(item.RepoName);
-      const jobResponse =
-        await installationGithubClient.actions.getJobForWorkflowRun({
+      const jobResponse = await githubJobGet(() =>
+        installationGithubClient.actions.getJobForWorkflowRun({
           owner,
           repo: repoName,
           job_id: jobId,
-        });
-      if (jobResponse.data.conclusion) {
-        console.log(`Deleting job ${installationId}/${jobId}`);
-        await dynamodbClient.send(
-          new DeleteItemCommand({
-            TableName: jobTableName,
-            Key: {
-              Id: numberAttributeCodec.write(jobId),
-              InstallationId: numberAttributeCodec.write(installationId),
-            },
-          }),
-        );
+        }),
+      );
+
+      if (!jobResponse || jobResponse.data.conclusion) {
+        await jobDelete({ installationId, jobId });
         continue;
       }
 
@@ -168,4 +165,23 @@ async function jobsRefresh({
       }
     }
   }
+}
+
+async function jobDelete({
+  installationId,
+  jobId,
+}: {
+  installationId: number;
+  jobId: number;
+}) {
+  console.log(`Deleting job ${installationId}/${jobId}`);
+  await dynamodbClient.send(
+    new DeleteItemCommand({
+      TableName: jobTableName,
+      Key: {
+        Id: numberAttributeCodec.write(jobId),
+        InstallationId: numberAttributeCodec.write(installationId),
+      },
+    }),
+  );
 }

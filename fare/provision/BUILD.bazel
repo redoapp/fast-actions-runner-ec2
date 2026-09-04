@@ -1,5 +1,6 @@
 load("@better_rules_javascript//commonjs:rules.bzl", "cjs_root")
 load("@better_rules_javascript//javascript:rules.bzl", "js_library")
+load("@better_rules_javascript//jest:rules.bzl", "jest_test")
 load("@better_rules_javascript//typescript:rules.bzl", "ts_library")
 load("//aws/rules:rules.bzl", "lambda_nodejs_function")
 
@@ -12,7 +13,10 @@ lambda_nodejs_function(
 
 ts_library(
     name = "lib",
-    srcs = glob(["src/**/*.ts"]),
+    srcs = glob(
+        ["src/**/*.ts"],
+        ["src/**/*.spec.ts"],
+    ),
     compiler = "//tools/typescript:tsc",
     config = "tsconfig.json",
     config_dep = ":tsconfig",
@@ -43,6 +47,37 @@ ts_library(
         "@npm//@types/node:lib",
         "@npm//temporal-polyfill:lib",
         "@npm//zod:lib",
+    ],
+)
+
+js_library(
+    name = "jest_config",
+    srcs = ["jest.config.js"],
+    root = ":root",
+)
+
+jest_test(
+    name = "test",
+    config = "jest.config.js",
+    config_dep = ":jest_config",
+    dep = ":test_lib",
+    jest = "@npm//jest:lib",
+)
+
+ts_library(
+    name = "test_lib",
+    srcs = glob(["src/**/*.spec.ts"]),
+    compiler = "//tools/typescript:tsc",
+    config = "tsconfig.json",
+    config_dep = ":tsconfig",
+    declaration_prefix = "lib",
+    js_prefix = "lib",
+    root = ":root",
+    strip_prefix = "src",
+    deps = [
+        ":lib",
+        "@npm//@octokit/request-error:lib",
+        "@npm//@types/jest:lib",
     ],
 )
 

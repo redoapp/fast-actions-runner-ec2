@@ -68,11 +68,6 @@ export const handler: APIGatewayProxyHandlerV2 = (
         const installationId = event.installation!.id;
         const jobId = event.workflow_job.id;
         const runnerName = event.workflow_job.runner_name ?? undefined;
-        if (!event.workflow_job.labels.length) {
-          // happens for synthetic check runs?
-          console.log(`No labels for job ${installationId}/${jobId}`);
-          return { statusCode: 204 };
-        }
         console.log(
           `Processing event ${action} for job ${installationId}/${jobId}`,
         );
@@ -88,6 +83,11 @@ export const handler: APIGatewayProxyHandlerV2 = (
           case "in_progress":
           case "queued": {
             const labels = event.workflow_job.labels;
+            if (!labels.length) {
+              // happens for synthetic check runs?
+              console.log(`No labels for job ${installationId}/${jobId}`);
+              return { statusCode: 204 };
+            }
             const orgName = event.organization?.login;
             const repoName = event.repository.name;
             const userName =
